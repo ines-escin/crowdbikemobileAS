@@ -4,12 +4,14 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="17"/>
-    
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
-    android:targetPackage="br.ufpe.cin.br.adapter.tests"  android:label="AppTests" />
-    
-    <uses-library android:name="android.test.runner" />
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="17" />
+
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:label="AppTests"
+        android:targetPackage="br.ufpe.cin.br.adapter.tests" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -17,9 +19,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"/>
-	
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -36,12 +38,16 @@
         </activity>
 
         <uses-library android:name="com.google.android.maps" />
+        <uses-library android:name="android.test.runner" />
 
         <activity
             android:name="br.ufpe.cin.contexto.crowdbikemobile.ActivitySendNotification"
-            android:screenOrientation="landscape" 
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="landscape" >
         </activity>
+        <activity android:name="br.ufpe.cin.contexto.crowdbikemobile.MapDisplayActivity" >
+        </activity>
+        <activity android:name="br.ufpe.cin.contexto.crowdbikemobile.IssueMenuActivity"></activity>
     </application>
 
 </manifest>

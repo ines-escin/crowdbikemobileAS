@@ -54,24 +54,35 @@ public final class R {
         public static final int icon50n=0x7f020015;
     }
     public static final class id {
-        public static final int action_settings=0x7f09000d;
-        public static final int backgroundApp=0x7f090007;
+        public static final int action_settings=0x7f090017;
+        public static final int backgroundApp=0x7f090011;
         public static final int bg_activity_send_notification=0x7f090000;
         public static final int btn_send_notification=0x7f090006;
-        public static final int iconWeather=0x7f090009;
-        public static final int previsao=0x7f09000c;
+        public static final int choose_loc_radio_btn=0x7f090009;
+        public static final int iconWeather=0x7f090013;
+        public static final int latitude_table_row=0x7f09000a;
+        public static final int latitude_text=0x7f09000c;
+        public static final int latitude_text_view=0x7f09000b;
+        public static final int longitude_table_row=0x7f09000d;
+        public static final int longitude_text=0x7f09000f;
+        public static final int longitude_text_view=0x7f09000e;
+        public static final int menu_spinner=0x7f090007;
+        public static final int my_loc_radio_btn=0x7f090008;
+        public static final int previsao=0x7f090016;
         public static final int radio0=0x7f090003;
         public static final int radio1=0x7f090004;
         public static final int radio2=0x7f090005;
         public static final int radio_type=0x7f090002;
-        public static final int temperatura=0x7f09000a;
-        public static final int txtMensagem=0x7f090008;
+        public static final int send_issue_btn=0x7f090010;
+        public static final int temperatura=0x7f090014;
+        public static final int txtMensagem=0x7f090012;
         public static final int txtResultado=0x7f090001;
-        public static final int txt_uom_temp=0x7f09000b;
+        public static final int txt_uom_temp=0x7f090015;
     }
     public static final class layout {
         public static final int activity_activity_send_notification=0x7f030000;
-        public static final int activity_main=0x7f030001;
+        public static final int activity_display_map=0x7f030001;
+        public static final int activity_main=0x7f030002;
     }
     public static final class menu {
         public static final int main=0x7f080000;

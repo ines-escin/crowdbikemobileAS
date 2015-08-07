@@ -84,7 +84,7 @@ public void handleConsumeOk(String consumerTag) {
  */
 public void handleDelivery(String consumerTag, Envelope env, BasicProperties props, byte[] body) throws IOException {
 	String result = SerializationUtils.deserialize(body);	
-   ((MainActivity) contexto).retornoFila(result);
+   //((MainActivity) contexto).retornoFila(result);
 }
 
 public void handleCancel(String consumerTag) {}

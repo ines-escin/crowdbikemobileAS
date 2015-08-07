@@ -110,7 +110,7 @@ public class AsyncSendNotification extends AsyncTask <String, Void, String> {
 	//	Toast.makeText(contexto, result, Toast.LENGTH_LONG).show();
 
 		super.onPostExecute(result);
-		((MainActivity) contexto).retornoServidor(result);
+		//((MainActivity) contexto).retornoServidor(result);
 	}
 
 }
