@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,7 +20,8 @@ import android.content.Context;
 import android.content.Intent;
 
 public class MapDisplayActivity extends Activity {
-	
+	String latitude_chosen;
+	String longitude_chosen;
 	@Override
 	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -25,10 +29,42 @@ public class MapDisplayActivity extends Activity {
 		Intent intent = getIntent();
 		ArrayList<String> coordinates = (ArrayList<String>) intent
 				.getSerializableExtra("COORDINATES");
-		
+
 		String latitude = coordinates.get(0);
 		String longitude = coordinates.get(1);
 		setSpinner();
+	}
+
+	public void onRadioButtonClicked(View view) {
+		// Is the button now checked?
+		View v;
+		boolean checked = ((RadioButton) view).isChecked();
+		TableRow tr1 = (TableRow) findViewById(R.id.latitude_table_row);
+		TableRow tr2 = (TableRow) findViewById(R.id.longitude_table_row);
+		// Check which radio button was clicked
+		switch (view.getId()) {
+		case R.id.my_loc_radio_btn:
+			if (checked) {
+				tr1.setVisibility(View.INVISIBLE);
+				tr2.setVisibility(View.INVISIBLE);
+				v = findViewById(R.id.choose_loc_radio_btn);
+				((RadioButton) v).setChecked(false);
+				break;
+			}
+		case R.id.choose_loc_radio_btn:
+			if (checked) {
+				tr1.setVisibility(View.VISIBLE);
+				tr2.setVisibility(View.VISIBLE);
+				v = findViewById(R.id.my_loc_radio_btn);
+				((RadioButton) v).setChecked(false);
+				break;
+			}
+		}
+	}
+//method that's the info back to the orion server and switches the activity to the main.
+	public void displayMainActivity(View v) {
+		Intent intent = new Intent(this, MainActivity.class);
+		startActivity(intent);
 	}
 
 	private void setSpinner() {
@@ -42,12 +78,6 @@ public class MapDisplayActivity extends Activity {
 				android.R.layout.simple_spinner_dropdown_item, occurrences);
 
 		spinner.setAdapter(adapter);
-
-	}
-
-	// Send the actual location of the device to Orion.
-	// method is going to be placed onCreate of this Activity
-	private void sendMyLocation() {
 
 	}
 
