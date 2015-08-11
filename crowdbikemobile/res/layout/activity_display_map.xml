@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/verde"
+    android:background="@color/branco"
     android:orientation="vertical"
     android:padding="30dp" >
 
@@ -16,14 +16,16 @@
         android:layout_width="251dp"
         android:layout_height="wrap_content"
         android:onClick="onRadioButtonClicked"
-        android:text="Meu Local" />
+        android:text="Meu Local"
+        android:textColor="@color/preto" />
 
     <RadioButton
         android:id="@+id/choose_loc_radio_btn"
         android:layout_width="253dp"
         android:layout_height="wrap_content"
         android:onClick="onRadioButtonClicked"
-        android:text="Escolher local" />
+        android:text="Escolher local"
+        android:textColor="@color/preto" />
 
     <TableRow
         android:id="@+id/latitude_table_row"
@@ -38,14 +40,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Latitude"
-            android:textColor="@color/branco"
+            android:textColor="@color/preto"
             android:textColorHint="@color/branco" />
 
         <EditText
             android:id="@+id/latitude_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/branco"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/border_edit_text"
             android:ems="10"
             android:inputType="numberDecimal" >
 
@@ -66,24 +69,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Longitude"
-            android:textColor="@color/branco"
+            android:textColor="@color/preto"
             android:textColorHint="@color/branco" />
 
         <EditText
             android:id="@+id/longitude_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/branco"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/border_edit_text"
             android:ems="10"
             android:inputType="numberDecimal" />
     </TableRow>
+
+    <ImageView
+        android:id="@+id/splash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/logo1" />
 
     <Button
         android:id="@+id/send_issue_btn"
         android:layout_width="223dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="35dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="20dp"
         android:onClick="displayMainActivity"
         android:text="Enviar" />
 
