@@ -126,7 +126,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
 		IMEI = getIMEI(this);
-
 		// Registra app no OrionCB
 		// Restaura as preferencias gravadas
 		SharedPreferences settings = getSharedPreferences(PREFS_REGISTERED, 0);

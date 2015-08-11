@@ -37,7 +37,9 @@
             android:id="@+id/latitude_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Latitude" />
+            android:text="Latitude"
+            android:textColor="@color/branco"
+            android:textColorHint="@color/branco" />
 
         <EditText
             android:id="@+id/latitude_text"
@@ -63,7 +65,9 @@
             android:id="@+id/longitude_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Longitude" />
+            android:text="Longitude"
+            android:textColor="@color/branco"
+            android:textColorHint="@color/branco" />
 
         <EditText
             android:id="@+id/longitude_text"
@@ -76,11 +80,10 @@
 
     <Button
         android:id="@+id/send_issue_btn"
-        android:layout_width="250dp"
+        android:layout_width="223dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="100dp"
-        android:layout_weight="0.01"
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="50dp"
         android:onClick="displayMainActivity"
         android:text="Enviar" />
 

@@ -52,9 +52,11 @@ public final class R {
         public static final int icon13n=0x7f020013;
         public static final int icon50d=0x7f020014;
         public static final int icon50n=0x7f020015;
+        public static final int logo1=0x7f020016;
+        public static final int map_marker=0x7f020017;
     }
     public static final class id {
-        public static final int action_settings=0x7f090017;
+        public static final int action_settings=0x7f090018;
         public static final int backgroundApp=0x7f090011;
         public static final int bg_activity_send_notification=0x7f090000;
         public static final int btn_send_notification=0x7f090006;
@@ -74,6 +76,7 @@ public final class R {
         public static final int radio2=0x7f090005;
         public static final int radio_type=0x7f090002;
         public static final int send_issue_btn=0x7f090010;
+        public static final int splash=0x7f090017;
         public static final int temperatura=0x7f090014;
         public static final int txtMensagem=0x7f090012;
         public static final int txtResultado=0x7f090001;
@@ -83,6 +86,7 @@ public final class R {
         public static final int activity_activity_send_notification=0x7f030000;
         public static final int activity_display_map=0x7f030001;
         public static final int activity_main=0x7f030002;
+        public static final int splash=0x7f030003;
     }
     public static final class menu {
         public static final int main=0x7f080000;
