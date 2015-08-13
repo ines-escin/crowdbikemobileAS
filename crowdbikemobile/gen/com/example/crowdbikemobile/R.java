@@ -31,35 +31,38 @@ public final class R {
     }
     public static final class drawable {
         public static final int add=0x7f020000;
-        public static final int button_shape_verde=0x7f020001;
-        public static final int button_shape_vermelho=0x7f020002;
-        public static final int ic_launcher=0x7f020003;
-        public static final int icon01d=0x7f020004;
-        public static final int icon01n=0x7f020005;
-        public static final int icon02d=0x7f020006;
-        public static final int icon02n=0x7f020007;
-        public static final int icon03d=0x7f020008;
-        public static final int icon03n=0x7f020009;
-        public static final int icon04d=0x7f02000a;
-        public static final int icon04n=0x7f02000b;
-        public static final int icon09d=0x7f02000c;
-        public static final int icon09n=0x7f02000d;
-        public static final int icon10d=0x7f02000e;
-        public static final int icon10n=0x7f02000f;
-        public static final int icon11d=0x7f020010;
-        public static final int icon11n=0x7f020011;
-        public static final int icon13d=0x7f020012;
-        public static final int icon13n=0x7f020013;
-        public static final int icon50d=0x7f020014;
-        public static final int icon50n=0x7f020015;
+        public static final int border_edit_text=0x7f020001;
+        public static final int button_shape_verde=0x7f020002;
+        public static final int button_shape_vermelho=0x7f020003;
+        public static final int ic_launcher=0x7f020004;
+        public static final int icon01d=0x7f020005;
+        public static final int icon01n=0x7f020006;
+        public static final int icon02d=0x7f020007;
+        public static final int icon02n=0x7f020008;
+        public static final int icon03d=0x7f020009;
+        public static final int icon03n=0x7f02000a;
+        public static final int icon04d=0x7f02000b;
+        public static final int icon04n=0x7f02000c;
+        public static final int icon09d=0x7f02000d;
+        public static final int icon09n=0x7f02000e;
+        public static final int icon10d=0x7f02000f;
+        public static final int icon10n=0x7f020010;
+        public static final int icon11d=0x7f020011;
+        public static final int icon11n=0x7f020012;
+        public static final int icon13d=0x7f020013;
+        public static final int icon13n=0x7f020014;
+        public static final int icon50d=0x7f020015;
+        public static final int icon50n=0x7f020016;
+        public static final int logo1=0x7f020017;
+        public static final int map_marker=0x7f020018;
     }
     public static final class id {
-        public static final int action_settings=0x7f090017;
-        public static final int backgroundApp=0x7f090011;
+        public static final int action_settings=0x7f090018;
+        public static final int backgroundApp=0x7f090012;
         public static final int bg_activity_send_notification=0x7f090000;
         public static final int btn_send_notification=0x7f090006;
         public static final int choose_loc_radio_btn=0x7f090009;
-        public static final int iconWeather=0x7f090013;
+        public static final int iconWeather=0x7f090014;
         public static final int latitude_table_row=0x7f09000a;
         public static final int latitude_text=0x7f09000c;
         public static final int latitude_text_view=0x7f09000b;
@@ -68,21 +71,23 @@ public final class R {
         public static final int longitude_text_view=0x7f09000e;
         public static final int menu_spinner=0x7f090007;
         public static final int my_loc_radio_btn=0x7f090008;
-        public static final int previsao=0x7f090016;
+        public static final int previsao=0x7f090017;
         public static final int radio0=0x7f090003;
         public static final int radio1=0x7f090004;
         public static final int radio2=0x7f090005;
         public static final int radio_type=0x7f090002;
-        public static final int send_issue_btn=0x7f090010;
-        public static final int temperatura=0x7f090014;
-        public static final int txtMensagem=0x7f090012;
+        public static final int send_issue_btn=0x7f090011;
+        public static final int splash=0x7f090010;
+        public static final int temperatura=0x7f090015;
+        public static final int txtMensagem=0x7f090013;
         public static final int txtResultado=0x7f090001;
-        public static final int txt_uom_temp=0x7f090015;
+        public static final int txt_uom_temp=0x7f090016;
     }
     public static final class layout {
         public static final int activity_activity_send_notification=0x7f030000;
         public static final int activity_display_map=0x7f030001;
         public static final int activity_main=0x7f030002;
+        public static final int splash=0x7f030003;
     }
     public static final class menu {
         public static final int main=0x7f080000;

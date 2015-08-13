@@ -17,8 +17,11 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import android.app.Activity;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,8 +39,13 @@ import br.ufpe.cin.services.crowdbikemobile.Metadata;
 
 public class MapDisplayActivity extends Activity {
 
+
 	private String latitude;
 	private String longitude;
+
+
+	String latitude_chosen;
+	String longitude_chosen;
 
 	@Override
 	protected void onCreate(Bundle icicle) {
@@ -45,11 +53,12 @@ public class MapDisplayActivity extends Activity {
 		super.onCreate(icicle);
 		setContentView(R.layout.activity_display_map);
 		Intent intent = getIntent();
+
 		ArrayList<String> coordinates = (ArrayList<String>) intent.getSerializableExtra("COORDINATES");
 
 		latitude = coordinates.get(0);
 		longitude = coordinates.get(1);
-		
+
 		setSpinner();
 		setButton(); 
 		
@@ -123,10 +132,45 @@ public class MapDisplayActivity extends Activity {
 				responseCode = 408;
 				e.printStackTrace();
 			}
+			View view = findViewById(R.layout.activity_display_map);
+			backToMainPage(view);
 		}
 	};
 	
+	public void backToMainPage(View view){
+		Intent intent = new Intent(this, MainActivity.class);
+		startActivity(intent);
+	}
+	
 	//Sets the spinner with the desired occurrences
+
+	public void onRadioButtonClicked(View view) {
+		// Is the button now checked?
+		View v;
+		boolean checked = ((RadioButton) view).isChecked();
+		TableRow tr1 = (TableRow) findViewById(R.id.latitude_table_row);
+		TableRow tr2 = (TableRow) findViewById(R.id.longitude_table_row);
+		// Check which radio button was clicked
+		switch (view.getId()) {
+		case R.id.my_loc_radio_btn:
+			if (checked) {
+				tr1.setVisibility(View.INVISIBLE);
+				tr2.setVisibility(View.INVISIBLE);
+				v = findViewById(R.id.choose_loc_radio_btn);
+				((RadioButton) v).setChecked(false);
+				break;
+			}
+		case R.id.choose_loc_radio_btn:
+			if (checked) {
+				tr1.setVisibility(View.VISIBLE);
+				tr2.setVisibility(View.VISIBLE);
+				v = findViewById(R.id.my_loc_radio_btn);
+				((RadioButton) v).setChecked(false);
+				break;
+			}
+		}
+	}
+
 	private void setSpinner() {
 
 		Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);

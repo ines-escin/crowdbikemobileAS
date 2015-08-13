@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/verde"
+    android:background="@color/branco"
     android:orientation="vertical"
     android:padding="30dp" >
 
@@ -15,38 +15,45 @@
         android:id="@+id/my_loc_radio_btn"
         android:layout_width="251dp"
         android:layout_height="wrap_content"
-        android:text="Meu Local" />
+        android:onClick="onRadioButtonClicked"
+        android:text="Meu Local"
+        android:textColor="@color/preto" />
 
     <RadioButton
         android:id="@+id/choose_loc_radio_btn"
         android:layout_width="253dp"
         android:layout_height="wrap_content"
-        android:text="Escolher local" />
+        android:onClick="onRadioButtonClicked"
+        android:text="Escolher local"
+        android:textColor="@color/preto" />
 
     <TableRow
         android:id="@+id/latitude_table_row"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="16dp"
+        android:layout_weight="0.00"
         android:visibility="invisible" >
 
         <TextView
             android:id="@+id/latitude_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Latitude" />
+            android:text="Latitude"
+            android:textColor="@color/preto"
+            android:textColorHint="@color/branco" />
 
         <EditText
             android:id="@+id/latitude_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/branco"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/border_edit_text"
             android:ems="10"
             android:inputType="numberDecimal" >
 
             <requestFocus />
         </EditText>
-
     </TableRow>
 
     <TableRow
@@ -54,31 +61,43 @@
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="16dp"
+        android:layout_weight="0.10"
         android:visibility="invisible" >
 
         <TextView
             android:id="@+id/longitude_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Longitude" />
+            android:text="Longitude"
+            android:textColor="@color/preto"
+            android:textColorHint="@color/branco" />
 
         <EditText
             android:id="@+id/longitude_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/branco"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/border_edit_text"
             android:ems="10"
             android:inputType="numberDecimal" />
-
     </TableRow>
+
+    <ImageView
+        android:id="@+id/splash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/logo1" />
 
     <Button
         android:id="@+id/send_issue_btn"
-        android:layout_width="250dp"
+        android:layout_width="223dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="100dp"
-        android:onClick="sendMyLocation"
-        android:text="Enviar" />
+		android:layout_marginLeft="35dp"
+        android:layout_marginTop="20dp"
+		android:text="Enviar" />
 
 </LinearLayout>
