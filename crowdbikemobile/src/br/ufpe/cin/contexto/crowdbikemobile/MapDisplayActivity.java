@@ -23,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -61,6 +62,7 @@ public class MapDisplayActivity extends Activity {
 
 		setSpinner();
 		setButton(); 
+		checkMyLocationRadio();
 		
 	}
 	
@@ -70,6 +72,20 @@ public class MapDisplayActivity extends Activity {
 		postButton.setOnClickListener(postButtonListener);
 	}
 	
+	private void checkMyLocationRadio(){
+		RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
+		myLocationRadio.setChecked(true);
+	}
+	
+	private String getIMEI(Context context) {
+
+		TelephonyManager mngr = (TelephonyManager) context
+				.getSystemService(context.TELEPHONY_SERVICE);
+		String imei = mngr.getDeviceId();
+		return imei;
+
+	}
+	
 	//Inner class to configure the post button
 	public OnClickListener postButtonListener = new OnClickListener(){
 		@Override
@@ -77,13 +93,26 @@ public class MapDisplayActivity extends Activity {
 			
 			String result = "";  
 			String line = "";
-			
-			String id = String.valueOf("66554433");
+			String id = getIMEI(getApplicationContext());
 		    Entity entity = new Entity();
 			List<Attributes> attributes = new ArrayList<Attributes>();
-			attributes.add(new Attributes("title", "String", "CPA", null));
+			
+			Spinner occurrenceSpinner = (Spinner) findViewById(R.id.menu_spinner);
+			String occurrence = occurrenceSpinner.getSelectedItem().toString();
+			
+			attributes.add(new Attributes("title", "String", occurrence, null));
 			List<Metadata> metadatas = new ArrayList<Metadata>();
 			metadatas.add(new Metadata("location", "String", "WGS84"));
+			
+			RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
+			
+			if(!myLocationRadio.isChecked()){
+				EditText longitudeBox = (EditText) findViewById(R.id.longitude_text);
+				EditText latitudeBox = (EditText) findViewById(R.id.latitude_text);
+				latitude = latitudeBox.getText().toString();
+				longitude = longitudeBox.getText().toString();
+			}
+			
 			attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude ,metadatas));
 			attributes.add(new Attributes("endereco", "String", "Rua do POG numero zero", null));
 			attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null)); 
