@@ -22,6 +22,7 @@ import android.content.Intent;
 public class MapDisplayActivity extends Activity {
 	String latitude_chosen;
 	String longitude_chosen;
+
 	@Override
 	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -33,6 +34,12 @@ public class MapDisplayActivity extends Activity {
 		String latitude = coordinates.get(0);
 		String longitude = coordinates.get(1);
 		setSpinner();
+		checkMyLocationRadio();
+	}
+
+	private void checkMyLocationRadio() {
+		RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
+		myLocationRadio.setChecked(true);
 	}
 
 	public void onRadioButtonClicked(View view) {
@@ -61,7 +68,9 @@ public class MapDisplayActivity extends Activity {
 			}
 		}
 	}
-//method that's the info back to the orion server and switches the activity to the main.
+
+	// method that's the info back to the orion server and switches the activity
+	// to the main.
 	public void displayMainActivity(View v) {
 		Intent intent = new Intent(this, MainActivity.class);
 		startActivity(intent);
