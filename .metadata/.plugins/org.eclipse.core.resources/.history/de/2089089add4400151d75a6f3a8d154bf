@@ -1,0 +1,22 @@
+package com.example.crowdbikemobile.test;
+
+import com.android.uiautomator.core.UiObject;
+import com.android.uiautomator.core.UiObjectNotFoundException;
+import com.android.uiautomator.core.UiSelector;
+import com.android.uiautomator.testrunner.UiAutomatorTestCase;
+
+public class SendMyLocationTest extends UiAutomatorTestCase {
+	public void test() {
+
+	}
+
+	private void addNewIssue() throws UiObjectNotFoundException {
+		UiObject newIssueButton = new UiObject(new UiSelector().className(
+				"android.widget.ImageButton").description("New Issue"));
+		newIssueButton.clickAndWaitForNewWindow();
+	}
+
+	private void sendIssue(){
+		UiObject issueType = new UiObject(new UiSelect().className("android.widget.Spinner");	
+		}
+}
