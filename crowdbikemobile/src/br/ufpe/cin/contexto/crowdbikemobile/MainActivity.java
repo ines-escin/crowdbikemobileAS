@@ -43,6 +43,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import at.abraxas.amarino.Amarino;
+import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.AsyncRegisterEntity;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
@@ -58,7 +59,6 @@ import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
 import com.rabbitmq.client.ConnectionFactory;
 
-import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
 	private long elapsedTime;
 	private TextView txtResultado;
 	private long timePosition;
-
+	
 	private String lastLatitudeString;
 	private String lastLongitudeString;
 	private long timeLastPosition;
@@ -266,6 +266,7 @@ public class MainActivity extends Activity {
 				// publishProgress(requisicao()); //old code
 				try {
 					publishProgress(fiwareRequest());
+					
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

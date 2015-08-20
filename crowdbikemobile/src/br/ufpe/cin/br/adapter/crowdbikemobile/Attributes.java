@@ -1,14 +1,23 @@
 package br.ufpe.cin.br.adapter.crowdbikemobile;
 
+import java.util.List;
+
 public class Attributes {
 
 	String name;
 	String type;
 	String value;
+	List<Metadata> metadas;
+
+	public Attributes(String name, String type, String value, List<Metadata> metadatas) {
+		super();
+		this.setName(name);
+		this.setType(type);
+		this.setValue(value);
+		this.setMetadas(metadatas);
+	}
 
 	public Attributes() {
-		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getName() {
@@ -33,6 +42,14 @@ public class Attributes {
 
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	public List<Metadata> getMetadas() {
+		return metadas;
+	}
+
+	public void setMetadas(List<Metadata> metadas) {
+		this.metadas = metadas;
 	}
 
 }

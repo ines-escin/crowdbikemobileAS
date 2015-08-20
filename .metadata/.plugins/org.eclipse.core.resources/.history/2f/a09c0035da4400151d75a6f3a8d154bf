@@ -1,9 +1,0 @@
-package com.example.crowdbikemobile.test;
-
-import com.android.uiautomator.testrunner.UiAutomatorTestCase;
-
-public class SendMyLocationTest extends UiAutomatorTestCase {
-	public void test() {
-		
-	}
-}

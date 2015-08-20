@@ -46,4 +46,5 @@
 <fullyQualifiedTypeName name="com.android.uiautomator.core.UiSelector"/>
 <fullyQualifiedTypeName name="android.widget.Spinner"/>
 <fullyQualifiedTypeName name="com.android.uiautomator.core.UiObject"/>
+<fullyQualifiedTypeName name="com.android.uiautomator.core.UiScrollable"/>
 </qualifiedTypeNameHistroy>
