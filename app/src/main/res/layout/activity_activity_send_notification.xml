@@ -1,0 +1,77 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bg_activity_send_notification"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:background="@color/verde"
+    tools:context=".ActivitySendNotification" >
+    
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_weight="2"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/txtResultado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tipo de notificação"
+            android:textColor="@color/branco"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <RadioGroup
+            android:id="@+id/radio_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" 
+            android:layout_marginTop="@dimen/activity_vertical_margin">
+
+            <RadioButton
+                android:id="@+id/radio0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Tráfego intenso"
+                android:textColor="@color/branco" 
+                android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+            <RadioButton
+                android:id="@+id/radio1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Via danificada"
+                android:textColor="@color/branco"
+                android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+            <RadioButton
+                android:id="@+id/radio2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Risco de assalto" 
+                android:textColor="@color/branco"
+                android:textAppearance="?android:attr/textAppearanceLarge"/>
+        </RadioGroup>
+        
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/btn_send_notification"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="sendNotification"
+            android:text="Send"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/branco" />
+
+    </LinearLayout>
+
+</LinearLayout>
