@@ -3,7 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/crowdbikemobile.iml" filepath="$PROJECT_DIR$/crowdbikemobile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/crowdbike.iml" filepath="$PROJECT_DIR$/crowdbike.iml" />
+      <module fileurl="file://$PROJECT_DIR$/robospock/robospock.iml" filepath="$PROJECT_DIR$/robospock/robospock.iml" />
     </modules>
   </component>
 </project>
