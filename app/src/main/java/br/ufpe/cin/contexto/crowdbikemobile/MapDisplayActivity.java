@@ -160,8 +160,10 @@ public class MapDisplayActivity extends Activity {
 				responseCode = 408;
 				e.printStackTrace();
 			}
+
 			View view = findViewById(R.layout.activity_display_map);
 			backToMainPage(view);
+
 		}
 	};
 	
