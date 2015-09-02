@@ -15,14 +15,14 @@ buildscript {
 
 dependencies {
     compile 'com.android.support:support-v4:23.0.0'
-    compile 'com.google.code.gson:gson:2.3'
+    compile 'com.google.code.gson:gson:2.2.4'
     compile files('libs/AmarinoLibrary_v0_55.jar')
     compile files('libs/commons-cli-1.1.jar')
     compile files('libs/commons-io-1.2.jar')
     compile files('libs/commons-lang3-3.3.2.jar')
     compile files('libs/json-simple-1.1.jar')
     compile files('libs/jsonassert-1.2.3.jar')
-    compile files('libs/rabbitmq-client.jar')
+
 
     testCompile 'org.robospock:robospock:0.6.0-rc'
     // robolectric requires is it to run
@@ -39,7 +39,7 @@ repositories {
 android {
     compileSdkVersion 18
     buildToolsVersion "23.0.0"
-    compileOptions.encoding = 'ISO-8859-1'
+    compileOptions.encoding = 'UTF-8'
     
     defaultConfig {
         applicationId "com.example.crowdbikemobile"

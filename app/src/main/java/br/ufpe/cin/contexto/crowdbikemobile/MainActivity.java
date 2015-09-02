@@ -1,7 +1,6 @@
 package br.ufpe.cin.contexto.crowdbikemobile;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,13 +8,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
+
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONObject;
+
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -23,9 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
+
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -37,27 +34,26 @@ import android.os.StrictMode;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import at.abraxas.amarino.Amarino;
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
-import br.ufpe.cin.br.adapter.crowdbikemobile.AsyncRegisterEntity;
+
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncQueue;
+
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncServidor;
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
-import br.ufpe.cin.contexto.crowdbikemobile.pojo.BikePosition;
-import br.ufpe.cin.contexto.crowdbikemobile.pojo.MsgResponse;
+
 import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 
 import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
-import com.rabbitmq.client.ConnectionFactory;
+
 
 
 @SuppressLint("NewApi")
@@ -68,19 +64,13 @@ public class MainActivity extends Activity {
 	private String longitudeString = "";
 	private Tempo tempoLocal = new Tempo();
 	private int bgColor = 0;
-	private SensorManager mSensorManager;
 	private TextView txtMensagem;
 	private String IMEI;
-	private AsyncServidor task;
 	private AsyncSendNotification task2;
 	private AsyncTempo tempo;
-	private boolean isGPSEnabled = true;
-	private long startTime;
-	private long stopTime;
-	private long elapsedTime;
 	private TextView txtResultado;
 	private long timePosition;
-	
+    private boolean isGPSEnabled = true;
 	private String lastLatitudeString;
 	private String lastLongitudeString;
 	private long timeLastPosition;
@@ -101,8 +91,6 @@ public class MainActivity extends Activity {
 
 	private DoSomethingThread randomWork;
 
-	private static final boolean IS_BIKE_MODULE = false;
-
 	// The minimum distance to change Updates in meters
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0; // 1 meters
 	// The minimum time between updates in milliseconds
@@ -111,7 +99,7 @@ public class MainActivity extends Activity {
 
 	private static final String PREFS_REGISTERED = "Preferences";
 
-	private ConnectionFactory factory = new ConnectionFactory();
+
 
 	private LocationManager mlocManager;
 	private LocationListener mlocListener;
@@ -123,22 +111,16 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_main);
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
 		IMEI = getIMEI(this);
+
 		// Registra app no OrionCB
 		// Restaura as preferencias gravadas
+
 		SharedPreferences settings = getSharedPreferences(PREFS_REGISTERED, 0);
 		registered = settings.getString("Registered", "");
-		/*
-		 * if (registered != "1") { //Chama a função de registrar ocorrencia
-		 * AsyncRegisterEntity asyncRegisterEntity = new
-		 * AsyncRegisterEntity(this); asyncRegisterEntity.execute(IMEI);
-		 * settings = getSharedPreferences(PREFS_REGISTERED, 0);
-		 * SharedPreferences.Editor editor = settings.edit();
-		 * editor.putString("Registered", ""); editor.putString("Registered",
-		 * "1"); //Confirma a gravação dos dados editor.commit(); }
-		 */
 
 		// Conectando ao arduíno
 		// Amarino.connect(this, DEVICE_ADDRESS);
@@ -146,8 +128,6 @@ public class MainActivity extends Activity {
 		txtResultado = (TextView) findViewById(R.id.txtResultado);
 
 		inicializarListenerGPS();
-
-		// Toast.makeText(this, "O IMEI é: " + IMEI, Toast.LENGTH_LONG).show();
 
 		// Setando a cor de fundo. Padrão: verde
 		setarCorDeFundo(R.color.verde);
@@ -162,10 +142,6 @@ public class MainActivity extends Activity {
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
-
-		// setupConnectionFactory();
-
-		// setupPubButton();
 
 		final Handler incomingMessageHandler = new Handler() {
 			@Override
@@ -198,26 +174,20 @@ public class MainActivity extends Activity {
 	Thread publishThread;
 
 	@Override
-	protected void onDestroy() {
+	public void onDestroy() {
 		super.onDestroy();
 		publishThread.interrupt();
 		subscribeThread.interrupt();
-		Amarino.disconnect(this, DEVICE_ADDRESS);
+        Amarino.disconnect(this, DEVICE_ADDRESS);
+
 	}
 
-	/**
-	 * Este método seta a cor de fundo do aplicativo
-	 * 
-	 * @param cor
-	 *            Código inteiro da cor. A lista de cores disponíveis está em
-	 *            res/calues/colors.xml
-	 */
 	public void setarCorDeFundo(int intColor) {
 		setBgColor(intColor);
 
 		String stringColor = getResources().getString(intColor);
 		LinearLayout layoutApp = (LinearLayout) findViewById(R.id.backgroundApp);
-		layoutApp.setBackgroundColor(Color.parseColor(stringColor));
+        layoutApp.setBackgroundColor(Color.parseColor(stringColor));
 	}
 	
 	public void displayMapActivity(View v){
@@ -229,26 +199,13 @@ public class MainActivity extends Activity {
 		startActivity(intent);
 	}
 
-	/*
-	 * ########################################################################
-	 * ########################################################################
-	 * Os seguintes métodos estão relacionados às requisições rest ao servidor
-	 * ########################################################################
-	 * ########################################################################
-	 */
 
 	private void startGenerating() {
 		randomWork = new DoSomethingThread();
 		randomWork.start();
 	}
 
-	private void stopGenerating() {
-		randomWork.interrupt();
-	}
-
 	public void updateResults(String resultado) throws Exception {
-		// xherman
-		// retornoServidor(resultado);
 		retornoServidorFiware(resultado);
 	}
 
@@ -262,8 +219,6 @@ public class MainActivity extends Activity {
 			Log.v(TAG, "doing work in Random Number Thread");
 
 			while (true) {
-				// xherman
-				// publishProgress(requisicao()); //old code
 				try {
 					publishProgress(fiwareRequest());
 					
@@ -301,74 +256,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/*
-	 * public String requisicao(){
-	 * 
-	 * String result = "false"; BikePosition posicao; String line; String
-	 * resultado = "";
-	 * 
-	 * startTime = System.currentTimeMillis();
-	 * 
-	 * 
-	 * Esta linha deve ser modificada. Aqui deve ser informada a uri do serviço
-	 * que recebe as coordenadas geográficas e retorna a situação do local:
-	 * perigoso, seguro, ...
-	 * 
-	 * 
-	 * String uri = "";
-	 * 
-	 * if(IS_BIKE_MODULE){ uri = "http://" +
-	 * getResources().getString(R.string.ip_host) + ":8080/project/rest/trace/";
-	 * 
-	 * }else{ uri = "http://" + getResources().getString(R.string.ip_host) +
-	 * ":8080/project/rest/vehicle/";
-	 * 
-	 * } int responseCode = 0;
-	 * 
-	 * try { HttpClient client = new DefaultHttpClient(); HttpPost httppost =
-	 * new HttpPost(uri);
-	 * 
-	 * List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-	 * 
-	 * posicao = new BikePosition(IMEI, latitudeString, longitudeString);
-	 * 
-	 * Gson gson = new Gson();
-	 * 
-	 * //nameValuePairs.add(new BasicNameValuePair("latitude", latitude ));
-	 * //nameValuePairs.add(new BasicNameValuePair("longitude", longitude));
-	 * 
-	 * //httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-	 * httppost.setEntity(new StringEntity(gson.toJson(posicao)));
-	 * 
-	 * int executeCount = 0; HttpResponse response; do { executeCount++;
-	 * //Log.v("TENTATIVA", "tentativa número:" + executeCount);
-	 * 
-	 * // Execute HTTP Post Request response = client.execute(httppost);
-	 * responseCode = response.getStatusLine().getStatusCode();
-	 * 
-	 * } while (executeCount < 5 && responseCode == 408);
-	 * 
-	 * BufferedReader rd = new BufferedReader(new InputStreamReader(
-	 * response.getEntity().getContent()));
-	 * 
-	 * while ((line = rd.readLine()) != null){ result = line.trim(); }
-	 * 
-	 * //Neste ponto result já guarda o Json puro
-	 * 
-	 * stopTime = System.currentTimeMillis(); elapsedTime = stopTime -
-	 * startTime;
-	 * 
-	 * Log.v("STATUS", elapsedTime + "ms");
-	 * 
-	 * } catch (Exception e) { Log.v("FALHA", "TASK"); responseCode = 408;
-	 * e.printStackTrace(); }
-	 * 
-	 * return result;
-	 * 
-	 * }
-	 */
-
-	// xherman
 	public String fiwareRequest() throws Exception {
 		int responseCode = 0;
 		String result = "";
@@ -409,40 +296,11 @@ public class MainActivity extends Activity {
 		return result;
 	}
 
-	/*
-	 * ########################################################################
-	 * ########################################################################
-	 * Os seguintes métodos estão relacionados às AsyncTasks e seus retornos
-	 * ########################################################################
-	 * ########################################################################
-	 */
-	/**
-	 * Este método executa as tarefas paralelas para: - Acesso ao servidor -
-	 * Receber informações de tempo
-	 * 
-	 * @throws IOException
-	 */
 	public void tarefasParalelas() {
-
-		// Toast.makeText(getApplicationContext(),
-		// "[TP] Sua localização é - \nLat: " + latitudeString + "\nLong: " +
-		// longitudeString, Toast.LENGTH_LONG).show();
-		startGenerating();
-		// serviço rest
-		// fila
-		/*
-		 * if (IS_BIKE_MODULE) { try { tarefaParalelaQueue(); } catch
-		 * (IOException e) { e.printStackTrace(); } }
-		 */
-
+        startGenerating();
 	}
 
-	/*
-	 * public void tarefaParalelaServidor(){ //Instanciando a asynctask para
-	 * contato com o servidor e acesso ao arduíno task = new
-	 * AsyncServidor(this); task.execute(IMEI, latitudeString, longitudeString);
-	 * }
-	 */
+
 	public void tarefaParalelaServidor2() {
 		// Instanciando a asynctask para contato com o servidor e acesso ao
 		// arduíno
@@ -457,51 +315,12 @@ public class MainActivity extends Activity {
 		tempo.execute(latitudeString, longitudeString);
 	}
 
-	/*
-	 * public void tarefaParalelaQueue() throws IOException{ //AsyncQueue queue
-	 * = new AsyncQueue(IMEI,HOST,"user","user","vhostuser"); String uri =
-	 * getResources().getString(R.string.ip_host); String username =
-	 * getResources().getString(R.string.username); String senha =
-	 * getResources().getString(R.string.senha); String virtualHost =
-	 * getResources().getString(R.string.vhost);
-	 * 
-	 * AsyncQueue queue = new AsyncQueue(IMEI, uri, username, senha,
-	 * virtualHost,this); queue.execute(""); }
-	 */
 
-	/**
-	 * Este método recebe o retorno do servidor sobre o local atual Neste método
-	 * será exibida a notificação do lugar na tela, a cor de background será
-	 * setada
-	 * 
-	 * @param retorno
-	 *            Resposta do servidor
-	 */
-	/*
-	 * public void retornoServidor(String retorno){
-	 * 
-	 * 
-	 * Gson gson = new Gson(); MsgResponse respostaServidor = new MsgResponse();
-	 * 
-	 * if(!retorno.equals("false") && !retorno.equals("") &&
-	 * !retorno.equals("OK")){ respostaServidor = gson.fromJson(retorno,
-	 * MsgResponse.class); //xherman if(respostaServidor.getDistance()!=null &&
-	 * Double.valueOf(respostaServidor.getDistance()) <= 30){
-	 * txtMensagem.setText("rest: " + respostaServidor.getDistance());
-	 * setarCorDeFundo(R.color.vermelho); }else{ txtMensagem.setText("");
-	 * setarCorDeFundo(R.color.verde); } Log.v("DIST",
-	 * respostaServidor.getDistance()); }
-	 * 
-	 * }
-	 */
-
-	// xherman
 	public void retornoServidorFiware(String retorno) throws Exception {
 		Gson gson = new Gson();
 		String noValues = "{\"errorCode\" : {\"code\" : \"404\",\"reasonPhrase\" : \"No context element found\"}}";
 		if (!retorno.equals(noValues) && !retorno.equals("")) {
 			String distance = getDistanceLocation(retorno);
-			// xherman
 			if (distance != null && Double.valueOf(distance) <= 100) {
 				txtMensagem.setText("Alerta: "
 						+ String.format("%.1f", Double.parseDouble(distance))
@@ -516,7 +335,7 @@ public class MainActivity extends Activity {
 
 	}
 
-	// xherman
+
 	public String getDistanceLocation(String result) throws Exception {
 		List<Entity> listEntity = AdapterOcurrence.parseListEntity(result);
 		double minDistance = 0;
@@ -543,25 +362,6 @@ public class MainActivity extends Activity {
 		return String.valueOf(minDistance);
 	}
 
-	/*
-	 * public void retornoFila(String retorno){ returnQueue = retorno;
-	 * Log.v("RETORNO =============>>> DISTANCIA:", retorno); if
-	 * (Double.valueOf(retorno) <= 25) { sendInformationToArduino("1"); }else{
-	 * sendInformationToArduino("0"); }
-	 * 
-	 * this.runOnUiThread(new Runnable() { public void run() { // Send Toast
-	 * Toast.makeText(getApplicationContext(), "RETORNO =====>>> DISTÂNCIA: "+
-	 * returnQueue, Toast.LENGTH_LONG).show();
-	 * 
-	 * } }); }
-	 */
-	/**
-	 * Este método seta o atributo tempoMain. Este atributo armazena as
-	 * informações de tempo
-	 * 
-	 * @param tempoMain
-	 *            objeto Tempo setado com as informações coletadas do tempo
-	 */
 	public void setTempoMain(Tempo tempoMain) {
 		this.tempoLocal = tempoMain;
 
@@ -589,28 +389,16 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/*
-	 * ########################################################################
-	 * ########################################################################
-	 * Os seguintes métodos estão relacionados ao Arduíno
-	 * ########################################################################
-	 * ########################################################################
-	 */
+
 	public void sendInformationToArduino(String informationText) {
 		String text = null;
 		text = informationText;
 
-		Amarino.sendDataToArduino(this, DEVICE_ADDRESS, 'A', text);
+        Amarino.sendDataToArduino(this, DEVICE_ADDRESS, 'A', text);
 		// Amarino.disconnect(this, DEVICE_ADDRESS);
 	}
 
-	/*
-	 * ########################################################################
-	 * ########################################################################
-	 * Os seguintes métodos estão relacionados à posição GPS
-	 * ########################################################################
-	 * ########################################################################
-	 */
+
 	public void inicializarListenerGPS() {
 
 		/* Use the LocationManager class to obtain GPS locations */
@@ -618,17 +406,7 @@ public class MainActivity extends Activity {
 		isGPSEnabled = mlocManager
 				.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		mlocListener = new MyLocationListener(this);
-		// -------------------------------
-		/*
-		 * Criteria criteria = new Criteria();
-		 * criteria.setAltitudeRequired(false);
-		 * criteria.setBearingRequired(false); criteria.setCostAllowed(false);
-		 * criteria.setPowerRequirement(Criteria.POWER_LOW);
-		 * 
-		 * criteria.setAccuracy(Criteria.ACCURACY_FINE); String providerFine =
-		 * mlocManager.getBestProvider(criteria, true);
-		 */
-		// -------------------------------
+
 		mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
 				MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES,
 				mlocListener);
@@ -721,23 +499,7 @@ public class MainActivity extends Activity {
 
 	}
 
-	private void setupConnectionFactory() {
 
-		String uri = getResources().getString(R.string.ip_host);
-		String username = getResources().getString(R.string.username);
-		String senha = getResources().getString(R.string.senha);
-		String virtualHost = getResources().getString(R.string.vhost);
-
-		factory.setShutdownTimeout(5000);
-		factory.setAutomaticRecoveryEnabled(false);
-		// factory.setTopologyRecoveryEnabled(true);
-
-		factory.setHost(uri);
-		factory.setPort(5672);
-		factory.setVirtualHost(virtualHost);
-		factory.setUsername(username);
-		factory.setPassword(senha);
-	}
 
 	/**
 	 * Este método recebe a resposta da chamada da ActivitySendNotification
@@ -752,13 +514,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Este método recupera o IMEI do aparelho
-	 * 
-	 * @param context
-	 *            Contexto da aplaicação
-	 * @return String com o IMEI
-	 */
 	public String getIMEI(Context context) {
 
 		TelephonyManager mngr = (TelephonyManager) context
@@ -778,14 +533,6 @@ public class MainActivity extends Activity {
 
 	public double calcularCaloria() {
 
-		// Atualizando as informações do app
-		/*
-		 * private String latitudeString; private String longitudeString;
-		 * private long timePosition;
-		 * 
-		 * private String lastLatitudeString; private String
-		 * lastLongitudeString; private long timeLastPosition;
-		 */
 
 		double distance = distance(latitudeString, longitudeString,
 				lastLatitudeString, lastLongitudeString, 'M');
@@ -831,35 +578,6 @@ public class MainActivity extends Activity {
 		return totalCalorias;
 	}
 
-	/*
-	 * public double calcularCaloria(Location newLocation) { // Speed in m/s
-	 * double speed = (lastLocation.getSpeed() + newLocation.getSpeed()) / 2.0;
-	 * 
-	 * // Duration in min double duration = (double) (newLocation.getTime() -
-	 * lastLocation.getTime()) * (1/1000.0) * (1/60.0);
-	 * 
-	 * double power = EARTH_GRAVITY * WEIGHT * speed * (K1 + GRADE) + K2 *
-	 * (speed * speed * speed);
-	 * 
-	 * // WorkRate in kgm/min double workRate = power * W_TO_KGM;
-	 * 
-	 * 
-	 * // VO2 in kgm/min/kg 1.8 = oxygen cost of producing 1 kgm/min of power //
-	 * output. 7 = oxygen cost of unloaded cycling plus resting oxygen //
-	 * consumption double vo2 = (1.8 * workRate / WEIGHT) + 7;
-	 * 
-	 * // Calorie in kcal totalCalorias = totalCalorias + vo2 * duration *
-	 * WEIGHT * KGM_TO_KCAL;;
-	 * 
-	 * Toast.makeText(this, "calorias: " + totalCalorias,
-	 * Toast.LENGTH_LONG).show();
-	 * 
-	 * TextView txtCalorias = (TextView) findViewById(R.id.txtCalorias);
-	 * txtCalorias.setText("Calorias:" + totalCalorias);
-	 * 
-	 * return totalCalorias; }
-	 */
-
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 	/* :: Esse método calcula a distância em K, M ou N : */
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
@@ -899,6 +617,7 @@ public class MainActivity extends Activity {
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 	/* :: This function converts decimal degrees to radians : */
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+
 	private double deg2rad(double deg) {
 		return (deg * Math.PI / 180.0);
 	}
@@ -906,6 +625,7 @@ public class MainActivity extends Activity {
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 	/* :: This function converts radians to decimal degrees : */
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+
 	private double rad2deg(double rad) {
 		return (rad * 180.0 / Math.PI);
 	}
