@@ -41,12 +41,8 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
 public class MapDisplayActivity extends Activity {
 
 
-	private String latitude;
-	private String longitude;
-
-
-	String latitude_chosen;
-	String longitude_chosen;
+	public String latitude;
+	public String longitude;
 
 	@Override
 	protected void onCreate(Bundle icicle) {
@@ -57,25 +53,25 @@ public class MapDisplayActivity extends Activity {
 
 		ArrayList<String> coordinates = (ArrayList<String>) intent.getSerializableExtra("COORDINATES");
 
-		latitude = coordinates.get(0);
-		longitude = coordinates.get(1);
+		this.latitude = coordinates.get(0);
+		this.longitude = coordinates.get(1);
 
 		setSpinner();
 		setButton();
 		checkMyLocationRadio();
 	}
-	
+
 	//Sets the post button
 	private void setButton(){
 		Button postButton = (Button) findViewById(R.id.send_issue_btn);
 		postButton.setOnClickListener(postButtonListener);
 	}
-	
+
 	private void checkMyLocationRadio(){
 		RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
 		myLocationRadio.setChecked(true);
 	}
-	
+
 	private String getIMEI(Context context) {
 
 		TelephonyManager mngr = (TelephonyManager) context
@@ -84,92 +80,97 @@ public class MapDisplayActivity extends Activity {
 		return imei;
 
 	}
-	
+
 	//Inner class to configure the post button
-	public OnClickListener postButtonListener = new OnClickListener(){
+	public OnClickListener postButtonListener = new OnClickListener() {
 		@Override
-		public void onClick(View v){
-			
-			String result = "";  
-			String line = "";
-			String id = getIMEI(getApplicationContext());
-		    Entity entity = new Entity();
-			List<Attributes> attributes = new ArrayList<Attributes>();
-			
-			Spinner occurrenceSpinner = (Spinner) findViewById(R.id.menu_spinner);
-			String occurrence = occurrenceSpinner.getSelectedItem().toString();
-			
-			attributes.add(new Attributes("title", "String", occurrence, null));
-			List<Metadata> metadatas = new ArrayList<Metadata>();
-			metadatas.add(new Metadata("location", "String", "WGS84"));
-			
-			RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
-			
-			if(!myLocationRadio.isChecked()){
-				EditText longitudeBox = (EditText) findViewById(R.id.longitude_text);
-				EditText latitudeBox = (EditText) findViewById(R.id.latitude_text);
-				latitude = latitudeBox.getText().toString();
-				longitude = longitudeBox.getText().toString();
-			}
-			
-			attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude, metadatas));
-			attributes.add(new Attributes("endereco", "String", "Rua do POG numero zero", null));
-			attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null)); 
-			attributes.add(new Attributes("userId", "String", "1",null)); 
-			
-			entity.setType("Ocurrence");
-			entity.setId(id);
-			entity.setAttributes(attributes);
+		public void onClick(View v) {
 
-			Gson gson;
-			String uri = "http://148.6.80.19:1026/v1/contextEntities";
-			
-			int responseCode = 0;
-			uri += "/" +entity.getId();
 			try {
-				HttpClient client = new DefaultHttpClient();
-				HttpPost httppost = new HttpPost(uri);
-			    httppost.setHeader("Accept", "application/json");
-				gson = new Gson();
-				StringEntity entityPost = new StringEntity(gson.toJson(entity));
-				entityPost.setContentType("application/json");
-				
-				
-				httppost.setEntity(entityPost);
-
-				int executeCount = 0;
-				HttpResponse response;
-				do {
-					executeCount++;
-					//Log.v("TENTATIVA", "tentativa nœmero:" + executeCount);
-
-					// Execute HTTP Post Request
-					response = client.execute(httppost);
-					responseCode = response.getStatusLine().getStatusCode();						
-
-				} while (executeCount < 5 && responseCode == 408);
-
-				BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-				while ((line = rd.readLine()) != null){
-					result += line.trim();
-				}
-
-			      
-			} catch (Exception e) {
-				responseCode = 408;
+				postInfo();
+				backToMainPage(v);
+			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			View view = findViewById(R.layout.activity_display_map);
-			backToMainPage(view);
 		}
 	};
-	
+
+	public void postInfo() throws JSONException {
+		String result = "";
+		String line = "";
+		String id = String.valueOf("66960489");
+		Entity entity = new Entity();
+		List<Attributes> attributes = new ArrayList<Attributes>();
+		attributes.add(new Attributes("title", "String", "CPA", null));
+		List<Metadata> metadatas = new ArrayList<Metadata>();
+		metadatas.add(new Metadata("location", "String", "WGS84"));
+		attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude ,metadatas));
+		attributes.add(new Attributes("endereco", "String", "Endereco qualquer", null));
+		attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null));
+		attributes.add(new Attributes("userId", "String", "1",null));
+
+		entity.setType("Ocurrence");
+		entity.setId(id);
+		entity.setAttributes(attributes);
+
+		Gson gson;
+		String uri = "http://148.6.80.19:1026/v1/contextEntities";
+
+
+		int responseCode = 0;
+
+		try {
+			HttpClient client = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost(uri);
+			httppost.setHeader("Accept", "application/json");
+			gson = new Gson();
+			StringEntity entityPost = new StringEntity(gson.toJson(entity));
+			entityPost.setContentType("application/json");
+
+
+			httppost.setEntity(entityPost);
+
+			int executeCount = 0;
+			HttpResponse response;
+			do {
+				executeCount++;
+				//Log.v("TENTATIVA", "tentativa número:" + executeCount);
+
+				// Execute HTTP Post Request
+				response = client.execute(httppost);
+				responseCode = response.getStatusLine().getStatusCode();
+
+			} while (executeCount < 5 && responseCode == 408);
+
+			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+			while ((line = rd.readLine()) != null){
+				result += line.trim();
+			}
+
+
+		} catch (Exception e) {
+			responseCode = 408;
+			e.printStackTrace();
+
+		}
+
+//
+//        String s = "{ \"type\" : \"Position\",\"isPattern\" : \"false\", " +
+//                "\"id\" : \"358972063059834\",\"contextResponses\" : " +
+//                "[{\"attributes\" : [{\"name\" : \"latitude\",\"type\" : " +
+//                "\"String\",\"value\" : \"\"},{\"name\" : \"longitude\"," +
+//                "\"type\" : \"String\",\"value\" : \"\"}],\"statusCode\" : " +
+//                "{\"code\" : \"200\",\"reasonPhrase\" : \"OK\"}}]}";
+//
+//        JSONAssert.assertEquals(s, result, false);
+	}
+
 	public void backToMainPage(View view){
 		Intent intent = new Intent(this, MainActivity.class);
 		startActivity(intent);
 	}
-	
+
 	//Sets the spinner with the desired occurrences
 
 	public void onRadioButtonClicked(View view) {
@@ -180,26 +181,26 @@ public class MapDisplayActivity extends Activity {
 		TableRow tr2 = (TableRow) findViewById(R.id.longitude_table_row);
 		// Check which radio button was clicked
 		switch (view.getId()) {
-		case R.id.my_loc_radio_btn:
-			if (checked) {
-				tr1.setVisibility(View.INVISIBLE);
-				tr2.setVisibility(View.INVISIBLE);
-				v = findViewById(R.id.choose_loc_radio_btn);
-				((RadioButton) v).setChecked(false);
-				break;
-			}
-		case R.id.choose_loc_radio_btn:
-			if (checked) {
-				tr1.setVisibility(View.VISIBLE);
-				tr2.setVisibility(View.VISIBLE);
-				v = findViewById(R.id.my_loc_radio_btn);
-				((RadioButton) v).setChecked(false);
-				break;
-			}
+			case R.id.my_loc_radio_btn:
+				if (checked) {
+					tr1.setVisibility(View.INVISIBLE);
+					tr2.setVisibility(View.INVISIBLE);
+					v = findViewById(R.id.choose_loc_radio_btn);
+					((RadioButton) v).setChecked(false);
+					break;
+				}
+			case R.id.choose_loc_radio_btn:
+				if (checked) {
+					tr1.setVisibility(View.VISIBLE);
+					tr2.setVisibility(View.VISIBLE);
+					v = findViewById(R.id.my_loc_radio_btn);
+					((RadioButton) v).setChecked(false);
+					break;
+				}
 		}
 	}
 
-	
+
 	private void setSpinner() {
 
 		Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
@@ -212,6 +213,10 @@ public class MapDisplayActivity extends Activity {
 
 		spinner.setAdapter(adapter);
 
+	}
+
+	public void onDestroy(){
+		super.onDestroy();
 	}
 
 }

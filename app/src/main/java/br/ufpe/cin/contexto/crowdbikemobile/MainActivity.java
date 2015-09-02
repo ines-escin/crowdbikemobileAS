@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -34,7 +35,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -84,6 +89,9 @@ public class MainActivity extends Activity {
 	private String lastLatitudeString;
 	private String lastLongitudeString;
 	private long timeLastPosition;
+    private long anterior;
+    private long atual;
+	private boolean first = true;
 
 	private static final double EARTH_GRAVITY = 9.81;
 	private static final double WEIGHT = 70.0;
@@ -91,6 +99,7 @@ public class MainActivity extends Activity {
 	public static final double W_TO_KGM = 6.12;
 	public static final double KGM_TO_KCAL = 1 / 427.0;
 
+    private TextToSpeech TTS;
 	// Lumped constant for all frictional losses (tires, bearings, chain).
 	private static final double K1 = 0.0053;
 
@@ -126,6 +135,11 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
 		IMEI = getIMEI(this);
+        TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+			@Override
+			public void onInit(int status){
+			}
+		});
 		// Registra app no OrionCB
 		// Restaura as preferencias gravadas
 		SharedPreferences settings = getSharedPreferences(PREFS_REGISTERED, 0);
@@ -208,7 +222,7 @@ public class MainActivity extends Activity {
 	/**
 	 * Este método seta a cor de fundo do aplicativo
 	 * 
-	 * @param cor
+	 * param cor
 	 *            Código inteiro da cor. A lista de cores disponíveis está em
 	 *            res/calues/colors.xml
 	 */
@@ -504,9 +518,20 @@ public class MainActivity extends Activity {
 			// xherman
 			if (distance != null && Double.valueOf(distance) <= 100) {
 				txtMensagem.setText("Alerta: "
-						+ String.format("%.1f", Double.parseDouble(distance))
-						+ "m");
+                        + String.format("%.1f", Double.parseDouble(distance))
+                        + "m");
 				setarCorDeFundo(R.color.vermelho);
+                atual = System.nanoTime();
+                if((Double.parseDouble(distance) <= 50.0)){
+                    if(first) {
+                        anterior = atual;
+                        notificacaoVoz(distance);
+						first = false;
+                    }else if(atual - anterior > 30000000000.0f){
+                        notificacaoVoz(distance);
+						anterior = atual;
+                    }
+                }
 			}
 			Log.v("DIST", distance);
 		} else {
@@ -515,6 +540,15 @@ public class MainActivity extends Activity {
 		}
 
 	}
+
+    private void notificacaoVoz(String distance){
+        String mensagem = "Alerta: " + String.format("%.1f", Double.parseDouble(distance))
+                + "metros";
+        //definir scopo de quando mandar a mensagem de voz, como identificar quando mandar.
+        TTS.setPitch(1); // Afinação da Voz
+        TTS.setSpeechRate(1);//Velocidade da Voz
+        TTS.speak(mensagem, TextToSpeech.QUEUE_FLUSH, null);
+    }
 
 	// xherman
 	public String getDistanceLocation(String result) throws Exception {
