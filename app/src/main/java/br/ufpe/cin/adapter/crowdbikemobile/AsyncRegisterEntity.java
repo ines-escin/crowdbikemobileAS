@@ -75,7 +75,7 @@ public class AsyncRegisterEntity extends AsyncTask <String, Void, String> {
 				HttpResponse response;
 				do {
 					executeCount++;
-					//Log.v("TENTATIVA", "tentativa número:" + executeCount);
+					//Log.v("TENTATIVA", "tentativa nï¿½mero:" + executeCount);
 
 					// Execute HTTP Post Request
 					response = client.execute(httppost);

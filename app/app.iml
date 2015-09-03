@@ -73,7 +73,11 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex-cache" />
+<<<<<<< HEAD
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support.test.uiautomator/uiautomator-v18/2.0.0/jars" />
+=======
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support.test.uiautomator/uiautomator-v18/2.1.1/jars" />
+>>>>>>> 4922f4fe13f1f7321daa1d0284d5e9271d6da5e7
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jacoco" />
@@ -93,6 +97,7 @@
     <orderEntry type="jdk" jdkName="Android API 18 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="AmarinoLibrary_v0_55" level="project" />
+<<<<<<< HEAD
     <orderEntry type="library" exported="" name="json-simple-1.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="uiautomator-v18-2.0.0" level="project" />
     <orderEntry type="library" exported="" name="commons-io-1.2" level="project" />
@@ -100,6 +105,14 @@
     <orderEntry type="library" exported="" name="jsonassert-1.2.3" level="project" />
     <orderEntry type="library" exported="" name="commons-cli-1.1" level="project" />
     <orderEntry type="library" exported="" name="gson-2.3" level="project" />
+=======
+    <orderEntry type="library" exported="" name="gson-2.2.4" level="project" />
+    <orderEntry type="library" exported="" name="json-simple-1.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="uiautomator-v18-2.1.1" level="project" />
+    <orderEntry type="library" exported="" name="commons-io-1.2" level="project" />
+    <orderEntry type="library" exported="" name="jsonassert-1.2.3" level="project" />
+    <orderEntry type="library" exported="" name="commons-cli-1.1" level="project" />
+>>>>>>> 4922f4fe13f1f7321daa1d0284d5e9271d6da5e7
     <orderEntry type="library" exported="" name="commons-lang3-3.3.2" level="project" />
     <orderEntry type="library" exported="" name="support-v4-23.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-23.0.0" level="project" />

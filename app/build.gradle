@@ -15,21 +15,19 @@ buildscript {
 
 dependencies {
     compile 'com.android.support:support-v4:23.0.0'
-    compile 'com.google.code.gson:gson:2.3'
+    compile 'com.google.code.gson:gson:2.2.4'
     compile files('libs/AmarinoLibrary_v0_55.jar')
     compile files('libs/commons-cli-1.1.jar')
     compile files('libs/commons-io-1.2.jar')
     compile files('libs/commons-lang3-3.3.2.jar')
     compile files('libs/json-simple-1.1.jar')
     compile files('libs/jsonassert-1.2.3.jar')
-    compile files('libs/rabbitmq-client.jar')
 
     testCompile 'org.robospock:robospock:0.6.0-rc'
-    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.0.0'
-
     // robolectric requires is it to run
     // if you're not using it in your code just leave it as a testCompile depedency
     testCompile 'com.android.support:support-v4:19.0.1'
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
 }
 
 repositories {

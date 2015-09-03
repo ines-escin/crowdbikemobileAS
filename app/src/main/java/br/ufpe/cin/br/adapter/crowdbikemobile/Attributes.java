@@ -7,7 +7,7 @@ public class Attributes {
 	String name;
 	String type;
 	String value;
-	List<Metadata> metadas;
+	List<Metadata> metadatas;
 
 	public Attributes(String name, String type, String value, List<Metadata> metadatas) {
 		super();
@@ -45,11 +45,11 @@ public class Attributes {
 	}
 
 	public List<Metadata> getMetadas() {
-		return metadas;
+		return metadatas;
 	}
 
-	public void setMetadas(List<Metadata> metadas) {
-		this.metadas = metadas;
+	public void setMetadas(List<Metadata> metadatas) {
+		this.metadatas = metadatas;
 	}
 
 }

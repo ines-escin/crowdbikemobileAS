@@ -40,7 +40,6 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
 
 public class MapDisplayActivity extends Activity {
 
-
 	public String latitude;
 	public String longitude;
 
@@ -155,6 +154,7 @@ public class MapDisplayActivity extends Activity {
 
 		}
 
+
 //
 //        String s = "{ \"type\" : \"Position\",\"isPattern\" : \"false\", " +
 //                "\"id\" : \"358972063059834\",\"contextResponses\" : " +
@@ -166,57 +166,52 @@ public class MapDisplayActivity extends Activity {
 //        JSONAssert.assertEquals(s, result, false);
 	}
 
-	public void backToMainPage(View view){
-		Intent intent = new Intent(this, MainActivity.class);
-		startActivity(intent);
-	}
+   public void backToMainPage(View view){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
 
-	//Sets the spinner with the desired occurrences
+    //Sets the spinner with the desired occurrences
 
-	public void onRadioButtonClicked(View view) {
-		// Is the button now checked?
-		View v;
-		boolean checked = ((RadioButton) view).isChecked();
-		TableRow tr1 = (TableRow) findViewById(R.id.latitude_table_row);
-		TableRow tr2 = (TableRow) findViewById(R.id.longitude_table_row);
-		// Check which radio button was clicked
-		switch (view.getId()) {
-			case R.id.my_loc_radio_btn:
-				if (checked) {
-					tr1.setVisibility(View.INVISIBLE);
-					tr2.setVisibility(View.INVISIBLE);
-					v = findViewById(R.id.choose_loc_radio_btn);
-					((RadioButton) v).setChecked(false);
-					break;
-				}
-			case R.id.choose_loc_radio_btn:
-				if (checked) {
-					tr1.setVisibility(View.VISIBLE);
-					tr2.setVisibility(View.VISIBLE);
-					v = findViewById(R.id.my_loc_radio_btn);
-					((RadioButton) v).setChecked(false);
-					break;
-				}
-		}
-	}
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        View v;
+        boolean checked = ((RadioButton) view).isChecked();
+        TableRow tr1 = (TableRow) findViewById(R.id.latitude_table_row);
+        TableRow tr2 = (TableRow) findViewById(R.id.longitude_table_row);
+        // Check which radio button was clicked
+        switch (view.getId()) {
+            case R.id.my_loc_radio_btn:
+                if (checked) {
+                    tr1.setVisibility(View.INVISIBLE);
+                    tr2.setVisibility(View.INVISIBLE);
+                    v = findViewById(R.id.choose_loc_radio_btn);
+                    ((RadioButton) v).setChecked(false);
+                    break;
+                }
+            case R.id.choose_loc_radio_btn:
+                if (checked) {
+                    tr1.setVisibility(View.VISIBLE);
+                    tr2.setVisibility(View.VISIBLE);
+                    v = findViewById(R.id.my_loc_radio_btn);
+                    ((RadioButton) v).setChecked(false);
+                    break;
+                }
+        }
+    }
 
 
-	private void setSpinner() {
+    private void setSpinner() {
 
-		Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
+        Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
 
-		String[] occurrences = { "CPA", "COVP", "CVM2-3R", "CACC", "CTPO",
-				"CTVF", "COVNM", "COFE", "ANDT", "AI" };
+        String[] occurrences = { "CPA", "COVP", "CVM2-3R", "CACC", "CTPO",
+                "CTVF", "COVNM", "COFE", "ANDT", "AI" };
 
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_dropdown_item, occurrences);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_dropdown_item, occurrences);
 
-		spinner.setAdapter(adapter);
+        spinner.setAdapter(adapter);
 
-	}
-
-	public void onDestroy(){
-		super.onDestroy();
-	}
-
+    }
 }
