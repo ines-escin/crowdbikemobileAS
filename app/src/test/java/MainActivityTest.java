@@ -1,5 +1,3 @@
-package com.example.crowdbikemobile.test;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -11,9 +9,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.w3c.dom.Text;
 
+import android.speech.tts.TextToSpeech;
+import android.support.annotation.Nullable;
 import android.test.ActivityInstrumentationTestCase2;
+import android.view.View;
+
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 import br.ufpe.cin.contexto.crowdbikemobile.MainActivity;
@@ -22,13 +27,42 @@ import com.google.gson.Gson;
 
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     public MainActivityTest() {
-        super(MainActivity.class);
+		super(MainActivity.class);
     }
 
-	
 	protected void setUp() throws Exception{
 		super.setUp();
 	}
+
+	@Test
+	public void testVoiceAlert() {
+		long time = 0;
+		long finalTime = 0;
+		TextToSpeech TTS = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
+			@Override
+			public void onInit(int status) {
+			}
+		});
+		boolean isSpeaking = false;
+		boolean speak = true;
+		if (speak) {
+			speak = false;
+			finalTime = time;
+			TTS.setSpeechRate(1);
+			TTS.setPitch(1);
+			TTS.speak("Alerta: 5,2 metros", TextToSpeech.QUEUE_FLUSH, null);
+			isSpeaking = TTS.isSpeaking();
+		} else if (time - finalTime > 30000000000.0) {
+			TTS.setSpeechRate(1);
+			TTS.setPitch(1);
+			TTS.speak("Alerta: 5,2 metros", TextToSpeech.QUEUE_FLUSH, null);
+			isSpeaking = TTS.isSpeaking();
+			finalTime = time;
+		}
+
+		assertTrue(isSpeaking);
+		assertFalse(isSpeaking);
+    }
     
 
 	public void testRegisterOrionEntity() throws JSONException {
