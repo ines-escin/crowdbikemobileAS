@@ -45,8 +45,8 @@ public class ActivitySendNotification extends Activity {
 	}
 	
 	 /**
-     * Este método seta a cor de fundo do aplicativo
-     * @param cor	Código inteiro da cor. A lista de cores disponíveis está em res/calues/colors.xml
+     * Este metodo seta a cor de fundo do aplicativo
+     * @param cor	Cï¿½digo inteiro da cor. A lista de cores disponï¿½veis estï¿½ em res/calues/colors.xml
      */
     public void setarCorDeFundo(int intColor){
     	String stringColor = getResources().getString(intColor);
@@ -55,7 +55,7 @@ public class ActivitySendNotification extends Activity {
     	LinearLayout layoutApp = (LinearLayout)findViewById(R.id.bg_activity_send_notification);
     	layoutApp.setBackgroundColor(Color.parseColor(stringColor));
     	
-    	//Setando o fundo do botão
+    	//Setando o fundo do botï¿½o
 		Button botaoSend = (Button)findViewById(R.id.btn_send_notification);
 		
 		if(intColor == R.color.verde){
@@ -67,7 +67,7 @@ public class ActivitySendNotification extends Activity {
     }
     
     /**
-     * Ação do botão SEND
+     * Ao do boto SEND
      * @param v
      */
 	public void sendNotification(View v){

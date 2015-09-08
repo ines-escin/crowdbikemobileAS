@@ -14,6 +14,8 @@ buildscript {
 
 
 dependencies {
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.9.5"
     compile 'com.android.support:support-v4:23.0.0'
     compile 'com.google.code.gson:gson:2.2.4'
     compile files('libs/AmarinoLibrary_v0_55.jar')
@@ -23,12 +25,11 @@ dependencies {
     compile files('libs/json-simple-1.1.jar')
     compile files('libs/jsonassert-1.2.3.jar')
 
-
     testCompile 'org.robospock:robospock:0.6.0-rc'
     // robolectric requires is it to run
     // if you're not using it in your code just leave it as a testCompile depedency
     testCompile 'com.android.support:support-v4:19.0.1'
-    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
+    testCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
 }
 
 repositories {
@@ -39,7 +40,7 @@ repositories {
 android {
     compileSdkVersion 18
     buildToolsVersion "23.0.0"
-    compileOptions.encoding = 'UTF-8'
+    compileOptions.encoding = 'ISO-8859-1'
     
     defaultConfig {
         applicationId "com.example.crowdbikemobile"
@@ -50,6 +51,10 @@ android {
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+    
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'

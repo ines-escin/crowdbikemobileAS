@@ -12,7 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
-import org.skyscreamer.jsonassert.JSONAssert;
+
 
 import android.app.Activity;
 import android.widget.ArrayAdapter;
@@ -41,75 +41,87 @@ import br.ufpe.cin.util.crowdbikemobile.IdGenerator;
 
 public class MapDisplayActivity extends Activity {
 
+	public String latitude;
+	public String longitude;
 
-    public String latitude;
-    public String longitude;
+	@Override
+	protected void onCreate(Bundle icicle) {
 
-    @Override
-    protected void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+		setContentView(R.layout.activity_display_map);
+		Intent intent = getIntent();
 
-        super.onCreate(icicle);
-        setContentView(R.layout.activity_display_map);
-        Intent intent = getIntent();
+		ArrayList<String> coordinates = (ArrayList<String>) intent.getSerializableExtra("COORDINATES");
 
-        ArrayList<String> coordinates = (ArrayList<String>) intent.getSerializableExtra("COORDINATES");
+		this.latitude = coordinates.get(0);
+		this.longitude = coordinates.get(1);
 
-        this.latitude = coordinates.get(0);
-        this.longitude = coordinates.get(1);
+		setSpinner();
+		setButton();
+		checkMyLocationRadio();
+	}
 
-        setSpinner();
-        setButton();
-        checkMyLocationRadio();
-    }
+	//Sets the post button
+	private void setButton(){
+		Button postButton = (Button) findViewById(R.id.send_issue_btn);
+		postButton.setOnClickListener(postButtonListener);
+	}
 
-    //Sets the post button
-    private void setButton(){
-        Button postButton = (Button) findViewById(R.id.send_issue_btn);
-        postButton.setOnClickListener(postButtonListener);
-    }
+	private void checkMyLocationRadio(){
+		RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
+		myLocationRadio.setChecked(true);
+	}
 
-    private void checkMyLocationRadio(){
-        RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
-        myLocationRadio.setChecked(true);
-    }
+	private String getIMEI(Context context) {
+
+		TelephonyManager mngr = (TelephonyManager) context
+				.getSystemService(context.TELEPHONY_SERVICE);
+		String imei = mngr.getDeviceId();
+		return imei;
+
 
     //Inner class to configure the post button
-    public OnClickListener postButtonListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
 
-            try {
-                postInfo();
-                backToMainPage(v);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    };
+	}
 
-    public void postInfo() throws JSONException {
-        String result = "";
-        String line = "";
-        String id = generateUniqueId(getApplicationContext());
-        Entity entity = new Entity();
-        List<Attributes> attributes = new ArrayList<Attributes>();
-        attributes.add(new Attributes("title", "String", "CPA", null));
-        List<Metadata> metadatas = new ArrayList<Metadata>();
-        metadatas.add(new Metadata("location", "String", "WGS84"));
-        attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude ,metadatas));
-        attributes.add(new Attributes("endereco", "String", "Endereco qualquer", null));
-        attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null));
-        attributes.add(new Attributes("userId", "String", "1",null));
+	//Inner class to configure the post button
+	public OnClickListener postButtonListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
 
-        entity.setType("Ocurrence");
-        entity.setId(id);
-        entity.setAttributes(attributes);
+			try {
+				postInfo();
+				backToMainPage(v);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+	};
+
+	public void postInfo() throws JSONException {
+		String result = "";
+		String line = "";
+		String id = String.valueOf("66960489");
+		Entity entity = new Entity();
+		List<Attributes> attributes = new ArrayList<Attributes>();
+		attributes.add(new Attributes("title", "String", "CPA", null));
+		List<Metadata> metadatas = new ArrayList<Metadata>();
+		metadatas.add(new Metadata("location", "String", "WGS84"));
+		attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude ,metadatas));
+		attributes.add(new Attributes("endereco", "String", "Endereco qualquer", null));
+		attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null));
+		attributes.add(new Attributes("userId", "String", "1",null));
+
+		entity.setType("Ocurrence");
+		entity.setId(id);
+		entity.setAttributes(attributes);
 
         Gson gson;
         String uri = "http://148.6.80.19:1026/v1/contextEntities/";
         uri += id;
 
-        int responseCode = 0;
+
+		int responseCode = 0;
 
         try {
 
@@ -120,33 +132,33 @@ public class MapDisplayActivity extends Activity {
             StringEntity entityPost = new StringEntity(gson.toJson(entity));
             entityPost.setContentType("application/json");
 
+			httppost.setEntity(entityPost);
 
-            httppost.setEntity(entityPost);
+			int executeCount = 0;
+			HttpResponse response;
+			do {
+				executeCount++;
+				//Log.v("TENTATIVA", "tentativa n�mero:" + executeCount);
 
-            int executeCount = 0;
-            HttpResponse response;
-            do {
-                executeCount++;
-                //Log.v("TENTATIVA", "tentativa número:" + executeCount);
+				// Execute HTTP Post Request
+				response = client.execute(httppost);
+				responseCode = response.getStatusLine().getStatusCode();
 
-                // Execute HTTP Post Request
-                response = client.execute(httppost);
-                responseCode = response.getStatusLine().getStatusCode();
+			} while (executeCount < 5 && responseCode == 408);
 
-            } while (executeCount < 5 && responseCode == 408);
+			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
-            BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-            while ((line = rd.readLine()) != null){
-                result += line.trim();
-            }
+			while ((line = rd.readLine()) != null){
+				result += line.trim();
+			}
 
 
-        } catch (Exception e) {
-            responseCode = 408;
-            e.printStackTrace();
+		} catch (Exception e) {
+			responseCode = 408;
+			e.printStackTrace();
 
-        }
+		}
+
 
 //
 //        String s = "{ \"type\" : \"Position\",\"isPattern\" : \"false\", " +
@@ -157,9 +169,9 @@ public class MapDisplayActivity extends Activity {
 //                "{\"code\" : \"200\",\"reasonPhrase\" : \"OK\"}}]}";
 //
 //        JSONAssert.assertEquals(s, result, false);
-    }
+	}
 
-    public void backToMainPage(View view){
+   public void backToMainPage(View view){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
@@ -216,9 +228,4 @@ public class MapDisplayActivity extends Activity {
         spinner.setAdapter(adapter);
 
     }
-
-    public void onDestroy(){
-        super.onDestroy();
-    }
-
 }

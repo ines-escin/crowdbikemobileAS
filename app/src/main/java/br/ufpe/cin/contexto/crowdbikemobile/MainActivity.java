@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 import org.apache.http.HttpResponse;
 
 import org.apache.http.client.HttpClient;
@@ -23,7 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 
-import android.hardware.SensorManager;
+
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -31,7 +32,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
+
 import android.util.Log;
 import android.view.View;
 
@@ -39,14 +42,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import at.abraxas.amarino.Amarino;
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncServidor;
+
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
 
 import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
@@ -74,6 +76,9 @@ public class MainActivity extends Activity {
 	private String lastLatitudeString;
 	private String lastLongitudeString;
 	private long timeLastPosition;
+    private long anterior;
+    private long atual;
+	private boolean first = true;
 
 	private static final double EARTH_GRAVITY = 9.81;
 	private static final double WEIGHT = 70.0;
@@ -81,6 +86,7 @@ public class MainActivity extends Activity {
 	public static final double W_TO_KGM = 6.12;
 	public static final double KGM_TO_KCAL = 1 / 427.0;
 
+    private TextToSpeech TTS;
 	// Lumped constant for all frictional losses (tires, bearings, chain).
 	private static final double K1 = 0.0053;
 
@@ -116,14 +122,17 @@ public class MainActivity extends Activity {
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
 		IMEI = getIMEI(this);
 
+        TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+			@Override
+			public void onInit(int status){
+			}
+		});
 		// Registra app no OrionCB
 		// Restaura as preferencias gravadas
 
 		SharedPreferences settings = getSharedPreferences(PREFS_REGISTERED, 0);
 		registered = settings.getString("Registered", "");
 
-		// Conectando ao arduíno
-		// Amarino.connect(this, DEVICE_ADDRESS);
 
 		txtResultado = (TextView) findViewById(R.id.txtResultado);
 
@@ -160,13 +169,12 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Amarino.disconnect(this, DEVICE_ADDRESS);
+
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Amarino.connect(this, DEVICE_ADDRESS);
 
 	}
 
@@ -176,9 +184,13 @@ public class MainActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		publishThread.interrupt();
-		subscribeThread.interrupt();
-        Amarino.disconnect(this, DEVICE_ADDRESS);
+		if(publishThread != null) {
+			publishThread.interrupt();
+		}
+		if(subscribeThread != null)
+		{
+			subscribeThread.interrupt();
+		}
 
 	}
 
@@ -301,13 +313,7 @@ public class MainActivity extends Activity {
 	}
 
 
-	public void tarefaParalelaServidor2() {
-		// Instanciando a asynctask para contato com o servidor e acesso ao
-		// arduíno
-		task2 = new AsyncSendNotification(this);
-		task2.execute(IMEI, latitudeString, longitudeString);
 
-	}
 
 	public void tarefaParalelaTempo() {
 		// Instanciando a asynktask para contato com o serviço de tempo
@@ -323,9 +329,20 @@ public class MainActivity extends Activity {
 			String distance = getDistanceLocation(retorno);
 			if (distance != null && Double.valueOf(distance) <= 100) {
 				txtMensagem.setText("Alerta: "
-						+ String.format("%.1f", Double.parseDouble(distance))
-						+ "m");
+                        + String.format("%.1f", Double.parseDouble(distance))
+                        + "m");
 				setarCorDeFundo(R.color.vermelho);
+                atual = System.nanoTime();
+                if((Double.parseDouble(distance) <= 50.0)){
+                    if(first) {
+                        anterior = atual;
+                        notificacaoVoz(distance);
+						first = false;
+                    }else if(atual - anterior > 30000000000.0f){
+                        notificacaoVoz(distance);
+						anterior = atual;
+                    }
+                }
 			}
 			Log.v("DIST", distance);
 		} else {
@@ -335,6 +352,16 @@ public class MainActivity extends Activity {
 
 	}
 
+    private void notificacaoVoz(String distance){
+        String mensagem = "Alerta: " + String.format("%.1f", Double.parseDouble(distance))
+                + "metros";
+        //definir scopo de quando mandar a mensagem de voz, como identificar quando mandar.
+        TTS.setPitch(1); // Afinação da Voz
+        TTS.setSpeechRate(1);//Velocidade da Voz
+        TTS.speak(mensagem, TextToSpeech.QUEUE_FLUSH, null);
+    }
+
+	// xherman
 
 	public String getDistanceLocation(String result) throws Exception {
 		List<Entity> listEntity = AdapterOcurrence.parseListEntity(result);
@@ -390,15 +417,6 @@ public class MainActivity extends Activity {
 	}
 
 
-	public void sendInformationToArduino(String informationText) {
-		String text = null;
-		text = informationText;
-
-        Amarino.sendDataToArduino(this, DEVICE_ADDRESS, 'A', text);
-		// Amarino.disconnect(this, DEVICE_ADDRESS);
-	}
-
-
 	public void inicializarListenerGPS() {
 
 		/* Use the LocationManager class to obtain GPS locations */
@@ -432,13 +450,6 @@ public class MainActivity extends Activity {
 
 	}
 
-	public String getLatitudeString() {
-		return latitudeString;
-	}
-
-	public String getLongitudeString() {
-		return longitudeString;
-	}
 
 	/* Class My Location Listener */
 	public class MyLocationListener implements LocationListener {
@@ -523,9 +534,7 @@ public class MainActivity extends Activity {
 
 	}
 
-	public int getBgColor() {
-		return bgColor;
-	}
+
 
 	public void setBgColor(int bgColor) {
 		this.bgColor = bgColor;
@@ -614,21 +623,6 @@ public class MainActivity extends Activity {
 		return (dist);
 	}
 
-	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-	/* :: This function converts decimal degrees to radians : */
-	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-
-	private double deg2rad(double deg) {
-		return (deg * Math.PI / 180.0);
-	}
-
-	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-	/* :: This function converts radians to decimal degrees : */
-	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-
-	private double rad2deg(double rad) {
-		return (rad * 180.0 / Math.PI);
-	}
 
 	public void setLatitudeString(String latitudeString) {
 		this.latitudeString = latitudeString;
