@@ -37,6 +37,7 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
+import br.ufpe.cin.util.crowdbikemobile.IdGenerator;
 
 public class MapDisplayActivity extends Activity {
 
@@ -72,15 +73,6 @@ public class MapDisplayActivity extends Activity {
         myLocationRadio.setChecked(true);
     }
 
-    private String getIMEI(Context context) {
-
-        TelephonyManager mngr = (TelephonyManager) context
-                .getSystemService(context.TELEPHONY_SERVICE);
-        String imei = mngr.getDeviceId();
-        return imei;
-
-    }
-
     //Inner class to configure the post button
     public OnClickListener postButtonListener = new OnClickListener() {
         @Override
@@ -98,7 +90,7 @@ public class MapDisplayActivity extends Activity {
     public void postInfo() throws JSONException {
         String result = "";
         String line = "";
-        String id = String.valueOf("66960489");
+        String id = generateUniqueId(getApplicationContext());
         Entity entity = new Entity();
         List<Attributes> attributes = new ArrayList<Attributes>();
         attributes.add(new Attributes("title", "String", "CPA", null));
@@ -114,12 +106,13 @@ public class MapDisplayActivity extends Activity {
         entity.setAttributes(attributes);
 
         Gson gson;
-        String uri = "http://148.6.80.19:1026/v1/contextEntities";
-
+        String uri = "http://148.6.80.19:1026/v1/contextEntities/";
+        uri += id;
 
         int responseCode = 0;
 
         try {
+
             HttpClient client = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(uri);
             httppost.setHeader("Accept", "application/json");
@@ -169,6 +162,15 @@ public class MapDisplayActivity extends Activity {
     public void backToMainPage(View view){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    private String generateUniqueId(Context context){
+        TelephonyManager mngr = (TelephonyManager) context
+                .getSystemService(context.TELEPHONY_SERVICE);
+        String imei = mngr.getDeviceId();
+        Calendar cal = Calendar.getInstance();
+        String date =  "" + cal.get(Calendar.MILLISECOND);
+        return imei + date;
     }
 
     //Sets the spinner with the desired occurrences

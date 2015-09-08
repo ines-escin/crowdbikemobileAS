@@ -1,11 +1,21 @@
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence
+import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes
+import br.ufpe.cin.br.adapter.crowdbikemobile.Entity
+import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata
 import br.ufpe.cin.contexto.crowdbikemobile.MapDisplayActivity
+import com.google.gson.Gson
+import org.apache.http.HttpResponse
+import org.apache.http.client.HttpClient
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.DefaultHttpClient
 import pl.polidea.robospock.RoboSpecification
 
 class PostLocationActivitySpec extends RoboSpecification {
 
-    def "Create the activity"(){
+    def "System creates the activity"(){
         when:
         def activity = new MapDisplayActivity()
 
@@ -13,22 +23,13 @@ class PostLocationActivitySpec extends RoboSpecification {
         noExceptionThrown()
     }
 
-    def "User submits an occurrence with his current location"(){
-        given:
-            //The user is connected to internet
-        when:
-            //The user submits the current location
-        then:
-            //The occurrence must be successfully posted to the server
+    def "Successful post of the current location"(){
+
+
     }
 
     def "User submits an occurrence with a location defined manually and with valid coordinate values" (){
-        given:
-            //the user is connected to internet
-        when:
-            //the user submits the current location with valid coordinate values
-        then:
-            //The occurrence must be successfully posted to the server
+
     }
 
 }
