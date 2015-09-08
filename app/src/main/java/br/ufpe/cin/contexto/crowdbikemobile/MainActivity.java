@@ -191,7 +191,7 @@ public class MainActivity extends Activity {
 		{
 			subscribeThread.interrupt();
 		}
-
+        //thread fix
 	}
 
 	public void setarCorDeFundo(int intColor) {
