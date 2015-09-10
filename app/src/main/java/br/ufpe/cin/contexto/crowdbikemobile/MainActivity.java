@@ -38,6 +38,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import android.widget.ImageView;
@@ -59,11 +61,17 @@ import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
 
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.widget.Button;
+import android.widget.PopupWindow;
+
 
 
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
-
+	private boolean doVoiceAlert;
+	private Point p;
 	private static final String DEVICE_ADDRESS = "30:14:11:03:21:35";
 	private String latitudeString = "";
 	private String longitudeString = "";
@@ -130,6 +138,18 @@ public class MainActivity extends Activity {
 			public void onInit(int status){
 			}
 		});
+
+		Button btn_show = (Button) findViewById(R.id.btn_pop_up);
+		btn_show.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+
+				//Open popup window
+				if (p != null)
+					pop_upMenu(MainActivity.this, p);
+			}
+		});
+
 		// Registra app no OrionCB
 		// Restaura as preferencias gravadas
 
@@ -169,6 +189,60 @@ public class MainActivity extends Activity {
 			}
 		};
 
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+
+		int[] location = new int[2];
+		Button button = (Button) findViewById(R.id.btn_pop_up);
+
+		// Get the x, y location and store it in the location[] array
+		// location[0] = x, location[1] = y.
+		button.getLocationOnScreen(location);
+
+		//Initialize the Point with x, and y positions
+		p = new Point();
+		p.x = location[0];
+		p.y = location[1];
+	}
+
+	public void pop_upMenu(final Activity context, Point p){
+		int popupWidth = 300;
+		int popupHeight = 350;
+
+		// Inflate the popup_layout.xml
+		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.pop_up);
+		LayoutInflater layoutInflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View layout = layoutInflater.inflate(R.layout.pop_up, viewGroup);
+
+		// Creating the PopupWindow
+		final PopupWindow popup = new PopupWindow(context);
+		popup.setContentView(layout);
+		popup.setWidth(popupWidth);
+		popup.setHeight(popupHeight);
+		popup.setFocusable(true);
+
+		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+		int OFFSET_X = 0;
+		int OFFSET_Y = 370;
+
+		// Clear the default translucent background
+		popup.setBackgroundDrawable(new BitmapDrawable());
+
+		// Displaying the popup at the specified location, + offsets.
+		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y - OFFSET_Y);
+
+		// Getting a reference to Close button, and close the popup when clicked.
+		Button close = (Button) layout.findViewById(R.id.close);
+		close.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				popup.dismiss();
+			}
+		});
 	}
 
 	@Override
