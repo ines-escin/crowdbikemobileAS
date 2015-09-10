@@ -12,7 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
-import org.skyscreamer.jsonassert.JSONAssert;
+
 
 import android.app.Activity;
 import android.widget.ArrayAdapter;
@@ -37,6 +37,7 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
+import br.ufpe.cin.util.crowdbikemobile.IdGenerator;
 
 public class MapDisplayActivity extends Activity {
 
@@ -78,6 +79,9 @@ public class MapDisplayActivity extends Activity {
 		String imei = mngr.getDeviceId();
 		return imei;
 
+
+    //Inner class to configure the post button
+
 	}
 
 	//Inner class to configure the post button
@@ -112,20 +116,21 @@ public class MapDisplayActivity extends Activity {
 		entity.setId(id);
 		entity.setAttributes(attributes);
 
-		Gson gson;
-		String uri = "http://148.6.80.19:1026/v1/contextEntities";
+        Gson gson;
+        String uri = "http://148.6.80.19:1026/v1/contextEntities/";
+        uri += id;
 
 
 		int responseCode = 0;
 
-		try {
-			HttpClient client = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost(uri);
-			httppost.setHeader("Accept", "application/json");
-			gson = new Gson();
-			StringEntity entityPost = new StringEntity(gson.toJson(entity));
-			entityPost.setContentType("application/json");
+        try {
 
+            HttpClient client = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost(uri);
+            httppost.setHeader("Accept", "application/json");
+            gson = new Gson();
+            StringEntity entityPost = new StringEntity(gson.toJson(entity));
+            entityPost.setContentType("application/json");
 
 			httppost.setEntity(entityPost);
 
@@ -133,7 +138,7 @@ public class MapDisplayActivity extends Activity {
 			HttpResponse response;
 			do {
 				executeCount++;
-				//Log.v("TENTATIVA", "tentativa número:" + executeCount);
+				//Log.v("TENTATIVA", "tentativa nï¿½mero:" + executeCount);
 
 				// Execute HTTP Post Request
 				response = client.execute(httppost);
@@ -169,6 +174,15 @@ public class MapDisplayActivity extends Activity {
    public void backToMainPage(View view){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    private String generateUniqueId(Context context){
+        TelephonyManager mngr = (TelephonyManager) context
+                .getSystemService(context.TELEPHONY_SERVICE);
+        String imei = mngr.getDeviceId();
+        Calendar cal = Calendar.getInstance();
+        String date =  "" + cal.get(Calendar.MILLISECOND);
+        return imei + date;
     }
 
     //Sets the spinner with the desired occurrences

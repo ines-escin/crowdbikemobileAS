@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpResponse;
 
@@ -23,9 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 
-
-import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -35,23 +34,24 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.format.Time;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import at.abraxas.amarino.Amarino;
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
+import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncServidor;
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
 
 import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
@@ -82,7 +82,6 @@ public class MainActivity extends Activity {
     private long anterior;
     private long atual;
 	private boolean first = true;
-	private boolean doVoiceAlert;
 
 	private static final double EARTH_GRAVITY = 9.81;
 	private static final double WEIGHT = 70.0;
@@ -110,22 +109,20 @@ public class MainActivity extends Activity {
 	private static final String PREFS_REGISTERED = "Preferences";
 
 
-	private LinearLayout layoutToAdd;
+
 	private LocationManager mlocManager;
 	private LocationListener mlocListener;
 
 	private String returnQueue = "";
 
 	private String registered = "";
-	private Point p;
 
 	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
-		layoutToAdd = (LinearLayout) findViewById(R.id.button_layout);
 		IMEI = getIMEI(this);
 
         TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -133,22 +130,14 @@ public class MainActivity extends Activity {
 			public void onInit(int status){
 			}
 		});
-
-		Button btn_show = (Button) findViewById(R.id.btn_pop_up);
-		btn_show.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-
-				//Open popup window
-				if (p != null)
-					pop_upMenu(MainActivity.this, p);
-			}
-		});
 		// Registra app no OrionCB
 		// Restaura as preferencias gravadas
 
 		SharedPreferences settings = getSharedPreferences(PREFS_REGISTERED, 0);
 		registered = settings.getString("Registered", "");
+
+		// Conectando ao arduíno
+		// Amarino.connect(this, DEVICE_ADDRESS);
 
 		txtResultado = (TextView) findViewById(R.id.txtResultado);
 
@@ -167,16 +156,32 @@ public class MainActivity extends Activity {
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
+
+		final Handler incomingMessageHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				String message = msg.getData().getString("msg");
+				TextView tv = (TextView) findViewById(R.id.txtMensagem);
+				Date now = new Date();
+				SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
+				txtMensagem.setText(message);
+				// tv.append(ft.format(now) + ' ' + message + '\n');
+			}
+		};
+
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Amarino.disconnect(this, DEVICE_ADDRESS);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Amarino.connect(this, DEVICE_ADDRESS);
+
 	}
 
 	Thread subscribeThread;
@@ -187,6 +192,8 @@ public class MainActivity extends Activity {
 		super.onDestroy();
 		publishThread.interrupt();
 		subscribeThread.interrupt();
+        Amarino.disconnect(this, DEVICE_ADDRESS);
+
 	}
 
 
@@ -197,59 +204,6 @@ public class MainActivity extends Activity {
 	 *            Código inteiro da cor. A lista de cores disponíveis está em
 	 *            res/calues/colors.xml
 	 */
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-
-		int[] location = new int[2];
-		Button button = (Button) findViewById(R.id.btn_pop_up);
-
-		// Get the x, y location and store it in the location[] array
-		// location[0] = x, location[1] = y.
-		button.getLocationOnScreen(location);
-
-		//Initialize the Point with x, and y positions
-		p = new Point();
-		p.x = location[0];
-		p.y = location[1];
-	}
-
-	public void pop_upMenu(final Activity context, Point p){
-		int popupWidth = 300;
-		int popupHeight = 350;
-
-		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.pop_up);
-		LayoutInflater layoutInflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View layout = layoutInflater.inflate(R.layout.pop_up, viewGroup);
-
-		// Creating the PopupWindow
-		final PopupWindow popup = new PopupWindow(context);
-		popup.setContentView(layout);
-		popup.setWidth(popupWidth);
-		popup.setHeight(popupHeight);
-		popup.setFocusable(true);
-
-		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-		int OFFSET_X = 0;
-		int OFFSET_Y = 370;
-
-		// Clear the default translucent background
-		popup.setBackgroundDrawable(new BitmapDrawable());
-
-		// Displaying the popup at the specified location, + offsets.
-		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y - OFFSET_Y);
-
-		// Getting a reference to Close button, and close the popup when clicked.
-		Button close = (Button) layout.findViewById(R.id.close);
-		close.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				popup.dismiss();
-			}
-		});
-	}
 
 	public void setarCorDeFundo(int intColor) {
 		setBgColor(intColor);
@@ -369,6 +323,15 @@ public class MainActivity extends Activity {
         startGenerating();
 	}
 
+
+	public void tarefaParalelaServidor2() {
+		// Instanciando a asynctask para contato com o servidor e acesso ao
+		// arduíno
+		task2 = new AsyncSendNotification(this);
+		task2.execute(IMEI, latitudeString, longitudeString);
+
+	}
+
 	public void tarefaParalelaTempo() {
 		// Instanciando a asynktask para contato com o serviço de tempo
 		tempo = new AsyncTempo(this);
@@ -471,6 +434,14 @@ public class MainActivity extends Activity {
 	}
 
 
+	public void sendInformationToArduino(String informationText) {
+		String text = null;
+		text = informationText;
+
+        Amarino.sendDataToArduino(this, DEVICE_ADDRESS, 'A', text);
+		// Amarino.disconnect(this, DEVICE_ADDRESS);
+	}
+
 
 	public void inicializarListenerGPS() {
 
@@ -503,6 +474,14 @@ public class MainActivity extends Activity {
 			}
 		}
 
+	}
+
+	public String getLatitudeString() {
+		return latitudeString;
+	}
+
+	public String getLongitudeString() {
+		return longitudeString;
 	}
 
 	/* Class My Location Listener */
@@ -586,6 +565,10 @@ public class MainActivity extends Activity {
 		String imei = mngr.getDeviceId();
 		return imei;
 
+	}
+
+	public int getBgColor() {
+		return bgColor;
 	}
 
 	public void setBgColor(int bgColor) {
@@ -678,6 +661,18 @@ public class MainActivity extends Activity {
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 	/* :: This function converts decimal degrees to radians : */
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+
+	private double deg2rad(double deg) {
+		return (deg * Math.PI / 180.0);
+	}
+
+	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+	/* :: This function converts radians to decimal degrees : */
+	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+
+	private double rad2deg(double rad) {
+		return (rad * 180.0 / Math.PI);
+	}
 
 	public void setLatitudeString(String latitudeString) {
 		this.latitudeString = latitudeString;
