@@ -20,9 +20,9 @@
         android:layout_height="wrap_content"
         android:text="Alerta de Voz"
         android:id="@+id/VoiceAlert"
-        android:checked="true" />
+        android:checked="false" />
 
-    <Button
+    Button
         android:id="@+id/close"
         android:layout_marginTop="10dp"
         android:layout_gravity="center_horizontal"

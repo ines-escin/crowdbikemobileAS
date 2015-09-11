@@ -20,6 +20,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -42,8 +43,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import at.abraxas.amarino.Amarino;
@@ -70,7 +74,6 @@ import android.widget.PopupWindow;
 
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
-	private boolean doVoiceAlert;
 	private Point p;
 	private static final String DEVICE_ADDRESS = "30:14:11:03:21:35";
 	private String latitudeString = "";
@@ -90,6 +93,7 @@ public class MainActivity extends Activity {
     private long anterior;
     private long atual;
 	private boolean first = true;
+	private boolean doVoiceAlert;
 
 	private static final double EARTH_GRAVITY = 9.81;
 	private static final double WEIGHT = 70.0;
@@ -209,13 +213,21 @@ public class MainActivity extends Activity {
 
 	public void pop_upMenu(final Activity context, Point p){
 		int popupWidth = 300;
-		int popupHeight = 350;
+		int popupHeight = 280;
 
 		// Inflate the popup_layout.xml
 		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.pop_up);
 		LayoutInflater layoutInflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View layout = layoutInflater.inflate(R.layout.pop_up, viewGroup);
+		CheckBox voice_control = (CheckBox) layout.findViewById(R.id.VoiceAlert);
+		voice_control.setChecked(doVoiceAlert);
+		voice_control.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton group, boolean isChecked) {
+				doVoiceAlert = isChecked;
+			}
+		});
 
 		// Creating the PopupWindow
 		final PopupWindow popup = new PopupWindow(context);
@@ -225,8 +237,8 @@ public class MainActivity extends Activity {
 		popup.setFocusable(true);
 
 		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-		int OFFSET_X = 0;
-		int OFFSET_Y = 370;
+		int OFFSET_X = -20;
+		int OFFSET_Y = 290;
 
 		// Clear the default translucent background
 		popup.setBackgroundDrawable(new BitmapDrawable());
@@ -234,15 +246,6 @@ public class MainActivity extends Activity {
 		// Displaying the popup at the specified location, + offsets.
 		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y - OFFSET_Y);
 
-		// Getting a reference to Close button, and close the popup when clicked.
-		Button close = (Button) layout.findViewById(R.id.close);
-		close.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				popup.dismiss();
-			}
-		});
 	}
 
 	@Override
@@ -420,20 +423,22 @@ public class MainActivity extends Activity {
 			String distance = getDistanceLocation(retorno);
 			if (distance != null && Double.valueOf(distance) <= 100) {
 				txtMensagem.setText("Alerta: "
-                        + String.format("%.1f", Double.parseDouble(distance))
-                        + "m");
+						+ String.format("%.1f", Double.parseDouble(distance))
+						+ "m");
 				setarCorDeFundo(R.color.vermelho);
-                atual = System.nanoTime();
-                if((Double.parseDouble(distance) <= 50.0)){
-                    if(first) {
-                        anterior = atual;
-                        notificacaoVoz(distance);
-						first = false;
-                    }else if(atual - anterior > 30000000000.0f){
-                        notificacaoVoz(distance);
-						anterior = atual;
-                    }
-                }
+				if (doVoiceAlert) {
+					atual = System.nanoTime();
+					if ((Double.parseDouble(distance) <= 100.0)) {
+						if (first) {
+							anterior = atual;
+							notificacaoVoz(distance);
+							first = false;
+						} else if (atual - anterior > 30000000000.0f) {
+							notificacaoVoz(distance);
+							anterior = atual;
+						}
+					}
+				}
 			}
 			Log.v("DIST", distance);
 		} else {
