@@ -7,13 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +17,11 @@ import br.ufpe.cin.contexto.crowdbikemobile.MainActivity;
 import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 
 import com.example.crowdbikemobile.R;
+import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -64,37 +64,29 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 		int responseCode = 0;
 		
 		try {
-			HttpClient client = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost(uri);
-			
-			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-			
-			nameValuePairs.add(new BasicNameValuePair("latitude",  latitude ));
-			nameValuePairs.add(new BasicNameValuePair("longitude", longitude));
-			
-			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			
-			int executeCount = 0;
-			HttpResponse response;
-			do {
-				executeCount++;
-				Log.v("TENTATIVA", "tentativa número:" + executeCount);
+			OkHttpClient client = new OkHttpClient();
+            RequestBody body = new FormEncodingBuilder()
+                    .add("latitude", latitude)
+                    .add("longitude",longitude)
+                    .build();
 
-				// Execute HTTP Post Request
-				response = client.execute(httppost);
-				responseCode = response.getStatusLine().getStatusCode();						
-				
-			} while (executeCount < 5 && responseCode == 408);
-			
-			BufferedReader rd = new BufferedReader(new InputStreamReader(
-					response.getEntity().getContent()));
+            Request request = new Request.Builder()
+                    .url(uri)
+                    .post(body)
+                    .build();
 
-			while ((line = rd.readLine()) != null){
-				result = line.trim();
-			}
+            int executeCount = 0;
+            Response response;
 
-			//Neste ponto result já guarda o Json puro
-			Log.v("STATUS", result);
+            do
+            {
+                response = client.newCall(request).execute();
+                executeCount++;
+            }
+            while(response.code() == 408 && executeCount < 5);
+
+            result = response.body().string();
+
 
 		} catch (Exception e) {
 			responseCode = 408;

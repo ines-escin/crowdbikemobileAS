@@ -50,7 +50,7 @@
             android:layout_marginLeft="5dp"
             android:background="@drawable/border_edit_text"
             android:ems="10"
-            android:inputType="numberDecimal" >
+            android:inputType="numberDecimal|numberSigned" >
 
             <requestFocus />
         </EditText>
@@ -79,7 +79,7 @@
             android:layout_marginLeft="5dp"
             android:background="@drawable/border_edit_text"
             android:ems="10"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal|numberSigned" />
     </TableRow>
 
     <ImageView

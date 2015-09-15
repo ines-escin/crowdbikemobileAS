@@ -8,15 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 
-import org.apache.http.HttpResponse;
-
-import org.apache.http.client.HttpClient;
-
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -55,7 +46,13 @@ import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 
 import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
+import org.json.JSONObject;
 
 
 @SuppressLint("NewApi")
@@ -80,6 +77,7 @@ public class MainActivity extends Activity {
     private long atual;
 	private boolean first = true;
 
+	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 	private static final double EARTH_GRAVITY = 9.81;
 	private static final double WEIGHT = 70.0;
 	private static final double GRADE = 70.0;
@@ -138,7 +136,7 @@ public class MainActivity extends Activity {
 
 		inicializarListenerGPS();
 
-		// Setando a cor de fundo. Padrão: verde
+		// Setando a cor de fundo. Padrï¿½o: verde
 		setarCorDeFundo(R.color.verde);
 
 		// forecast
@@ -147,7 +145,7 @@ public class MainActivity extends Activity {
 		// Executando tarefas paralelas
 		tarefasParalelas();
 
-		// Necessário para usar Runable na activity?
+		// Necessï¿½rio para usar Runable na activity?
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
@@ -270,42 +268,43 @@ public class MainActivity extends Activity {
 
 	public String fiwareRequest() throws Exception {
 		int responseCode = 0;
-		String result = "";
+		String json = "";
+        String result= "";
 		String line = "";
-		HttpClient client;
-		HttpResponse response;
+
 		BufferedReader rd;
 		try {
 			String uri = "http://148.6.80.19:1026/v1/queryContext";
-			String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}],\"restriction\": "
-					+ "{\"scopes\": [{\"type\" : \"FIWARE::Location\",\"value\" : {\"circle\": {\"centerLatitude\": \""
-					+ latitudeString
-					+ "\",\"centerLongitude\": \""
-					+ longitudeString + "\",\"radius\": \"100\"}}}]}}";
-			client = new DefaultHttpClient();
+            String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}],\"restriction\": " +
+                    "{\"scopes\": [{\"type\" : \"FIWARE::Location\",\"value\" : {\"circle\": {\"centerLatitude\": \"" +
+                    latitudeString +"\",\"centerLongitude\": \"" +longitudeString +"\",\"radius\": \"100\"}}}]}}";
+			OkHttpClient client = new OkHttpClient();
+			RequestBody body = RequestBody.create(JSON, getAll);
+            Request request = new Request.Builder()
+                    .url(uri)
+                    .post(body)
+                    .addHeader("Accept", "application/json")
+                    .build();
 
-			HttpPost httppost = new HttpPost(uri);
-			httppost.setHeader("Accept", "application/json");
-			StringEntity entityPost = new StringEntity(getAll);
-			entityPost.setContentType("application/json");
-			httppost.setEntity(entityPost);
-			int executeCount = 0;
-			do {
-				executeCount++;
-				response = client.execute(httppost);
-				responseCode = response.getStatusLine().getStatusCode();
-			} while (executeCount < 5 && responseCode == 408);
-			rd = new BufferedReader(new InputStreamReader(response.getEntity()
-					.getContent()));
-			while ((line = rd.readLine()) != null) {
-				result += line.trim();
-			}
+            Response response;
+
+            int executeCount = 0;
+            do
+            {
+                response = client.newCall(request).execute();
+                executeCount++;
+            }
+            while(response.code() == 408 && executeCount < 5);
+
+            result = response.body().string();
+            json = new JSONObject(result).toString();
+
 		} catch (Exception e) {
 			responseCode = 408;
 			e.printStackTrace();
 		}
 
-		return result;
+		return json;
 	}
 
 	public void tarefasParalelas() {
@@ -316,7 +315,7 @@ public class MainActivity extends Activity {
 
 
 	public void tarefaParalelaTempo() {
-		// Instanciando a asynktask para contato com o serviço de tempo
+		// Instanciando a asynktask para contato com o serviï¿½o de tempo
 		tempo = new AsyncTempo(this);
 		tempo.execute(latitudeString, longitudeString);
 	}
@@ -356,7 +355,7 @@ public class MainActivity extends Activity {
         String mensagem = "Alerta: " + String.format("%.1f", Double.parseDouble(distance))
                 + "metros";
         //definir scopo de quando mandar a mensagem de voz, como identificar quando mandar.
-        TTS.setPitch(1); // Afinação da Voz
+        TTS.setPitch(1); // Afinaï¿½ï¿½o da Voz
         TTS.setSpeechRate(1);//Velocidade da Voz
         TTS.speak(mensagem, TextToSpeech.QUEUE_FLUSH, null);
     }
@@ -401,17 +400,17 @@ public class MainActivity extends Activity {
 			Integer temperatura = Double.valueOf(tempoLocal.getTemperatura())
 					.intValue();
 
-			// Exibindo o ícone
+			// Exibindo o ï¿½cone
 			iconWeather.setBackgroundDrawable(getResources().getDrawable(
 					tempoLocal.getIcone()));
 
 			// Exibindo a temperatura
 			txtTemp.setText(temperatura.toString());
 
-			// Exibindo ºC
-			txtUom.setText("ºC");
+			// Exibindo ï¿½C
+			txtUom.setText("ï¿½C");
 
-			// Exibindo a descrição
+			// Exibindo a descriï¿½ï¿½o
 			txtDesc.setText(tempoLocal.getDescricao());
 		}
 	}
@@ -419,36 +418,36 @@ public class MainActivity extends Activity {
 
 	public void inicializarListenerGPS() {
 
-		/* Use the LocationManager class to obtain GPS locations */
-		mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		isGPSEnabled = mlocManager
-				.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		mlocListener = new MyLocationListener(this);
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        LocationListener locationListener = new MyLocationListener(this);
 
-		mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-				MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES,
-				mlocListener);
-		Location location = mlocManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-		if (location != null) {
-			latitudeString = String.valueOf(location.getLatitude());
-			longitudeString = String.valueOf(location.getLongitude());
-		} else {
-
-			mlocManager.requestLocationUpdates(
-					LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES,
-					MIN_DISTANCE_CHANGE_FOR_UPDATES, mlocListener);
-			location = mlocManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-			if (location != null) {
-				latitudeString = String.valueOf(location.getLatitude());
-				longitudeString = String.valueOf(location.getLongitude());
-			}
-		}
+        try
+        {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(location != null)
+            {
+                latitudeString = String.valueOf(location.getLatitude());
+                longitudeString = String.valueOf(location.getLongitude());
+            }
+            else
+            {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                if(location != null)
+                {
+                    latitudeString = String.valueOf(location.getLatitude());
+                    longitudeString = String.valueOf(location.getLongitude());
+                }
+            }
+        }
+        catch (SecurityException e)
+        {
+            e.printStackTrace();
+        }
 
 	}
+
 
 
 	/* Class My Location Listener */
@@ -468,7 +467,7 @@ public class MainActivity extends Activity {
 
 			if (loc.getAccuracy() <= 10 && loc.getSpeed() <= 12) {
 				// Do something
-				// Atualizando as informações do app
+				// Atualizando as informaï¿½ï¿½es do app
 				((MainActivity) lContexto).setLatitudeString(String.valueOf(loc
 						.getLatitude()));
 				((MainActivity) lContexto).setLongitudeString(String
@@ -481,7 +480,7 @@ public class MainActivity extends Activity {
 			((MainActivity) lContexto).setTimePosition(System
 					.currentTimeMillis());
 
-			// calculandoa caloria do último percurso
+			// calculandoa caloria do ï¿½ltimo percurso
 			if (getLastLatitudeString() != null) {
 				if (getLastLongitudeString() != null) {
 					((MainActivity) lContexto).calcularCaloria();
@@ -513,7 +512,7 @@ public class MainActivity extends Activity {
 
 
 	/**
-	 * Este método recebe a resposta da chamada da ActivitySendNotification
+	 * Este mï¿½todo recebe a resposta da chamada da ActivitySendNotification
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 30) {
@@ -554,7 +553,7 @@ public class MainActivity extends Activity {
 		// 2.0;
 		double speed = distance / durationSec;
 
-		txtResultado.setText("Distância: " + distance + "\n Tempo: "
+		txtResultado.setText("Distï¿½ncia: " + distance + "\n Tempo: "
 				+ durationSec + "s \n " + speed + "m/s");
 
 		// Duration in min
@@ -588,7 +587,7 @@ public class MainActivity extends Activity {
 	}
 
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-	/* :: Esse método calcula a distância em K, M ou N : */
+	/* :: Esse mï¿½todo calcula a distï¿½ncia em K, M ou N : */
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 	private double distance(String latitude1, String longitude1,
 			String latitude2, String longitude2, char unit) {

@@ -5,12 +5,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -20,10 +14,17 @@ import br.ufpe.cin.contexto.crowdbikemobile.pojo.BikePosition;
 
 import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 public class AsyncServidor extends AsyncTask <String, Void, String> {
 
 	private Context contexto;
+	public static final MediaType JSON
+			= MediaType.parse("application/json; charset=utf-8");
 
 	public AsyncServidor(Context ctx) {
 		this.contexto = ctx;
@@ -57,42 +58,36 @@ public class AsyncServidor extends AsyncTask <String, Void, String> {
 		int responseCode = 0;
 
 		try {
-			HttpClient client = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost(uri);
+			try {
+				OkHttpClient client = new OkHttpClient();
 
-			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+				posicao = new BikePosition(IMEI, latitude, longitude);
 
-			posicao = new BikePosition(IMEI, latitude, longitude);
+				Gson gson = new Gson();
 
-			Gson gson = new Gson();
+				RequestBody body = RequestBody.create(JSON, gson.toJson(posicao));
+				Request request = new Request.Builder()
+						.url(uri)
+						.post(body)
+						.build();
 
-			//nameValuePairs.add(new BasicNameValuePair("latitude",  latitude ));
-			//nameValuePairs.add(new BasicNameValuePair("longitude", longitude));
+				int executeCount = 0;
+				Response response;
 
-			//httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			httppost.setEntity(new StringEntity(gson.toJson(posicao)));
+				do
+				{
+					response = client.newCall(request).execute();
+					executeCount++;
+				}
+				while(response.code() == 408 && executeCount < 5);
 
-			int executeCount = 0;
-			HttpResponse response;
-			do {
-				executeCount++;
-				Log.v("TENTATIVA", "tentativa número:" + executeCount);
+                result = response.body().string();
 
-				// Execute HTTP Post Request
-				response = client.execute(httppost);
-				responseCode = response.getStatusLine().getStatusCode();						
-
-			} while (executeCount < 5 && responseCode == 408);
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(
-					response.getEntity().getContent()));
-
-			while ((line = rd.readLine()) != null){
-				result = line.trim();
+			} catch (Exception e) {
+				Log.v("FALHA", "TASK");
+				responseCode = 408;
+				e.printStackTrace();
 			}
-
-			//Neste ponto result já guarda o Json puro
-			Log.v("STATUS", result);
 
 		} catch (Exception e) {
 			Log.v("FALHA", "TASK");
