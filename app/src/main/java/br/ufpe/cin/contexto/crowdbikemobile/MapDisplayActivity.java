@@ -219,8 +219,8 @@ public class MapDisplayActivity extends Activity {
 
         Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
 
-        String[] occurrences = { "CPA", "COVP", "CVM2-3R", "CACC", "CTPO",
-                "CTVF", "COVNM", "COFE", "ANDT", "AI" };
+        String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Semáforo", "Via danificada",
+                "Imprudência"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_dropdown_item, occurrences);
