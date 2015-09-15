@@ -6,16 +6,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 
-
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,21 +26,29 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
-
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.format.Time;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import at.abraxas.amarino.Amarino;
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
-
+import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncServidor;
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
 
 import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
@@ -52,12 +61,18 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
+
 import org.json.JSONObject;
+
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.widget.Button;
+import android.widget.PopupWindow;
 
 
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
-
+	private Point p;
 	private static final String DEVICE_ADDRESS = "30:14:11:03:21:35";
 	private String latitudeString = "";
 	private String longitudeString = "";
@@ -76,6 +91,7 @@ public class MainActivity extends Activity {
     private long anterior;
     private long atual;
 	private boolean first = true;
+	private boolean doVoiceAlert;
 
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 	private static final double EARTH_GRAVITY = 9.81;
@@ -125,18 +141,32 @@ public class MainActivity extends Activity {
 			public void onInit(int status){
 			}
 		});
+
+		Button btn_show = (Button) findViewById(R.id.btn_pop_up);
+		btn_show.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+
+				//Open popup window
+				if (p != null)
+					pop_upMenu(MainActivity.this, p);
+			}
+		});
+
 		// Registra app no OrionCB
 		// Restaura as preferencias gravadas
 
 		SharedPreferences settings = getSharedPreferences(PREFS_REGISTERED, 0);
 		registered = settings.getString("Registered", "");
 
+		// Conectando ao ardu?no
+		// Amarino.connect(this, DEVICE_ADDRESS);
 
 		txtResultado = (TextView) findViewById(R.id.txtResultado);
 
 		inicializarListenerGPS();
 
-		// Setando a cor de fundo. Padr�o: verde
+		// Setando a cor de fundo. Padr?o: verde
 		setarCorDeFundo(R.color.verde);
 
 		// forecast
@@ -145,7 +175,7 @@ public class MainActivity extends Activity {
 		// Executando tarefas paralelas
 		tarefasParalelas();
 
-		// Necess�rio para usar Runable na activity?
+		// Necess?rio para usar Runable na activity?
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
@@ -165,6 +195,59 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+
+		int[] location = new int[2];
+		Button button = (Button) findViewById(R.id.btn_pop_up);
+
+		// Get the x, y location and store it in the location[] array
+		// location[0] = x, location[1] = y.
+		button.getLocationOnScreen(location);
+
+		//Initialize the Point with x, and y positions
+		p = new Point();
+		p.x = location[0];
+		p.y = location[1];
+	}
+
+	public void pop_upMenu(final Activity context, Point p){
+		int popupWidth = 300;
+		int popupHeight = 280;
+
+		// Inflate the popup_layout.xml
+		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.pop_up);
+		LayoutInflater layoutInflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View layout = layoutInflater.inflate(R.layout.pop_up, viewGroup);
+		CheckBox voice_control = (CheckBox) layout.findViewById(R.id.VoiceAlert);
+		voice_control.setChecked(doVoiceAlert);
+		voice_control.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton group, boolean isChecked) {
+				doVoiceAlert = isChecked;
+			}
+		});
+
+		// Creating the PopupWindow
+		final PopupWindow popup = new PopupWindow(context);
+		popup.setContentView(layout);
+		popup.setWidth(popupWidth);
+		popup.setHeight(popupHeight);
+		popup.setFocusable(true);
+
+		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+		int OFFSET_X = -20;
+		int OFFSET_Y = 290;
+
+		// Clear the default translucent background
+		popup.setBackgroundDrawable(new BitmapDrawable());
+
+		// Displaying the popup at the specified location, + offsets.
+		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y - OFFSET_Y);
+
+	}
+
+	@Override
 	protected void onPause() {
 		super.onPause();
 
@@ -174,6 +257,7 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 
+
 	}
 
 	Thread subscribeThread;
@@ -182,15 +266,25 @@ public class MainActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if(publishThread != null) {
+		if(publishThread != null)
+		{
 			publishThread.interrupt();
 		}
 		if(subscribeThread != null)
 		{
 			subscribeThread.interrupt();
 		}
-        //thread fix
+
 	}
+
+
+	/**
+	 * Este m?todo seta a cor de fundo do aplicativo
+	 * 
+	 * param cor
+	 *            C?digo inteiro da cor. A lista de cores dispon?veis est? em
+	 *            res/calues/colors.xml
+	 */
 
 	public void setarCorDeFundo(int intColor) {
 		setBgColor(intColor);
@@ -312,10 +406,16 @@ public class MainActivity extends Activity {
 	}
 
 
+	public void tarefaParalelaServidor2() {
+		// Instanciando a asynctask para contato com o servidor e acesso ao
+		// ardu?no
+		task2 = new AsyncSendNotification(this);
+		task2.execute(IMEI, latitudeString, longitudeString);
 
+	}
 
 	public void tarefaParalelaTempo() {
-		// Instanciando a asynktask para contato com o servi�o de tempo
+		// Instanciando a asynktask para contato com o servi?o de tempo
 		tempo = new AsyncTempo(this);
 		tempo.execute(latitudeString, longitudeString);
 	}
@@ -328,20 +428,22 @@ public class MainActivity extends Activity {
 			String distance = getDistanceLocation(retorno);
 			if (distance != null && Double.valueOf(distance) <= 100) {
 				txtMensagem.setText("Alerta: "
-                        + String.format("%.1f", Double.parseDouble(distance))
-                        + "m");
+						+ String.format("%.1f", Double.parseDouble(distance))
+						+ "m");
 				setarCorDeFundo(R.color.vermelho);
-                atual = System.nanoTime();
-                if((Double.parseDouble(distance) <= 50.0)){
-                    if(first) {
-                        anterior = atual;
-                        notificacaoVoz(distance);
-						first = false;
-                    }else if(atual - anterior > 30000000000.0f){
-                        notificacaoVoz(distance);
-						anterior = atual;
-                    }
-                }
+				if (doVoiceAlert) {
+					atual = System.nanoTime();
+					if ((Double.parseDouble(distance) <= 100.0)) {
+						if (first) {
+							anterior = atual;
+							notificacaoVoz(distance);
+							first = false;
+						} else if (atual - anterior > 30000000000.0f) {
+							notificacaoVoz(distance);
+							anterior = atual;
+						}
+					}
+				}
 			}
 			Log.v("DIST", distance);
 		} else {
@@ -355,7 +457,7 @@ public class MainActivity extends Activity {
         String mensagem = "Alerta: " + String.format("%.1f", Double.parseDouble(distance))
                 + "metros";
         //definir scopo de quando mandar a mensagem de voz, como identificar quando mandar.
-        TTS.setPitch(1); // Afina��o da Voz
+        TTS.setPitch(1); // Afina??o da Voz
         TTS.setSpeechRate(1);//Velocidade da Voz
         TTS.speak(mensagem, TextToSpeech.QUEUE_FLUSH, null);
     }
@@ -400,17 +502,17 @@ public class MainActivity extends Activity {
 			Integer temperatura = Double.valueOf(tempoLocal.getTemperatura())
 					.intValue();
 
-			// Exibindo o �cone
+			// Exibindo o ?cone
 			iconWeather.setBackgroundDrawable(getResources().getDrawable(
 					tempoLocal.getIcone()));
 
 			// Exibindo a temperatura
 			txtTemp.setText(temperatura.toString());
 
-			// Exibindo �C
-			txtUom.setText("�C");
+			// Exibindo ?C
+			txtUom.setText("˚C");
 
-			// Exibindo a descri��o
+			// Exibindo a descri??o
 			txtDesc.setText(tempoLocal.getDescricao());
 		}
 	}
@@ -448,6 +550,13 @@ public class MainActivity extends Activity {
 
 	}
 
+	public String getLatitudeString() {
+		return latitudeString;
+	}
+
+	public String getLongitudeString() {
+		return longitudeString;
+	}
 
 
 	/* Class My Location Listener */
@@ -467,7 +576,7 @@ public class MainActivity extends Activity {
 
 			if (loc.getAccuracy() <= 10 && loc.getSpeed() <= 12) {
 				// Do something
-				// Atualizando as informa��es do app
+				// Atualizando as informa??es do app
 				((MainActivity) lContexto).setLatitudeString(String.valueOf(loc
 						.getLatitude()));
 				((MainActivity) lContexto).setLongitudeString(String
@@ -480,7 +589,7 @@ public class MainActivity extends Activity {
 			((MainActivity) lContexto).setTimePosition(System
 					.currentTimeMillis());
 
-			// calculandoa caloria do �ltimo percurso
+			// calculandoa caloria do ?ltimo percurso
 			if (getLastLatitudeString() != null) {
 				if (getLastLongitudeString() != null) {
 					((MainActivity) lContexto).calcularCaloria();
@@ -512,7 +621,7 @@ public class MainActivity extends Activity {
 
 
 	/**
-	 * Este m�todo recebe a resposta da chamada da ActivitySendNotification
+	 * Este m?todo recebe a resposta da chamada da ActivitySendNotification
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 30) {
@@ -533,7 +642,9 @@ public class MainActivity extends Activity {
 
 	}
 
-
+	public int getBgColor() {
+		return bgColor;
+	}
 
 	public void setBgColor(int bgColor) {
 		this.bgColor = bgColor;
@@ -553,7 +664,7 @@ public class MainActivity extends Activity {
 		// 2.0;
 		double speed = distance / durationSec;
 
-		txtResultado.setText("Dist�ncia: " + distance + "\n Tempo: "
+		txtResultado.setText("Dist?ncia: " + distance + "\n Tempo: "
 				+ durationSec + "s \n " + speed + "m/s");
 
 		// Duration in min
@@ -587,7 +698,7 @@ public class MainActivity extends Activity {
 	}
 
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
-	/* :: Esse m�todo calcula a dist�ncia em K, M ou N : */
+	/* :: Esse m?todo calcula a dist?ncia em K, M ou N : */
 	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
 	private double distance(String latitude1, String longitude1,
 			String latitude2, String longitude2, char unit) {
@@ -622,6 +733,21 @@ public class MainActivity extends Activity {
 		return (dist);
 	}
 
+	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+	/* :: This function converts decimal degrees to radians : */
+	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+
+	private double deg2rad(double deg) {
+		return (deg * Math.PI / 180.0);
+	}
+
+	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+	/* :: This function converts radians to decimal degrees : */
+	/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+
+	private double rad2deg(double rad) {
+		return (rad * 180.0 / Math.PI);
+	}
 
 	public void setLatitudeString(String latitudeString) {
 		this.latitudeString = latitudeString;

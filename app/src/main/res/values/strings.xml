@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">CrowdBike Mobile</string>
+    <string name="app_name">Bike Cidadão</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_activity_send_notification">ActivitySendNotification</string>
@@ -12,5 +12,6 @@
 	<string name="senha">user</string>
 	<string name="vhost">vhostuser</string>
 	 <string name="registered_app">0</string>
+
 	
 </resources>

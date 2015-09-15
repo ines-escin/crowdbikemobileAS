@@ -18,6 +18,7 @@ import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
+import android.widget.Button;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
@@ -43,8 +44,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void onInit(int status) {
 			}
 		});
+
 		boolean isSpeaking = false;
-		boolean speak = true;
+		boolean speak = false;
+
 		if (speak) {
 			speak = false;
 			finalTime = time;
@@ -63,11 +66,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(isSpeaking);
 		assertFalse(isSpeaking);
     }
-    
+
 
 	public void testRegisterOrionEntity() throws JSONException {
-	
-		   String result = "";  
+
+		   String result = "";
 			String line = "";
 			String IMEI 	 = String.valueOf("358972063059834");
 		    Entity entity = new Entity();
@@ -82,15 +85,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			att1.setValue("-3.691944");
 			attributes.add(att);
 			attributes.add(att1);
-			
+
 			entity.setType("Position");
 			entity.setId(IMEI);
 			entity.setAttributes(attributes);
 
 			Gson gson;
 			String uri = "http://148.6.80.19:1026/v1/contextEntities";
-			
-			
+
+
 			int responseCode = 0;
 
 			try {
@@ -100,8 +103,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				gson = new Gson();
 				StringEntity entityPost = new StringEntity(gson.toJson(entity));
 				entityPost.setContentType("application/json");
-				
-				
+
+
 				httppost.setEntity(entityPost);
 
 				int executeCount = 0;
@@ -112,7 +115,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 					// Execute HTTP Post Request
 					response = client.execute(httppost);
-					responseCode = response.getStatusLine().getStatusCode();						
+					responseCode = response.getStatusLine().getStatusCode();
 
 				} while (executeCount < 5 && responseCode == 408);
 
@@ -122,23 +125,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					result += line.trim();
 				}
 
-			      
+
 			} catch (Exception e) {
 				responseCode = 408;
 				e.printStackTrace();
 				fail("Not yet");
 			}
-			
-			
+
+
 	    String s = "{ \"type\" : \"Position\",\"isPattern\" : \"false\", " +
 	    		"\"id\" : \"358972063059834\",\"contextResponses\" : " +
 	    		"[{\"attributes\" : [{\"name\" : \"latitude\",\"type\" : " +
 	    		"\"String\",\"value\" : \"\"},{\"name\" : \"longitude\"," +
 	    		"\"type\" : \"String\",\"value\" : \"\"}],\"statusCode\" : " +
 	    		"{\"code\" : \"200\",\"reasonPhrase\" : \"OK\"}}]}";
-	    
+
 	    JSONAssert.assertEquals(s, result, false);
 	}
-	
-	
+
+
 }

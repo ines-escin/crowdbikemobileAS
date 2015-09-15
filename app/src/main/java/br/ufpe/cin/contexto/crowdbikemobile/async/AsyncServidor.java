@@ -81,7 +81,7 @@ public class AsyncServidor extends AsyncTask <String, Void, String> {
 				}
 				while(response.code() == 408 && executeCount < 5);
 
-                result = response.body().string();
+				result = response.body().string();
 
 			} catch (Exception e) {
 				Log.v("FALHA", "TASK");

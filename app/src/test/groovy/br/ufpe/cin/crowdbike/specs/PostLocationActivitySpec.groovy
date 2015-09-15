@@ -23,7 +23,6 @@ class PostLocationActivitySpec extends RoboSpecification {
         noExceptionThrown()
     }
 
-<<<<<<< HEAD
     def "Successful post of the current location"(){
 
 
@@ -33,6 +32,4 @@ class PostLocationActivitySpec extends RoboSpecification {
 
     }
 
-=======
->>>>>>> 7d0adc6480ae685ee93682bfa7eb86262552b6b1
 }

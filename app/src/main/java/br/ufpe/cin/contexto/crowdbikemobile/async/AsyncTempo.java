@@ -45,7 +45,7 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 	protected Tempo doInBackground(String... params) {
 		
 		/* 
-		 * As duas linhas seguintes recebem a atual coordenada geográfica da bike 
+		 * As duas linhas seguintes recebem a atual coordenada geogrï¿½fica da bike 
 		 *  
 		 */
 		String latitude  = params[0];
@@ -56,10 +56,10 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 		String resultado = "";
 		
 		/*
-		 * Aqui está o endereço do serviço de tempo
+		 * Aqui estï¿½ o endereï¿½o do serviï¿½o de tempo
 		 * 
 		 */
-		String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&units=metric";
+		String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude;
 		
 		int responseCode = 0;
 		
@@ -104,8 +104,8 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 	}
 
 	/**
-	 * Este método recebe o resultado do tempo em JSON.
-	 * Seu objetivo é fazer um parse do tempo em JSON para um objeto Tempo.
+	 * Este mï¿½todo recebe o resultado do tempo em JSON.
+	 * Seu objetivo ï¿½ fazer um parse do tempo em JSON para um objeto Tempo.
 	 * 
 	 * @param jsonString	Resultado do webservice em JSON
 	 * @return	Resultado do webservice em objeto Tempo
@@ -124,18 +124,25 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 				JSONObject jsonMain = jsonObject.getJSONObject("main");
 				
 				//Setando a temperatura no objeto
-				tempo.setTemperatura(jsonMain.getString("temp"));
+                String kelvin = jsonMain.getString("temp");
+                String celsius = "";
+
+                if(kelvin != null) {
+                    celsius = String.valueOf(Double.parseDouble(kelvin) - 273);
+                }
+
+				tempo.setTemperatura(celsius);
 			
-			//Tratando a descrição
-				//Buscando a descrição no json
+			//Tratando a descriï¿½ï¿½o
+				//Buscando a descriï¿½ï¿½o no json
 				JSONArray jsonArray    = jsonObject.getJSONArray("weather");
 				JSONObject jsonWeather = jsonArray.getJSONObject(0);
 				
-				//Setando a descrição no objeto
+				//Setando a descriï¿½ï¿½o no objeto
 				tempo.setDescricao(jsonWeather.getString("description"));
 				
-			//Tratando ícone
-				//Buscando o código do ícone no json
+			//Tratando ï¿½cone
+				//Buscando o cï¿½digo do ï¿½cone no json
 				tempo.setIcone(getIdIcone(jsonWeather.getString("icon")));
 				
 		} catch (JSONException e) {
