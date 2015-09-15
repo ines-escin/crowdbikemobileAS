@@ -18,6 +18,7 @@ import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
+import android.widget.Button;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
@@ -45,7 +46,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 
 		boolean isSpeaking = false;
-		boolean speak = true;
+		boolean speak = false;
+
 		if (speak) {
 			speak = false;
 			finalTime = time;
