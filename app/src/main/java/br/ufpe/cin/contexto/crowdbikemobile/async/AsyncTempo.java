@@ -7,13 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +17,11 @@ import br.ufpe.cin.contexto.crowdbikemobile.MainActivity;
 import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 
 import com.example.crowdbikemobile.R;
+import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -45,7 +45,7 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 	protected Tempo doInBackground(String... params) {
 		
 		/* 
-		 * As duas linhas seguintes recebem a atual coordenada geográfica da bike 
+		 * As duas linhas seguintes recebem a atual coordenada geogrï¿½fica da bike 
 		 *  
 		 */
 		String latitude  = params[0];
@@ -56,45 +56,37 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 		String resultado = "";
 		
 		/*
-		 * Aqui está o endereço do serviço de tempo
+		 * Aqui estï¿½ o endereï¿½o do serviï¿½o de tempo
 		 * 
 		 */
-		String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&units=metric";
+		String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude;
 		
 		int responseCode = 0;
 		
 		try {
-			HttpClient client = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost(uri);
-			
-			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-			
-			nameValuePairs.add(new BasicNameValuePair("latitude",  latitude ));
-			nameValuePairs.add(new BasicNameValuePair("longitude", longitude));
-			
-			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			
-			int executeCount = 0;
-			HttpResponse response;
-			do {
-				executeCount++;
-				Log.v("TENTATIVA", "tentativa número:" + executeCount);
+			OkHttpClient client = new OkHttpClient();
+            RequestBody body = new FormEncodingBuilder()
+                    .add("latitude", latitude)
+                    .add("longitude",longitude)
+                    .build();
 
-				// Execute HTTP Post Request
-				response = client.execute(httppost);
-				responseCode = response.getStatusLine().getStatusCode();						
-				
-			} while (executeCount < 5 && responseCode == 408);
-			
-			BufferedReader rd = new BufferedReader(new InputStreamReader(
-					response.getEntity().getContent()));
+            Request request = new Request.Builder()
+                    .url(uri)
+                    .post(body)
+                    .build();
 
-			while ((line = rd.readLine()) != null){
-				result = line.trim();
-			}
+            int executeCount = 0;
+            Response response;
 
-			//Neste ponto result já guarda o Json puro
-			Log.v("STATUS", result);
+            do
+            {
+                response = client.newCall(request).execute();
+                executeCount++;
+            }
+            while(response.code() == 408 && executeCount < 5);
+
+            result = response.body().string();
+
 
 		} catch (Exception e) {
 			responseCode = 408;
@@ -112,8 +104,8 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 	}
 
 	/**
-	 * Este método recebe o resultado do tempo em JSON.
-	 * Seu objetivo é fazer um parse do tempo em JSON para um objeto Tempo.
+	 * Este mï¿½todo recebe o resultado do tempo em JSON.
+	 * Seu objetivo ï¿½ fazer um parse do tempo em JSON para um objeto Tempo.
 	 * 
 	 * @param jsonString	Resultado do webservice em JSON
 	 * @return	Resultado do webservice em objeto Tempo
@@ -132,18 +124,25 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 				JSONObject jsonMain = jsonObject.getJSONObject("main");
 				
 				//Setando a temperatura no objeto
-				tempo.setTemperatura(jsonMain.getString("temp"));
+                String kelvin = jsonMain.getString("temp");
+                String celsius = "";
+
+                if(kelvin != null) {
+                    celsius = String.valueOf(Double.parseDouble(kelvin) - 273);
+                }
+
+				tempo.setTemperatura(celsius);
 			
-			//Tratando a descrição
-				//Buscando a descrição no json
+			//Tratando a descriï¿½ï¿½o
+				//Buscando a descriï¿½ï¿½o no json
 				JSONArray jsonArray    = jsonObject.getJSONArray("weather");
 				JSONObject jsonWeather = jsonArray.getJSONObject(0);
 				
-				//Setando a descrição no objeto
+				//Setando a descriï¿½ï¿½o no objeto
 				tempo.setDescricao(jsonWeather.getString("description"));
 				
-			//Tratando ícone
-				//Buscando o código do ícone no json
+			//Tratando ï¿½cone
+				//Buscando o cï¿½digo do ï¿½cone no json
 				tempo.setIcone(getIdIcone(jsonWeather.getString("icon")));
 				
 		} catch (JSONException e) {

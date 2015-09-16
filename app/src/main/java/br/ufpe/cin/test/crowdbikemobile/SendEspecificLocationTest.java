@@ -9,7 +9,7 @@ import com.android.uiautomator.testrunner.UiAutomatorTestCase;
 public class SendEspecificLocationTest extends UiAutomatorTestCase {
 
 	public void test() throws UiObjectNotFoundException {
-		sendIssueWithLL("AI", "-87.231310", "-3.1238913");
+		sendIssueWithLL("Via danificada", "-87.231310", "-3.1238913");
 	}
 
 	private void sendIssueWithLL(String issue, String latitude, String longitude) throws UiObjectNotFoundException {

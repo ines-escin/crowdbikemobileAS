@@ -1,16 +1,12 @@
 package br.ufpe.cin.contexto.crowdbikemobile;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 
 
@@ -30,6 +26,11 @@ import android.view.View.OnClickListener;
 
 import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +44,8 @@ public class MapDisplayActivity extends Activity {
 
 	public String latitude;
 	public String longitude;
+    public static final MediaType JSON
+            = MediaType.parse("application/json; charset=utf-8");
 
 	@Override
 	protected void onCreate(Bundle icicle) {
@@ -116,59 +119,32 @@ public class MapDisplayActivity extends Activity {
 		entity.setId(id);
 		entity.setAttributes(attributes);
 
-        Gson gson;
+        Gson gson = new Gson();
         String uri = "http://148.6.80.19:1026/v1/contextEntities/";
         uri += id;
 
+		try
+		{
+			OkHttpClient client = new OkHttpClient();
+			RequestBody body = RequestBody.create(JSON, gson.toJson(entity));
+			Request request = new Request.Builder().url(uri).post(body).build();
+			Response response;
 
-		int responseCode = 0;
+            int executeCount = 0;
+            do
+            {
+                response = client.newCall(request).execute();
+                executeCount++;
+            }
+            while(response.code() == 408 && executeCount < 5);
 
-        try {
-
-            HttpClient client = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost(uri);
-            httppost.setHeader("Accept", "application/json");
-            gson = new Gson();
-            StringEntity entityPost = new StringEntity(gson.toJson(entity));
-            entityPost.setContentType("application/json");
-
-			httppost.setEntity(entityPost);
-
-			int executeCount = 0;
-			HttpResponse response;
-			do {
-				executeCount++;
-				//Log.v("TENTATIVA", "tentativa nï¿½mero:" + executeCount);
-
-				// Execute HTTP Post Request
-				response = client.execute(httppost);
-				responseCode = response.getStatusLine().getStatusCode();
-
-			} while (executeCount < 5 && responseCode == 408);
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			while ((line = rd.readLine()) != null){
-				result += line.trim();
-			}
-
-
-		} catch (Exception e) {
-			responseCode = 408;
-			e.printStackTrace();
-
+            result = response.body().string();
 		}
-
-
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
 //
-//        String s = "{ \"type\" : \"Position\",\"isPattern\" : \"false\", " +
-//                "\"id\" : \"358972063059834\",\"contextResponses\" : " +
-//                "[{\"attributes\" : [{\"name\" : \"latitude\",\"type\" : " +
-//                "\"String\",\"value\" : \"\"},{\"name\" : \"longitude\"," +
-//                "\"type\" : \"String\",\"value\" : \"\"}],\"statusCode\" : " +
-//                "{\"code\" : \"200\",\"reasonPhrase\" : \"OK\"}}]}";
-//
-//        JSONAssert.assertEquals(s, result, false);
 	}
 
    public void backToMainPage(View view){
@@ -219,8 +195,8 @@ public class MapDisplayActivity extends Activity {
 
         Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
 
-        String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Semáforo", "Via danificada",
-                "Imprudência"};
+        String[] occurrences = { "Local de acidente", "TrÃ¡fego intenso", "SinalizaÃ§Ã£o Ruim", "SemÃ¡foro", "Via danificada",
+                "SituaÃ§Ã£o de imprudÃªncia"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_dropdown_item, occurrences);
