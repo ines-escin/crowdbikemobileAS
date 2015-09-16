@@ -13,7 +13,7 @@ import com.android.uiautomator.testrunner.UiAutomatorTestCase;
 public class SendMyLocationTest extends UiAutomatorTestCase {
 	public void test() throws UiObjectNotFoundException {
 		//addNewIssue();
-		sendIssue("COFE");
+		sendIssue("Risco de Acidente");
 	}
 
 	private void addNewIssue() throws UiObjectNotFoundException {
