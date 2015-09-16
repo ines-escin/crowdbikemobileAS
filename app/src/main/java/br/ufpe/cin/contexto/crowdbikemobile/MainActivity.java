@@ -274,7 +274,8 @@ public class MainActivity extends Activity {
 		{
 			subscribeThread.interrupt();
 		}
-
+		TTS.stop();
+		TTS.shutdown();
 	}
 
 

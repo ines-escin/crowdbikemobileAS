@@ -53,7 +53,8 @@ public class SplashScreenActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(Object result){
-			Intent intent = new Intent("MAIN_ACTIVITY");
+
+			Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
 			startActivity(intent);
 			finish();
 			super.onPostExecute(result);
