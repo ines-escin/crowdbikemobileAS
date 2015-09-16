@@ -12,6 +12,7 @@
 	<string name="senha">user</string>
 	<string name="vhost">vhostuser</string>
 	 <string name="registered_app">0</string>
+    <string name="title_activity_maps">Map</string>
 
 	
 </resources>
