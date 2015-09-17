@@ -1,28 +1,18 @@
 package br.ufpe.cin.contexto.crowdbikemobile;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
-import org.json.JSONException;
-
-
 import android.app.Activity;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.Spinner;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.Spinner;
+import android.widget.TableRow;
+import android.widget.TextView;
 
 import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
@@ -32,32 +22,39 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
-import android.content.Context;
-import android.content.Intent;
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
-import br.ufpe.cin.util.crowdbikemobile.IdGenerator;
 
 public class MapDisplayActivity extends Activity {
 
 	public String latitude;
 	public String longitude;
-    public static final MediaType JSON
-            = MediaType.parse("application/json; charset=utf-8");
+	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+	public boolean isLocalChecked = false;
+	public TableRow tr1;
+	public TableRow tr2;
+	public Intent intent;
+	public ArrayList<String> coordinates;
 
 	@Override
 	protected void onCreate(Bundle icicle) {
 
 		super.onCreate(icicle);
 		setContentView(R.layout.activity_display_map);
-		Intent intent = getIntent();
+		intent = getIntent();
+		this.latitude = "";
+		this.longitude = "";
 
-		ArrayList<String> coordinates = (ArrayList<String>) intent.getSerializableExtra("COORDINATES");
-
-		this.latitude = coordinates.get(0);
-		this.longitude = coordinates.get(1);
+		coordinates = (ArrayList<String>) intent.getSerializableExtra("COORDINATES");
 
 		setSpinner();
 		setButton();
@@ -83,7 +80,7 @@ public class MapDisplayActivity extends Activity {
 		return imei;
 
 
-    //Inner class to configure the post button
+		//Inner class to configure the post button
 
 	}
 
@@ -91,20 +88,33 @@ public class MapDisplayActivity extends Activity {
 	public OnClickListener postButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
+			if(isLocalChecked){
+				TextView tv1 =(TextView ) tr1.getChildAt(1);
+				latitude = tv1.getText().toString();
+				TextView tv2 =(TextView ) tr2.getChildAt(1);
+				longitude = tv2.getText().toString();
 
-			try {
-				postInfo();
-				backToMainPage(v);
-			} catch (JSONException e) {
-				e.printStackTrace();
+				if(!latitude.equals("") && !longitude.equals("")){
+					sendInformation(v);
+				}else {
+					sendInformation(v);
+				}
 			}
 		}
 	};
 
+	public void sendInformation(View v){
+		try {
+			postInfo();
+			backToMainPage(v);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 	public void postInfo() throws JSONException {
 		String result = "";
 		String line = "";
-		String id = String.valueOf("66960489");
+		String id = String.valueOf(generateUniqueId(getApplicationContext()));
 		Entity entity = new Entity();
 		List<Attributes> attributes = new ArrayList<Attributes>();
 		attributes.add(new Attributes("title", "String", "CPA", null));
@@ -119,9 +129,9 @@ public class MapDisplayActivity extends Activity {
 		entity.setId(id);
 		entity.setAttributes(attributes);
 
-        Gson gson = new Gson();
-        String uri = "http://148.6.80.19:1026/v1/contextEntities/";
-        uri += id;
+		Gson gson = new Gson();
+		String uri = "http://148.6.80.19:1026/v1/contextEntities/";
+		uri += id;
 
 		try
 		{
@@ -130,15 +140,15 @@ public class MapDisplayActivity extends Activity {
 			Request request = new Request.Builder().url(uri).post(body).build();
 			Response response;
 
-            int executeCount = 0;
-            do
-            {
-                response = client.newCall(request).execute();
-                executeCount++;
-            }
-            while(response.code() == 408 && executeCount < 5);
+			int executeCount = 0;
+			do
+			{
+				response = client.newCall(request).execute();
+				executeCount++;
+			}
+			while(response.code() == 408 && executeCount < 5);
 
-            result = response.body().string();
+			result = response.body().string();
 		}
 		catch(IOException e)
 		{
@@ -147,61 +157,64 @@ public class MapDisplayActivity extends Activity {
 //
 	}
 
-   public void backToMainPage(View view){
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
+	public void backToMainPage(View view){
+		Intent intent = new Intent(this, MainActivity.class);
+		startActivity(intent);
+	}
 
-    private String generateUniqueId(Context context){
-        TelephonyManager mngr = (TelephonyManager) context
-                .getSystemService(context.TELEPHONY_SERVICE);
-        String imei = mngr.getDeviceId();
-        Calendar cal = Calendar.getInstance();
-        String date =  "" + cal.get(Calendar.MILLISECOND);
-        return imei + date;
-    }
+	private String generateUniqueId(Context context){
+		TelephonyManager mngr = (TelephonyManager) context
+				.getSystemService(context.TELEPHONY_SERVICE);
+		String imei = mngr.getDeviceId();
+		Calendar cal = Calendar.getInstance();
+		String date =  "" + cal.get(Calendar.SECOND) + "" + cal.get(Calendar.MINUTE) + "" + cal.get(Calendar.HOUR_OF_DAY)
+				+ "" + cal.get(Calendar.DAY_OF_MONTH) +  "" + cal.get(Calendar.MONTH) + "" + cal.get(Calendar.YEAR) ;
+		return date;
+	}
 
-    //Sets the spinner with the desired occurrences
+	//Sets the spinner with the desired occurrences
 
-    public void onRadioButtonClicked(View view) {
-        // Is the button now checked?
-        View v;
-        boolean checked = ((RadioButton) view).isChecked();
-        TableRow tr1 = (TableRow) findViewById(R.id.latitude_table_row);
-        TableRow tr2 = (TableRow) findViewById(R.id.longitude_table_row);
-        // Check which radio button was clicked
-        switch (view.getId()) {
-            case R.id.my_loc_radio_btn:
-                if (checked) {
-                    tr1.setVisibility(View.INVISIBLE);
-                    tr2.setVisibility(View.INVISIBLE);
-                    v = findViewById(R.id.choose_loc_radio_btn);
-                    ((RadioButton) v).setChecked(false);
-                    break;
-                }
-            case R.id.choose_loc_radio_btn:
-                if (checked) {
-                    tr1.setVisibility(View.VISIBLE);
-                    tr2.setVisibility(View.VISIBLE);
-                    v = findViewById(R.id.my_loc_radio_btn);
-                    ((RadioButton) v).setChecked(false);
-                    break;
-                }
-        }
-    }
+	public void onRadioButtonClicked(View view) {
+		// Is the button now checked?
+		View v;
+		boolean checked = ((RadioButton) view).isChecked();
+		tr1 = (TableRow) findViewById(R.id.latitude_table_row);
+		tr2 = (TableRow) findViewById(R.id.longitude_table_row);
+		// Check which radio button was clicked
+		switch (view.getId()) {
+			case R.id.my_loc_radio_btn:
+				if (checked) {
+					tr1.setVisibility(View.INVISIBLE);
+					tr2.setVisibility(View.INVISIBLE);
+					v = findViewById(R.id.choose_loc_radio_btn);
+					((RadioButton) v).setChecked(false);
+					isLocalChecked = false;
+					break;
+				}
+			case R.id.choose_loc_radio_btn:
+				if (checked) {
+					tr1.setVisibility(View.VISIBLE);
+					tr2.setVisibility(View.VISIBLE);
+					v = findViewById(R.id.my_loc_radio_btn);
+					((RadioButton) v).setChecked(false);
+					isLocalChecked = true;
+					break;
+				}
+		}
+	}
 
 
-    private void setSpinner() {
+	private void setSpinner() {
 
-        Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
+		Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
 
-        String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Semáforo", "Via danificada",
-                "Situação de imprudência"};
+		String[] occurrences = { "Local de acidente", "Tr·fego intenso", "SinalizaÁ„o Ruim", "Sem·foro", "Via danificada",
+				"SituaÁ„o de imprudÍncia"};
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item, occurrences);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_dropdown_item, occurrences);
 
-        spinner.setAdapter(adapter);
+		spinner.setAdapter(adapter);
 
-    }
+	}
 }

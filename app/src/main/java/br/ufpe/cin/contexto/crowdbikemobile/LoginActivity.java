@@ -4,13 +4,16 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.view.View.OnClickListener;
+import android.widget.EditText;
 
 import com.example.crowdbikemobile.R;
+import com.squareup.okhttp.OkHttpClient;
 
 public class LoginActivity extends Activity {
 
@@ -32,10 +35,36 @@ public class LoginActivity extends Activity {
         @Override
         public void onClick (View v)
         {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
+            boolean invalidLoginData = false;
+
+            EditText usernameField = (EditText) findViewById(R.id.login_field);
+            EditText passwordField = (EditText) findViewById(R.id.passwordField);
+
+            Editable usernameEditable  = usernameField.getText();
+            Editable passwordEditable = passwordField.getText();
+
+            String username;
+            String password;
+
+            if(usernameEditable == null || passwordEditable == null)
+            {
+                invalidLoginData = true;
+            }
+            else
+            {
+                username = usernameEditable.toString();
+                password = passwordEditable.toString();
+            }
+
+            loginApproved();
         }
     };
+
+    public void loginApproved()
+    {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

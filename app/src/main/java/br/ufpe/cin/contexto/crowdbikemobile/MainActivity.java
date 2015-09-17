@@ -23,6 +23,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
@@ -92,6 +93,7 @@ public class MainActivity extends Activity {
     private long atual;
 	private boolean first = true;
 	private boolean doVoiceAlert;
+	private PowerManager.WakeLock wakeLock;
 
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 	private static final double EARTH_GRAVITY = 9.81;
@@ -253,12 +255,27 @@ public class MainActivity extends Activity {
 
 	}
 
+    @Override
+    protected void onStop(){
+        super.onStop();
+        wakeLock.release(); // release the wakelock
+    }
+
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-
 	}
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        // get the app's power manager
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        //get a wakelock preventing the device from sleeping
+        wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, "No sleep");
+        wakeLock.acquire(); // acquire the wake lock
+    }
 
 	Thread subscribeThread;
 	Thread publishThread;
@@ -337,7 +354,6 @@ public class MainActivity extends Activity {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-
 			}
 		}
 
@@ -424,7 +440,7 @@ public class MainActivity extends Activity {
 
 	public void retornoServidorFiware(String retorno) throws Exception {
 		Gson gson = new Gson();
-		String noValues = "{\"errorCode\" : {\"code\" : \"404\",\"reasonPhrase\" : \"No context element found\"}}";
+		String noValues = "{\"errorCode\":{\"code\":\"404\",\"reasonPhrase\":\"No context element found\"}}";
 		if (!retorno.equals(noValues) && !retorno.equals("")) {
 			String distance = getDistanceLocation(retorno);
 			if (distance != null && Double.valueOf(distance) <= 100) {
