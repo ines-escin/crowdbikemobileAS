@@ -45,12 +45,7 @@ public class AsyncSendNotification extends AsyncTask <String, Void, String> {
 		String line;
 		String resultado = "";
 
-		/*
-		 * Esta linha deve ser modificada.
-		 * Aqui deve ser informada a uri do serviço que recebe as coordenadas
-		 * geográficas e retorna a situação do local: perigoso, seguro, ...
-		 * 
-		 */
+
 		String uri = "http://" + contexto.getResources().getString(R.string.ip_host) + ":8080/project/rest/vehicle/";
 
 		int responseCode = 0;

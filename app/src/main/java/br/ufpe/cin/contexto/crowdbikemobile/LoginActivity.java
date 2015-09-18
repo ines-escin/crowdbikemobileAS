@@ -21,12 +21,26 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        setButton();
+        setButtonLogin();
+        setEditText();
     }
 
-    private void setButton()
+    private void setEditText(){
+        EditText usernameField = (EditText) findViewById(R.id.login_field);
+        EditText passwordField = (EditText) findViewById(R.id.passwordField);
+
+        usernameField.setBackgroundResource(R.drawable.green_edit_text_holo_light);
+        passwordField.setBackgroundResource(R.drawable.green_edit_text_holo_light);
+        if(usernameField.isActivated())
+            usernameField.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
+        if(passwordField.isActivated())
+            passwordField.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
+    }
+
+    private void setButtonLogin()
     {
         Button loginButton = (Button) findViewById(R.id.login_button);
+        loginButton.setBackgroundResource(R.drawable.green_btn_default_normal_holo_light);
         loginButton.setOnClickListener(loginButtonListener);
     }
 
@@ -35,6 +49,7 @@ public class LoginActivity extends Activity {
         @Override
         public void onClick (View v)
         {
+            v.setBackgroundResource(R.drawable.green_btn_default_pressed_holo_light);
             boolean invalidLoginData = false;
 
             EditText usernameField = (EditText) findViewById(R.id.login_field);
