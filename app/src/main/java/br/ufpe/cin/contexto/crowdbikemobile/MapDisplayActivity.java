@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.text.method.CharacterPickerDialog;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +14,7 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.crowdbikemobile.R;
 import com.google.gson.Gson;
@@ -100,18 +99,26 @@ public class MapDisplayActivity extends Activity {
 	public OnClickListener postButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			v.setBackgroundResource(R.drawable.green_btn_default_pressed_holo_light);
+			latitude = coordinates.get(0);
+			longitude = coordinates.get(1);
 			if(isLocalChecked){
-				TextView tv1 =(TextView ) tr1.getChildAt(1);
-				latitude = tv1.getText().toString();
-				TextView tv2 =(TextView ) tr2.getChildAt(1);
-				longitude = tv2.getText().toString();
+				if(tr1.getVirtualChildAt(1) != null && tr2.getVirtualChildAt(1)!= null) {
+					TextView tv1 = (TextView) tr1.getVirtualChildAt(1);
+					TextView tv2 = (TextView) tr2.getVirtualChildAt(1);
+					if(!tv1.getText().toString().equals("") && !tv2.getText().toString().equals("")){
+						latitude = tv1.getText().toString();
+						longitude = tv2.getText().toString();
+						sendInformation(v);
+					}else {
+						Toast.makeText(getApplicationContext(), "Latititude e Longitude obrigatórios!", Toast.LENGTH_LONG).show();
+					}
 
-				if(!latitude.equals("") && !longitude.equals("")){
-					sendInformation(v);
 				}else {
-					sendInformation(v);
+					Toast.makeText(getApplicationContext(), "Latititude e Longitude obrigatórios!", Toast.LENGTH_LONG).show();
 				}
+
+			}else {
+				sendInformation(v);
 			}
 		}
 	};
@@ -223,7 +230,7 @@ public class MapDisplayActivity extends Activity {
 		spinner.setBackgroundResource(R.drawable.green_spinner_default_holo_light);
 		spinner.setPopupBackgroundResource(android.R.color.white);
 
-		String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Semáforo", "Via danificada",
+		String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada",
 				"Situação de imprudência"};
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,

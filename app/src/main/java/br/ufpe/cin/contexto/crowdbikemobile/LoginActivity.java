@@ -65,7 +65,10 @@ public class LoginActivity extends Activity {
         public void onClick (View v)
         {
             v.setBackgroundResource(R.drawable.green_btn_default_pressed_holo_light);
+
             boolean invalidLoginData = false;
+
+
 
             EditText usernameField = (EditText) findViewById(R.id.login_field);
             EditText passwordField = (EditText) findViewById(R.id.passwordField);
@@ -102,7 +105,7 @@ public class LoginActivity extends Activity {
                     e.printStackTrace();
                 }
             }
-
+            loginApproved();
         }
     };
 
