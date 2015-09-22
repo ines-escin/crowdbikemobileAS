@@ -2,7 +2,6 @@ package br.ufpe.cin.contexto.crowdbikemobile;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.Menu;
@@ -13,9 +12,14 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import com.example.crowdbikemobile.R;
-import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.Response;
+
+import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncLogin;
 
 public class LoginActivity extends Activity {
+
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +32,18 @@ public class LoginActivity extends Activity {
     {
         Button loginButton = (Button) findViewById(R.id.login_button);
         loginButton.setOnClickListener(loginButtonListener);
+        Button registerButton = (Button) findViewById(R.id.register_button);
+        registerButton.setOnClickListener(registerButtonListener);
+        getWindow().getDecorView().clearFocus();
     }
+
+    public OnClickListener registerButtonListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+                Intent intent = new Intent (getApplicationContext(), RegisterActivity.class);
+                startActivity(intent);
+        }
+    };
 
     public OnClickListener loginButtonListener = new OnClickListener()
     {
@@ -43,10 +58,11 @@ public class LoginActivity extends Activity {
             Editable usernameEditable  = usernameField.getText();
             Editable passwordEditable = passwordField.getText();
 
-            String username;
-            String password;
+            String username = "";
+            String password = "";
 
-            if(usernameEditable == null || passwordEditable == null)
+
+            if(usernameEditable == null || usernameEditable.toString().isEmpty()|| passwordEditable == null || passwordEditable.toString().isEmpty())
             {
                 invalidLoginData = true;
             }
@@ -56,7 +72,22 @@ public class LoginActivity extends Activity {
                 password = passwordEditable.toString();
             }
 
-            loginApproved();
+            if(!invalidLoginData) {
+
+                try
+                {
+                    Response response = new AsyncLogin().execute(username, password).get();
+                    if(response.code() != 408)
+                    {
+                        loginApproved();
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
         }
     };
 

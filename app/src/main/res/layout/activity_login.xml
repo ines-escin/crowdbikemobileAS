@@ -7,6 +7,8 @@
     tools:context="br.ufpe.cin.contexto.crowdbikemobile.LoginActivity"
     android:weightSum="1"
     android:background="@color/branco"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:outlineProvider="none">
 
     <ImageView
