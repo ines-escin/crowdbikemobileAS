@@ -1,14 +1,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="wrap_content"
-    android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="br.ufpe.cin.contexto.crowdbikemobile.LoginActivity"
     android:weightSum="1"
-    android:background="@color/branco"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:background="#fff"
     android:outlineProvider="none">
 
     <ImageView
@@ -50,19 +50,20 @@
         android:layout_height="50dp"
         android:text="Login"
         android:id="@+id/login_button"
-        android:background="#56ff90"
         android:layout_below="@+id/passwordField"
         android:layout_marginTop="30dp"
         android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/passwordField" />
+        android:layout_alignEnd="@+id/passwordField"
+        android:textColor="#000"/>
 
     <Button
-        android:layout_width="100dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="Criar conta"
         android:id="@+id/register_button"
-        android:background="@color/branco"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:background="#fff"
+        android:layout_below="@+id/login_button"
+        android:layout_alignEnd="@+id/login_button"
+        android:textColor="#000" />
 
 </RelativeLayout>

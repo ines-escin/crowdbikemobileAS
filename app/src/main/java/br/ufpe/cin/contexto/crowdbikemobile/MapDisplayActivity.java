@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.text.method.CharacterPickerDialog;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TableRow;
@@ -59,11 +62,20 @@ public class MapDisplayActivity extends Activity {
 		setSpinner();
 		setButton();
 		checkMyLocationRadio();
+		EditText latitude_text = (EditText) findViewById(R.id.latitude_text);
+		EditText longitude_text = (EditText) findViewById(R.id.longitude_text);
+		latitude_text.setBackgroundResource(R.drawable.green_edit_text_holo_light);
+		longitude_text.setBackgroundResource(R.drawable.green_edit_text_holo_light);
+		if(latitude_text.isActivated())
+			latitude_text.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
+		if(longitude_text.isActivated())
+			longitude_text.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
 	}
 
 	//Sets the post button
 	private void setButton(){
 		Button postButton = (Button) findViewById(R.id.send_issue_btn);
+		postButton.setBackgroundResource(R.drawable.green_btn_default_normal_holo_light);
 		postButton.setOnClickListener(postButtonListener);
 	}
 
@@ -88,6 +100,7 @@ public class MapDisplayActivity extends Activity {
 	public OnClickListener postButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
+			v.setBackgroundResource(R.drawable.green_btn_default_pressed_holo_light);
 			if(isLocalChecked){
 				TextView tv1 =(TextView ) tr1.getChildAt(1);
 				latitude = tv1.getText().toString();
@@ -207,14 +220,15 @@ public class MapDisplayActivity extends Activity {
 	private void setSpinner() {
 
 		Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
+		spinner.setBackgroundResource(R.drawable.green_spinner_default_holo_light);
+		spinner.setPopupBackgroundResource(android.R.color.white);
 
-		String[] occurrences = { "Local de acidente", "Tr·fego intenso", "SinalizaÁ„o Ruim", "Sem·foro", "Via danificada",
-				"SituaÁ„o de imprudÍncia"};
+		String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Semáforo", "Via danificada",
+				"Situação de imprudência"};
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_dropdown_item, occurrences);
-
 		spinner.setAdapter(adapter);
-
 	}
+
 }
