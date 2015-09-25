@@ -55,6 +55,15 @@
         android:layout_weight="2.80"
         android:orientation="vertical"
         android:paddingTop="@dimen/activity_vertical_margin" >
+        <ImageView
+            android:id="@+id/logoMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingRight="20dp"
+            android:paddingBottom="30dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/logo1" />
 
         <ImageView
             android:id="@+id/iconWeather"
@@ -74,7 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textColor="@color/branco"
+                android:textColor="@color/preto"
                 android:textSize="70dp" />
 
             <TextView
@@ -84,7 +93,7 @@
                 android:layout_gravity="fill_vertical"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/branco" />
+                android:textColor="@color/preto" />
         </LinearLayout>
 
         <TextView
@@ -93,7 +102,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text=""
-            android:textColor="@color/branco"
+            android:textColor="@color/preto"
             android:textSize="20dp" />
 
         <TextView
@@ -101,8 +110,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/branco" 
+            android:textColor="@color/preto"
             android:textSize="20dp" />
+
     </LinearLayout>
 
 </LinearLayout>

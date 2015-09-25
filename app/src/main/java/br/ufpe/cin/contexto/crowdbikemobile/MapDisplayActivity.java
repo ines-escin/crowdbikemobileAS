@@ -3,8 +3,10 @@ package br.ufpe.cin.contexto.crowdbikemobile;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -17,6 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.crowdbikemobile.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -35,8 +40,14 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
+import br.ufpe.cin.util.crowdbikemobile.LocationAddress;
 
-public class MapDisplayActivity extends Activity {
+public class MapDisplayActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
+		GoogleApiClient.OnConnectionFailedListener {
+
+	public static final String LOCATION = "location";
+	private GoogleApiClient mGoogleApiClient2;
+	private Location mLastLocation2;
 
 	public String latitude;
 	public String longitude;
@@ -46,6 +57,10 @@ public class MapDisplayActivity extends Activity {
 	public TableRow tr2;
 	public Intent intent;
 	public ArrayList<String> coordinates;
+	public Spinner spinner;
+	public String endereco;
+
+
 
 	@Override
 	protected void onCreate(Bundle icicle) {
@@ -69,6 +84,7 @@ public class MapDisplayActivity extends Activity {
 			latitude_text.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
 		if(longitude_text.isActivated())
 			longitude_text.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
+		callConnection();
 	}
 
 	//Sets the post button
@@ -124,24 +140,43 @@ public class MapDisplayActivity extends Activity {
 	};
 
 	public void sendInformation(View v){
+		if (mLastLocation2 != null) {
+			double latitude = mLastLocation2.getLatitude();
+			double longitude = mLastLocation2.getLongitude();
+			LocationAddress locationAddress = new LocationAddress();
+			endereco = locationAddress.getAddressFromLocation(latitude, longitude,	getApplicationContext());
+		}
+
 		try {
-			postInfo();
+			if (endereco != null && !endereco.equals("")) {
+				postInfo();
+			}
 			backToMainPage(v);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+
 	}
+
+	public String getEndereco() {
+		return endereco;
+	}
+
+	public void setEndereco(String endereco) {
+		this.endereco = endereco;
+	}
+
 	public void postInfo() throws JSONException {
 		String result = "";
 		String line = "";
 		String id = String.valueOf(generateUniqueId(getApplicationContext()));
 		Entity entity = new Entity();
 		List<Attributes> attributes = new ArrayList<Attributes>();
-		attributes.add(new Attributes("title", "String", "CPA", null));
+		attributes.add(new Attributes("title", "String", spinner.getSelectedItem().toString(), null));
 		List<Metadata> metadatas = new ArrayList<Metadata>();
 		metadatas.add(new Metadata("location", "String", "WGS84"));
 		attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude ,metadatas));
-		attributes.add(new Attributes("endereco", "String", "Endereco qualquer", null));
+		attributes.add(new Attributes("endereco", "String", endereco, null));
 		attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null));
 		attributes.add(new Attributes("userId", "String", "1",null));
 
@@ -169,12 +204,27 @@ public class MapDisplayActivity extends Activity {
 			while(response.code() == 408 && executeCount < 5);
 
 			result = response.body().string();
+
+
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
 		}
 //
+	}
+
+	@Override
+	protected void onStop(){
+		super.onStop();
+		mGoogleApiClient2.disconnect();
+
+	}
+	@Override
+	protected void onDestroy(){
+		super.onStop();
+		mGoogleApiClient2.disconnect();
+
 	}
 
 	public void backToMainPage(View view){
@@ -226,7 +276,7 @@ public class MapDisplayActivity extends Activity {
 
 	private void setSpinner() {
 
-		Spinner spinner = (Spinner) findViewById(R.id.menu_spinner);
+		spinner = (Spinner) findViewById(R.id.menu_spinner);
 		spinner.setBackgroundResource(R.drawable.green_spinner_default_holo_light);
 		spinner.setPopupBackgroundResource(android.R.color.white);
 
@@ -236,6 +286,39 @@ public class MapDisplayActivity extends Activity {
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_dropdown_item, occurrences);
 		spinner.setAdapter(adapter);
+	}
+
+
+
+	private synchronized void callConnection(){
+		Log.i("LOG", "AddressLocationActivity.callConnection()");
+		mGoogleApiClient2 = new GoogleApiClient.Builder(this)
+				.addOnConnectionFailedListener(this)
+				.addConnectionCallbacks(this)
+				.addApi(LocationServices.API)
+				.build();
+		mGoogleApiClient2.connect();
+	}
+
+
+	// LISTERNERS
+	@Override
+	public void onConnected(Bundle bundle) {
+		Log.i("LOG", "AddressLocationActivity.onConnected(" + bundle + ")");
+
+		mLastLocation2 = LocationServices
+				.FusedLocationApi
+				.getLastLocation(mGoogleApiClient2);
+	}
+
+	@Override
+	public void onConnectionSuspended(int i) {
+		Log.i("LOG", "AddressLocationActivity.onConnectionSuspended(" + i + ")");
+	}
+
+	@Override
+	public void onConnectionFailed(ConnectionResult connectionResult) {
+		Log.i("LOG", "AddressLocationActivity.onConnectionFailed(" + connectionResult + ")");
 	}
 
 }

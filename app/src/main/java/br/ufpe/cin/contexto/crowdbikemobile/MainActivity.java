@@ -1,60 +1,38 @@
 package br.ufpe.cin.contexto.crowdbikemobile;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-
-import android.hardware.SensorManager;
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-import at.abraxas.amarino.Amarino;
-import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
-
-import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
-
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncServidor;
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
-
-import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 
 import com.example.crowdbikemobile.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -62,19 +40,28 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
-
 import org.json.JSONObject;
 
-import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.widget.Button;
-import android.widget.PopupWindow;
+import java.io.BufferedReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
+import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
+import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
+import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
+import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
+import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 
 
 @SuppressLint("NewApi")
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
+		GoogleApiClient.OnConnectionFailedListener,
+		LocationListener {
+
 	private Point p;
-	private static final String DEVICE_ADDRESS = "30:14:11:03:21:35";
 	private String latitudeString = "";
 	private String longitudeString = "";
 	private Tempo tempoLocal = new Tempo();
@@ -85,15 +72,22 @@ public class MainActivity extends Activity {
 	private AsyncTempo tempo;
 	private TextView txtResultado;
 	private long timePosition;
-    private boolean isGPSEnabled = true;
+	private boolean isGPSEnabled = true;
 	private String lastLatitudeString;
 	private String lastLongitudeString;
 	private long timeLastPosition;
-    private long anterior;
-    private long atual;
-	private boolean first = true;
+	private long anterior;
+	private long atual;
+	private boolean first = true;   //forecast
+
+
+	private long anteriorForecast;
+	private long atualForecast;
+	private boolean firstForecast = true;
+
+	private boolean firstLocation = true;
 	private boolean doVoiceAlert;
-	private PowerManager.WakeLock wakeLock;
+
 
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 	private static final double EARTH_GRAVITY = 9.81;
@@ -102,7 +96,7 @@ public class MainActivity extends Activity {
 	public static final double W_TO_KGM = 6.12;
 	public static final double KGM_TO_KCAL = 1 / 427.0;
 
-    private TextToSpeech TTS;
+	private TextToSpeech TTS;
 	// Lumped constant for all frictional losses (tires, bearings, chain).
 	private static final double K1 = 0.0053;
 
@@ -117,28 +111,27 @@ public class MainActivity extends Activity {
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0; // 1 meters
 	// The minimum time between updates in milliseconds
 	private static final long MIN_TIME_BW_UPDATES = 0;// 1000 * 60 * 1; // 1
-														// minute
+	// minute
 
 	private static final String PREFS_REGISTERED = "Preferences";
 
 
-
-	private LocationManager mlocManager;
-	private LocationListener mlocListener;
-
-	private String returnQueue = "";
-
 	private String registered = "";
+	private GoogleApiClient mGoogleApiClient;
+	private LocationRequest mLocationRequest;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
 		IMEI = getIMEI(this);
 
-        TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+		TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
 			@Override
 			public void onInit(int status){
 			}
@@ -148,34 +141,18 @@ public class MainActivity extends Activity {
 		btn_show.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-
 				//Open popup window
 				if (p != null)
 					pop_upMenu(MainActivity.this, p);
 			}
 		});
 
-		// Registra app no OrionCB
-		// Restaura as preferencias gravadas
-
-		SharedPreferences settings = getSharedPreferences(PREFS_REGISTERED, 0);
-		registered = settings.getString("Registered", "");
-
-		// Conectando ao ardu?no
-		// Amarino.connect(this, DEVICE_ADDRESS);
-
 		txtResultado = (TextView) findViewById(R.id.txtResultado);
 
-		inicializarListenerGPS();
+		// Setando a cor de fundo. Padrao: branco
+		setarCorDeFundo(R.color.branco);
 
-		// Setando a cor de fundo. Padr?o: verde
-		setarCorDeFundo(R.color.verde);
-
-		// forecast
-		tarefaParalelaTempo();
-
-		// Executando tarefas paralelas
-		tarefasParalelas();
+		callConnection();
 
 		// Necess?rio para usar Runable na activity?
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
@@ -252,57 +229,39 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		if(mGoogleApiClient != null){
+			stopLocationUpdate();
+		}
 
 	}
-
-    @Override
-    protected void onStop(){
-        super.onStop();
-        wakeLock.release(); // release the wakelock
-    }
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if(mGoogleApiClient !=null && mGoogleApiClient.isConnected()){
+			startLocationUpdate();
+		}
 	}
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-        // get the app's power manager
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        //get a wakelock preventing the device from sleeping
-        wakeLock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, "No sleep");
-        wakeLock.acquire(); // acquire the wake lock
-    }
 
-	Thread subscribeThread;
-	Thread publishThread;
+	@Override
+	protected void onStop(){
+		super.onStop();
+
+	}
+
+	@Override
+	protected void onStart(){
+		super.onStart();
+	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if(publishThread != null)
-		{
-			publishThread.interrupt();
-		}
-		if(subscribeThread != null)
-		{
-			subscribeThread.interrupt();
-		}
 		TTS.stop();
 		TTS.shutdown();
 	}
 
-
-	/**
-	 * Este m?todo seta a cor de fundo do aplicativo
-	 * 
-	 * param cor
-	 *            C?digo inteiro da cor. A lista de cores dispon?veis est? em
-	 *            res/calues/colors.xml
-	 */
 
 	public void setarCorDeFundo(int intColor) {
 		setBgColor(intColor);
@@ -311,7 +270,7 @@ public class MainActivity extends Activity {
 		LinearLayout layoutApp = (LinearLayout) findViewById(R.id.backgroundApp);
         layoutApp.setBackgroundColor(Color.parseColor(stringColor));
 	}
-	
+
 	public void displayMapActivity(View v){
 		Intent intent = new Intent(this, MapDisplayActivity.class);
 		ArrayList<String> coordinates = new ArrayList<String>();
@@ -334,36 +293,22 @@ public class MainActivity extends Activity {
 	public class DoSomethingThread extends Thread {
 
 		private static final String TAG = "DoSomethingThread";
-		private static final int DELAY = 1000; // 1 second
-
 		@Override
 		public void run() {
 			Log.v(TAG, "doing work in Random Number Thread");
-
 			while (true) {
 				try {
 					publishProgress(fiwareRequest());
-					
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				//
-				try {
-					Thread.sleep(DELAY);
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
 
 		private void publishProgress(String param) {
-
 			Log.v(TAG, "reporting back from the consumer message Thread");
 			final String resultado = param;
-
 			runOnUiThread(new Runnable() {
-
 				@Override
 				public void run() {
 					try {
@@ -418,22 +363,19 @@ public class MainActivity extends Activity {
 		return json;
 	}
 
-	public void tarefasParalelas() {
-        startGenerating();
-	}
 
-
+/*
 	public void tarefaParalelaServidor2() {
 		// Instanciando a asynctask para contato com o servidor e acesso ao
-		// ardu?no
+		// arduino
 		task2 = new AsyncSendNotification(this);
 		task2.execute(IMEI, latitudeString, longitudeString);
 
 	}
-
+*/
 	public void tarefaParalelaTempo() {
-		// Instanciando a asynktask para contato com o servi?o de tempo
-		tempo = new AsyncTempo(this);
+			// Instanciando a asynktask para contato com o servi?o de tempo
+		tempo = new AsyncTempo(MainActivity.this);
 		tempo.execute(latitudeString, longitudeString);
 	}
 
@@ -443,6 +385,7 @@ public class MainActivity extends Activity {
 		String noValues = "{\"errorCode\":{\"code\":\"404\",\"reasonPhrase\":\"No context element found\"}}";
 		if (!retorno.equals(noValues) && !retorno.equals("")) {
 			String distance = getDistanceLocation(retorno);
+			String title = getTipoOcorrencia(retorno);
 			if (distance != null && Double.valueOf(distance) <= 100) {
 				txtMensagem.setText("Alerta: "
 						+ String.format("%.1f", Double.parseDouble(distance))
@@ -453,10 +396,10 @@ public class MainActivity extends Activity {
 					if ((Double.parseDouble(distance) <= 100.0)) {
 						if (first) {
 							anterior = atual;
-							notificacaoVoz(distance);
+							notificacaoVoz(title,distance);
 							first = false;
 						} else if (atual - anterior > 30000000000.0f) {
-							notificacaoVoz(distance);
+							notificacaoVoz(title,distance);
 							anterior = atual;
 						}
 					}
@@ -465,13 +408,13 @@ public class MainActivity extends Activity {
 			Log.v("DIST", distance);
 		} else {
 			txtMensagem.setText("");
-			setarCorDeFundo(R.color.verde);
+			setarCorDeFundo(R.color.branco);
 		}
 
 	}
 
-    private void notificacaoVoz(String distance){
-        String mensagem = "Alerta: " + String.format("%.1f", Double.parseDouble(distance))
+    private void notificacaoVoz(String title, String distance){
+        String mensagem = "Alerta: "+title + String.format("%.1f", Double.parseDouble(distance))
                 + "metros";
         //definir scopo de quando mandar a mensagem de voz, como identificar quando mandar.
         TTS.setPitch(1); // Afina??o da Voz
@@ -507,6 +450,22 @@ public class MainActivity extends Activity {
 		return String.valueOf(minDistance);
 	}
 
+	public String getTipoOcorrencia(String result) throws Exception {
+		List<Entity> listEntity = AdapterOcurrence.parseListEntity(result);
+		boolean isFirst = true;
+		String title = "";
+		for (Entity entity : listEntity) {
+			for (Attributes att : entity.getAttributes()) {
+				if (att.getName().equalsIgnoreCase("title")) {
+					String[] tokensVal = att.getValue().split(",");
+					title = String.valueOf(tokensVal[0].trim());
+				}
+			}
+		}
+		return title;
+	}
+
+
 	public void setTempoMain(Tempo tempoMain) {
 		this.tempoLocal = tempoMain;
 
@@ -534,39 +493,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-
-	public void inicializarListenerGPS() {
-
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new MyLocationListener(this);
-
-        try
-        {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if(location != null)
-            {
-                latitudeString = String.valueOf(location.getLatitude());
-                longitudeString = String.valueOf(location.getLongitude());
-            }
-            else
-            {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                if(location != null)
-                {
-                    latitudeString = String.valueOf(location.getLatitude());
-                    longitudeString = String.valueOf(location.getLongitude());
-                }
-            }
-        }
-        catch (SecurityException e)
-        {
-            e.printStackTrace();
-        }
-
-	}
-
 	public String getLatitudeString() {
 		return latitudeString;
 	}
@@ -576,69 +502,9 @@ public class MainActivity extends Activity {
 	}
 
 
-	/* Class My Location Listener */
-	public class MyLocationListener implements LocationListener {
-
-		private Context lContexto;
-
-		public MyLocationListener(Context contexto) {
-			this.lContexto = contexto;
-		}
-
-		@Override
-		public void onLocationChanged(Location loc) {
-			// Continue listening for a more accurate location
-			loc.getLatitude();
-			loc.getLongitude();
-
-			if (loc.getAccuracy() <= 10 && loc.getSpeed() <= 12) {
-				// Do something
-				// Atualizando as informa??es do app
-				((MainActivity) lContexto).setLatitudeString(String.valueOf(loc
-						.getLatitude()));
-				((MainActivity) lContexto).setLongitudeString(String
-						.valueOf(loc.getLongitude()));
-
-				((MainActivity) lContexto).tarefasParalelas();
-
-			}
-			// setando o momento da coordenada
-			((MainActivity) lContexto).setTimePosition(System
-					.currentTimeMillis());
-
-			// calculandoa caloria do ?ltimo percurso
-			if (getLastLatitudeString() != null) {
-				if (getLastLongitudeString() != null) {
-					((MainActivity) lContexto).calcularCaloria();
-				}
-			}
-
-			// setando a coordenada
-			((MainActivity) lContexto).setLastLatitudeString(latitudeString);
-			((MainActivity) lContexto).setLastLongitudeString(longitudeString);
-
-			// setando o momento da coordenada
-			((MainActivity) lContexto).setTimeLastPosition(timePosition);
-		}
-
-		@Override
-		public void onProviderDisabled(String provider) {
-		}
-
-		@Override
-		public void onProviderEnabled(String provider) {
-		}
-
-		@Override
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
-
-	}
-
-
 
 	/**
-	 * Este m?todo recebe a resposta da chamada da ActivitySendNotification
+	 * Este metodo recebe a resposta da chamada da ActivitySendNotification
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 30) {
@@ -797,5 +663,112 @@ public class MainActivity extends Activity {
 	public void setTimeLastPosition(long timeLastPosition) {
 		this.timeLastPosition = timeLastPosition;
 	}
+
+
+	private synchronized void callConnection(){
+		Log.i("LOG", "UpdateLocationActivity.callConnection()");
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
+				.addOnConnectionFailedListener(this)
+				.addConnectionCallbacks(this)
+				.addApi(LocationServices.API)
+				.build();
+		mGoogleApiClient.connect();
+	}
+
+
+	private void initLocationRequest(){
+		mLocationRequest = new LocationRequest();
+		mLocationRequest.setInterval(2000);
+		mLocationRequest.setFastestInterval(1000);
+		mLocationRequest.setSmallestDisplacement(1); // deslocamento mínimo em metros
+		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+	}
+
+
+	private void startLocationUpdate(){
+		initLocationRequest();
+		LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+	}
+
+
+	private void stopLocationUpdate(){
+		LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,  this);
+	}
+
+
+	// LISTENERS
+	@Override
+	public void onConnected(Bundle bundle) {
+		Log.i("LOG", "UpdateLocationActivity.onConnected(" + bundle + ")");
+
+		Location l = LocationServices
+				.FusedLocationApi
+				.getLastLocation(mGoogleApiClient); // PARA JÁ TER UMA COORDENADA PARA O UPDATE FEATURE UTILIZAR
+
+		startLocationUpdate();
+	}
+
+	@Override
+	public void onConnectionSuspended(int i) {
+		Log.i("LOG", "UpdateLocationActivity.onConnectionSuspended(" + i + ")");
+	}
+
+	@Override
+	public void onConnectionFailed(ConnectionResult connectionResult) {
+		Log.i("LOG", "UpdateLocationActivity.onConnectionFailed(" + connectionResult + ")");
+	}
+
+
+	@Override
+	public void onLocationChanged(Location loc) {
+		loc.getLatitude();
+		loc.getLongitude();
+
+
+			// Do something
+			// Atualizando as informacoes do app
+			setLatitudeString(String.valueOf(loc.getLatitude()));
+			setLongitudeString(String.valueOf(loc.getLongitude()));
+			if (firstLocation) {
+				startGenerating();
+				firstLocation = false;
+			}
+
+
+		// setando o momento da coordenada
+		setTimePosition(System.currentTimeMillis());
+
+		// calculandoa caloria do ultimo percurso
+		if (getLastLatitudeString() != null) {
+			if (getLastLongitudeString() != null) {
+				calcularCaloria();
+			}
+		}
+
+		// setando a coordenada
+		setLastLatitudeString(latitudeString);
+		setLastLongitudeString(longitudeString);
+
+		// setando o momento da coordenada
+		setTimeLastPosition(timePosition);
+
+        if(!latitudeString.equals("")&& !longitudeString.equals("")){
+			atualForecast = System.nanoTime();
+			if (firstForecast) {
+				anteriorForecast = atualForecast;
+				firstForecast = false;
+				// forecast
+				tarefaParalelaTempo();
+			} else if (atualForecast - anteriorForecast > 60000000000.0f) {
+				anteriorForecast = atualForecast;
+				// forecast
+				tarefaParalelaTempo();
+			}
+		}
+
+	}
+
+
+
 
 }
