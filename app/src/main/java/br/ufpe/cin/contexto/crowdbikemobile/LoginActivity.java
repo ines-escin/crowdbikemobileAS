@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.crowdbikemobile.R;
 import com.squareup.okhttp.MediaType;
@@ -95,17 +96,21 @@ public class LoginActivity extends Activity {
                 try
                 {
                     Response response = new AsyncLogin().execute(username, password).get();
-                    if(response.code() != 408)
+                    if(response != null && response.code() != 408)
                     {
                         loginApproved();
                     }
+                    loginApproved();
                 }
                 catch (Exception e)
                 {
                     e.printStackTrace();
                 }
             }
-            loginApproved();
+            else
+            {
+                Toast.makeText(getApplicationContext(), "Nome de usuario ou senha incorretos", Toast.LENGTH_LONG).show();
+            }
         }
     };
 

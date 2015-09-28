@@ -175,7 +175,7 @@ public class MapDisplayActivity extends Activity implements GoogleApiClient.Conn
 		attributes.add(new Attributes("title", "String", spinner.getSelectedItem().toString(), null));
 		List<Metadata> metadatas = new ArrayList<Metadata>();
 		metadatas.add(new Metadata("location", "String", "WGS84"));
-		attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude ,metadatas));
+		attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude , metadatas));
 		attributes.add(new Attributes("endereco", "String", endereco, null));
 		attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null));
 		attributes.add(new Attributes("userId", "String", "1",null));

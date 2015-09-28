@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.crowdbikemobile.R;
 import com.squareup.okhttp.Response;
@@ -47,7 +48,7 @@ public class RegisterActivity extends Activity {
                 try
                 {
                     Response response = new AsyncLogin().execute(username, password, email).get();
-                    if(response.code() != 408)
+                    if(response != null && response.code() != 408)
                     {
                         registrationSuccessfull();
                     }
@@ -56,6 +57,10 @@ public class RegisterActivity extends Activity {
                 {
                     e.printStackTrace();
                 }
+            }
+            else
+            {
+                Toast.makeText(getApplicationContext(), "Preencha todos os campos corretamente", Toast.LENGTH_LONG).show();
             }
         }
     };

@@ -375,9 +375,32 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 */
 	public void tarefaParalelaTempo() {
 			// Instanciando a asynktask para contato com o servi?o de tempo
-		tempo = new AsyncTempo(MainActivity.this);
-		tempo.execute(latitudeString, longitudeString);
-	}
+		if(firstForecast)
+        {
+            boolean findFirst = false;
+
+            while(!findFirst) {
+
+                tempo = new AsyncTempo(MainActivity.this);
+                tempo.execute(latitudeString, longitudeString);
+                try {
+                    Tempo respostaTempo = tempo.get();
+                    if(respostaTempo != null)
+                    {
+                        findFirst = true;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            firstForecast = false;
+        }
+        else
+        {
+            tempo = new AsyncTempo(MainActivity.this);
+            tempo.execute(latitudeString, longitudeString);
+        }
+    }
 
 
 	public void retornoServidorFiware(String retorno) throws Exception {
@@ -741,7 +764,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 		// calculandoa caloria do ultimo percurso
 		if (getLastLatitudeString() != null) {
 			if (getLastLongitudeString() != null) {
-				calcularCaloria();
+				//calcularCaloria();
 			}
 		}
 
@@ -756,9 +779,9 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 			atualForecast = System.nanoTime();
 			if (firstForecast) {
 				anteriorForecast = atualForecast;
-				firstForecast = false;
-				// forecast
 				tarefaParalelaTempo();
+				firstForecast = false;
+				//forecast
 			} else if (atualForecast - anteriorForecast > 60000000000.0f) {
 				anteriorForecast = atualForecast;
 				// forecast
