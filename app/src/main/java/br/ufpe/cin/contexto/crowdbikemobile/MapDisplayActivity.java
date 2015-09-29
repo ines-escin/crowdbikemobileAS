@@ -222,7 +222,7 @@ public class MapDisplayActivity extends Activity implements GoogleApiClient.Conn
 	}
 	@Override
 	protected void onDestroy(){
-		super.onStop();
+		super.onDestroy();
 		mGoogleApiClient2.disconnect();
 
 	}

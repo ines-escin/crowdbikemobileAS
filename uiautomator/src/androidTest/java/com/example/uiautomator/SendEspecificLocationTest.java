@@ -1,4 +1,4 @@
-package br.ufpe.cin.test.crowdbikemobile;
+package com.example.uiautomator;
 
 import com.android.uiautomator.core.UiObject;
 import com.android.uiautomator.core.UiObjectNotFoundException;
