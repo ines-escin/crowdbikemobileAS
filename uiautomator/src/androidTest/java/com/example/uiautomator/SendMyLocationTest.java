@@ -1,4 +1,4 @@
-package br.ufpe.cin.test.crowdbikemobile;
+package com.example.uiautomator;
 
 import android.widget.Button;
 import android.widget.LinearLayout;
