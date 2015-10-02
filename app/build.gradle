@@ -1,0 +1,91 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.android.application'
+apply plugin: 'groovyx.grooid.groovy-android'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'org.codehaus.groovy:gradle-groovy-android-plugin:0.3.6'
+    }
+}
+
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.9.5"
+    compile files('libs/AmarinoLibrary_v0_55.jar')
+    compile files('libs/commons-cli-1.1.jar')
+    compile files('libs/commons-io-1.2.jar')
+    compile files('libs/commons-lang3-3.3.2.jar')
+    compile files('libs/json-simple-1.1.jar')
+    compile files('libs/jsonassert-1.2.3.jar')
+    compile fileTree('libs/uiautomator.jar')
+
+
+    androidTestCompile 'org.robolectric:robolectric:2.3'
+    // Set this dependency to use JUnit 4 rules
+    androidTestCompile 'com.android.support.test:rules:0.3'
+    // Set this dependency to build and run UI Automator tests
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
+
+    testCompile 'org.robospock:robospock:0.7.0'
+    // robolectric requires is it to run
+    // if you're not using it in your code just leave it as a testCompile depedency
+    testCompile 'com.android.support:support-v4:23.0.0'
+    androidTestCompile 'com.android.support:support-annotations:23.0.0'
+    testCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
+
+
+    compile 'com.android.support:support-v4:23.0.0'
+    compile 'com.google.code.gson:gson:2.3'
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
+    compile 'com.google.android.gms:play-services:7.8.0'
+    compile 'com.android.support:appcompat-v7:23.0.0'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        minSdkVersion 18
+        targetSdkVersion 23
+        applicationId "com.example.crowdbikemobile"
+
+        testApplicationId "com.example.crowdbikemobile.test"
+        //testInstrumentationRunner "android.test.InstrumentationTestRunner"
+        //testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
