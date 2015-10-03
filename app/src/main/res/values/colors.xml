@@ -6,5 +6,9 @@
     <color name="branco">#FFFFFF</color>
     <color name="preto">#000000</color>
     <color name="amarelo">#FFEA00</color>
-      
+
+    <color name="teal">#009688</color>
+    <color name="teal_dark">#004D40</color>
+    <color name="teal_accent">#80CBC4</color>
+
 </resources>

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +24,12 @@ import com.example.crowdbikemobile.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -42,8 +50,8 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
 import br.ufpe.cin.util.crowdbikemobile.LocationAddress;
 
-public class MapDisplayActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener {
+public class MapDisplayActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback{
 
 	public static final String LOCATION = "location";
 	private GoogleApiClient mGoogleApiClient2;
@@ -85,6 +93,19 @@ public class MapDisplayActivity extends Activity implements GoogleApiClient.Conn
 		if(longitude_text.isActivated())
 			longitude_text.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
 		callConnection();
+
+		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.map);
+		mapFragment.getMapAsync(this);
+	}
+
+	@Override
+	public void onMapReady(GoogleMap map) {
+		// Add a marker in Sydney, Australia, and move the camera.
+		LatLng location = new LatLng(-8.054277,-34.881256);
+		map.addMarker(new MarkerOptions().position(location).title("Crowdbike Marker"));
+		map.moveCamera(CameraUpdateFactory.newLatLng(location));
+		map.animateCamera(CameraUpdateFactory.zoomTo(13));
 	}
 
 	//Sets the post button
@@ -278,7 +299,7 @@ public class MapDisplayActivity extends Activity implements GoogleApiClient.Conn
 
 		spinner = (Spinner) findViewById(R.id.menu_spinner);
 		spinner.setBackgroundResource(R.drawable.green_spinner_default_holo_light);
-		spinner.setPopupBackgroundResource(android.R.color.white);
+		//spinner.setPopupBackgroundResource(android.R.color.white);
 
 		String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada",
 				"Situação de imprudência"};
