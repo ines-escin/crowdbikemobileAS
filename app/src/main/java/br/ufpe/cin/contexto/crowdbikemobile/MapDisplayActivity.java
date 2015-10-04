@@ -1,16 +1,19 @@
 package br.ufpe.cin.contexto.crowdbikemobile;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,9 +29,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
@@ -51,12 +57,12 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
 import br.ufpe.cin.util.crowdbikemobile.LocationAddress;
 
 public class MapDisplayActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback{
+		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnMapLongClickListener{
 
 	public static final String LOCATION = "location";
 	private GoogleApiClient mGoogleApiClient2;
 	private Location mLastLocation2;
-
+    private GoogleMap googleMap;
 	public String latitude;
 	public String longitude;
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -102,11 +108,49 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 	@Override
 	public void onMapReady(GoogleMap map) {
 		// Add a marker in Sydney, Australia, and move the camera.
+        this.googleMap = map;
 		LatLng location = new LatLng(-8.054277,-34.881256);
-		map.addMarker(new MarkerOptions().position(location).title("Crowdbike Marker"));
-		map.moveCamera(CameraUpdateFactory.newLatLng(location));
-		map.animateCamera(CameraUpdateFactory.zoomTo(13));
+        Marker marker = map.addMarker(new MarkerOptions().position(location).title("Crowdbike Marker").icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon())));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 13));
+        map.setOnMapLongClickListener(this);
 	}
+
+    public Bitmap getBitmapIcon(){
+        View markerView = getMarkerView();
+        Bitmap markerBmp =  createDrawableFromView(markerView);
+        return markerBmp;
+    }
+
+    public View getMarkerView(){
+
+        View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.mark_layout, null);
+        return marker;
+
+    }
+
+    public Bitmap createDrawableFromView(View view) {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        this.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Crowdbike Marker").icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon()));
+            googleMap.addMarker(markerOptions);
+            Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
+
+    }
 
 	//Sets the post button
 	private void setButton(){
@@ -341,5 +385,6 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		Log.i("LOG", "AddressLocationActivity.onConnectionFailed(" + connectionResult + ")");
 	}
+
 
 }
