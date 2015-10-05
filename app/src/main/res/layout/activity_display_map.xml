@@ -4,9 +4,21 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:background="#fff">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.3">
+
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment" />
+    </LinearLayout>
+
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_weight="0.5"
+        android:layout_weight="0.7"
         android:layout_height="match_parent">
 
         <LinearLayout
@@ -101,16 +113,6 @@
                 android:textColor="#000" />
         </LinearLayout>
     </ScrollView>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.5">
 
-        <fragment
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment" />
-    </LinearLayout>
 
 </LinearLayout>

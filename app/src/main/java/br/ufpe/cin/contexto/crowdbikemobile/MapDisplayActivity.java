@@ -1,6 +1,8 @@
 package br.ufpe.cin.contexto.crowdbikemobile;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -54,6 +56,7 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
+import br.ufpe.cin.br.adapter.crowdbikemobile.Ocorrencia;
 import br.ufpe.cin.util.crowdbikemobile.LocationAddress;
 
 public class MapDisplayActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
@@ -109,54 +112,77 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 	public void onMapReady(GoogleMap map) {
 		// Add a marker in Sydney, Australia, and move the camera.
         this.googleMap = map;
-		LatLng location = new LatLng(-8.054277,-34.881256);
-        Marker marker = map.addMarker(new MarkerOptions().position(location).title("Crowdbike Marker").icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon())));
+        LatLng location;
+        if(mLastLocation2!=null){
+		    location = new LatLng(mLastLocation2.getLatitude(),mLastLocation2.getLongitude());
+        }else{
+            location = new LatLng(-8.054277,-34.881256);
+        }
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 13));
         map.setOnMapLongClickListener(this);
+        try {
+            showAllMarkers();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+	protected OnClickListener report = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			showReportDialog();
+		}
+	};
+
+	public void showReportDialog(){
+		String[] occurrences = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada",
+				"Situação de imprudência"};
+		AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
+		// Set the dialog title
+		builder.setTitle("Report an issue")
+				// Specify the list array, the items to be selected by default (null for none),
+				// and the listener through which to receive callbacks when items are selected
+//	    	.setMessage("helper message")
+
+				.setSingleChoiceItems(occurrences, 0,
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+
+							}
+						})
+						// Set the action buttons
+				.setPositiveButton("Send report", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						sendInformation();
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+					}
+				})
+		;
+
+		builder.create().show();
 	}
 
-    public Bitmap getBitmapIcon(){
-        View markerView = getMarkerView();
-        Bitmap markerBmp =  createDrawableFromView(markerView);
-        return markerBmp;
-    }
 
-    public View getMarkerView(){
-
-        View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.mark_layout, null);
-        return marker;
-
-    }
-
-    public Bitmap createDrawableFromView(View view) {
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        this.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-
-        return bitmap;
-    }
-
+    LatLng latLngLast;
     @Override
     public void onMapLongClick(LatLng latLng) {
-            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Crowdbike Marker").icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon()));
-            googleMap.addMarker(markerOptions);
-            Toast.makeText(this, latLng.toString(), Toast.LENGTH_LONG).show();
-
+        latLngLast = latLng;
+        latitude = latLng.latitude+"";
+        longitude = latLng.longitude+"";
+        showReportDialog();
     }
 
 	//Sets the post button
 	private void setButton(){
 		Button postButton = (Button) findViewById(R.id.send_issue_btn);
 		postButton.setBackgroundResource(R.drawable.green_btn_default_normal_holo_light);
-		postButton.setOnClickListener(postButtonListener);
+		postButton.setOnClickListener(report);
 	}
 
 	private void checkMyLocationRadio(){
@@ -189,7 +215,7 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 					if(!tv1.getText().toString().equals("") && !tv2.getText().toString().equals("")){
 						latitude = tv1.getText().toString();
 						longitude = tv2.getText().toString();
-						sendInformation(v);
+						sendInformation();
 					}else {
 						Toast.makeText(getApplicationContext(), "Latititude e Longitude obrigatórios!", Toast.LENGTH_LONG).show();
 					}
@@ -199,12 +225,12 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 				}
 
 			}else {
-				sendInformation(v);
+				sendInformation();
 			}
 		}
 	};
 
-	public void sendInformation(View v){
+	public void sendInformation(){
 		if (mLastLocation2 != null) {
 			double latitude = mLastLocation2.getLatitude();
 			double longitude = mLastLocation2.getLongitude();
@@ -214,9 +240,12 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 
 		try {
 			if (endereco != null && !endereco.equals("")) {
-				postInfo();
+			    String title = postInfo();
+                if(title!=null){ // it means the object was added
+                    this.addMarker(latLngLast, title);
+                }
 			}
-			backToMainPage(v);
+			//backToMainPage(v);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -231,13 +260,14 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 		this.endereco = endereco;
 	}
 
-	public void postInfo() throws JSONException {
-		String result = "";
+	public String postInfo() throws JSONException {
+		String result = null;
 		String line = "";
 		String id = String.valueOf(generateUniqueId(getApplicationContext()));
+        String title = spinner.getSelectedItem().toString();
 		Entity entity = new Entity();
 		List<Attributes> attributes = new ArrayList<Attributes>();
-		attributes.add(new Attributes("title", "String", spinner.getSelectedItem().toString(), null));
+		attributes.add(new Attributes("title", "String", title, null));
 		List<Metadata> metadatas = new ArrayList<Metadata>();
 		metadatas.add(new Metadata("location", "String", "WGS84"));
 		attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude , metadatas));
@@ -267,19 +297,87 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 				executeCount++;
 			}
 			while(response.code() == 408 && executeCount < 5);
-
-			result = response.body().string();
-
+            if( response.code()==200){
+                result = title;
+            }
 
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
 		}
-//
+      return result;
 	}
 
-	@Override
+    public void showAllMarkers() throws Exception {
+
+        List<Ocorrencia> occurrences = getAllOccurrences();
+
+        for(Ocorrencia occurrence: occurrences){
+
+            LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
+            this.addMarker(latLng, occurrence.getTitle());
+
+        }
+
+    }
+
+    public void addMarker(LatLng latLng, String title){
+        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(title).icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon()));
+        googleMap.addMarker(markerOptions);
+    }
+
+    public List<Ocorrencia> getAllOccurrences() throws Exception {
+
+        ////////////////
+        String result = "";
+        String line = "";
+        Gson gson = new Gson();
+
+
+        String uri = "http://148.6.80.19:1026/v1/queryContext";
+        String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}]}";
+        OkHttpClient client = new OkHttpClient();
+        try
+        {
+            RequestBody body = RequestBody.create(JSON, getAll);
+            Request request = new Request.Builder()
+                    .url(uri)
+                    .post(body)
+                    .addHeader("Accept","application/json")
+                    .build();
+
+            int executeCount = 0;
+            Response response;
+
+            do
+            {
+                response = client.newCall(request).execute();
+                executeCount++;
+            }
+            while(response.code() == 408 && executeCount < 5);
+
+            result = response.body().string();
+
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+        /////////////////////////////////////////
+
+        List<Entity> contextElement = AdapterOcurrence.parseListEntity(result);
+        List<Ocorrencia> ocurrences = new ArrayList<Ocorrencia>();
+        for (Entity entity : contextElement) {
+            ocurrences.add(AdapterOcurrence.toOcurrence(entity));
+        }
+
+        // TODO Auto-generated method stub
+        return ocurrences;
+    }
+
+
+    @Override
 	protected void onStop(){
 		super.onStop();
 		mGoogleApiClient2.disconnect();
@@ -354,7 +452,6 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 	}
 
 
-
 	private synchronized void callConnection(){
 		Log.i("LOG", "AddressLocationActivity.callConnection()");
 		mGoogleApiClient2 = new GoogleApiClient.Builder(this)
@@ -386,5 +483,32 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 		Log.i("LOG", "AddressLocationActivity.onConnectionFailed(" + connectionResult + ")");
 	}
 
+    public Bitmap getBitmapIcon(){
+        View markerView = getMarkerView();
+        Bitmap markerBmp =  createDrawableFromView(markerView);
+        return markerBmp;
+    }
 
+    public View getMarkerView(){
+
+        View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.mark_layout, null);
+        return marker;
+
+    }
+
+    public Bitmap createDrawableFromView(View view) {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        this.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
 }
