@@ -11,4 +11,9 @@
     <color name="teal_dark">#004D40</color>
     <color name="teal_accent">#80CBC4</color>
 
+    <color name="red_smooth">#c83737</color>
+    <color name="yellow_smooth">#ffc107</color>
+    <color name="green_smooth">#077375</color>
+    <color name="gray_white">#eee</color>
+
 </resources>

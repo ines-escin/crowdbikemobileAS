@@ -4,6 +4,7 @@
          <item name="colorPrimary">@color/teal</item>
          <item name="colorPrimaryDark">@color/teal_dark</item>
          <item name="colorAccent">@color/teal_accent</item>
+         <item name="colorButtonNormal">@color/green_smooth</item>
      </style>
     
     

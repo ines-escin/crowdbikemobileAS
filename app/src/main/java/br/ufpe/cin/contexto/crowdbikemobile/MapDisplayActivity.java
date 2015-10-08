@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -16,18 +18,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.Spinner;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.crowdbikemobile.R;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,9 +38,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.google.maps.android.SphericalUtil;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -48,8 +52,11 @@ import com.squareup.okhttp.Response;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
@@ -59,24 +66,23 @@ import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Ocorrencia;
 import br.ufpe.cin.util.crowdbikemobile.LocationAddress;
 
-public class MapDisplayActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+public class MapDisplayActivity extends AppCompatActivity implements LocationListener, GoogleApiClient.ConnectionCallbacks,
 		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnMapLongClickListener{
 
 	public static final String LOCATION = "location";
-	private GoogleApiClient mGoogleApiClient2;
-	private Location mLastLocation2;
+	private GoogleApiClient mGoogleApiClient;
+	private Location mLastLocation;
     private GoogleMap googleMap;
-	public String latitude;
-	public String longitude;
+
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-	public boolean isLocalChecked = false;
-	public TableRow tr1;
-	public TableRow tr2;
+
 	public Intent intent;
-	public ArrayList<String> coordinates;
-	public Spinner spinner;
 	public String endereco;
 
+
+	public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada",
+			"Situação de imprudência"};
+	int selectedOccurence;
 
 
 	@Override
@@ -85,41 +91,50 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 		super.onCreate(icicle);
 		setContentView(R.layout.activity_display_map);
 		intent = getIntent();
-		this.latitude = "";
-		this.longitude = "";
 
-		coordinates = (ArrayList<String>) intent.getSerializableExtra("COORDINATES");
-
-		setSpinner();
-		setButton();
-		checkMyLocationRadio();
-		EditText latitude_text = (EditText) findViewById(R.id.latitude_text);
-		EditText longitude_text = (EditText) findViewById(R.id.longitude_text);
-		latitude_text.setBackgroundResource(R.drawable.green_edit_text_holo_light);
-		longitude_text.setBackgroundResource(R.drawable.green_edit_text_holo_light);
-		if(latitude_text.isActivated())
-			latitude_text.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
-		if(longitude_text.isActivated())
-			longitude_text.setBackgroundResource(R.drawable.green_textfield_activated_holo_light);
-		callConnection();
+        setLocationService();
+        setStartButton();
+        callConnection();
 
 		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 	}
 
-	@Override
+    public void setStartButton(){
+        Button startButton = (Button) findViewById(R.id.start_button);
+        startButton.setOnClickListener(startButtonListener);
+    }
+    boolean isStarted = false;
+    double stopTime;
+    double startTime;
+    public OnClickListener startButtonListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Button startButton = (Button) findViewById(R.id.start_button);
+            double seconds = getTimeInSeconds();
+            if(isStarted){ //then stop and show start button
+                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.green_smooth));
+                startButton.setText(getResources().getText(R.string.start_run));
+                stopTime = seconds;
+            }else{
+                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.red_smooth));
+                startButton.setText(getResources().getText(R.string.stop_run));
+                startTime = seconds;
+            }
+            isStarted = !isStarted;
+        }
+    };
+
+    @Override
 	public void onMapReady(GoogleMap map) {
 		// Add a marker in Sydney, Australia, and move the camera.
         this.googleMap = map;
-        LatLng location;
-        if(mLastLocation2!=null){
-		    location = new LatLng(mLastLocation2.getLatitude(),mLastLocation2.getLongitude());
-        }else{
-            location = new LatLng(-8.054277,-34.881256);
-        }
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 13));
-        map.setOnMapLongClickListener(this);
+
+        this.googleMap.setOnMapLongClickListener(this);
+        this.googleMap.setMyLocationEnabled(true);
+        this.googleMap.setBuildingsEnabled(true);
+        this.googleMap.getUiSettings().setZoomControlsEnabled(true);
         try {
             showAllMarkers();
         } catch (Exception e) {
@@ -135,8 +150,7 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 	};
 
 	public void showReportDialog(){
-		String[] occurrences = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada",
-				"Situação de imprudência"};
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
 		// Set the dialog title
 		builder.setTitle("Report an issue")
@@ -144,25 +158,28 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 				// and the listener through which to receive callbacks when items are selected
 //	    	.setMessage("helper message")
 
-				.setSingleChoiceItems(occurrences, 0,
+				.setSingleChoiceItems(OCCURRENCES, 0,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
+								selectedOccurence = which;
+                                //Toast.makeText(getApplicationContext(), OCCURRENCES[selectedOccurence], Toast.LENGTH_LONG).show();
 
-							}
+                            }
 						})
 						// Set the action buttons
 				.setPositiveButton("Send report", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int id) {
+
 						sendInformation();
 					}
 				})
 				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-					}
-				})
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                })
 		;
 
 		builder.create().show();
@@ -173,22 +190,9 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
     @Override
     public void onMapLongClick(LatLng latLng) {
         latLngLast = latLng;
-        latitude = latLng.latitude+"";
-        longitude = latLng.longitude+"";
         showReportDialog();
     }
 
-	//Sets the post button
-	private void setButton(){
-		Button postButton = (Button) findViewById(R.id.send_issue_btn);
-		postButton.setBackgroundResource(R.drawable.green_btn_default_normal_holo_light);
-		postButton.setOnClickListener(report);
-	}
-
-	private void checkMyLocationRadio(){
-		RadioButton myLocationRadio = (RadioButton) findViewById(R.id.my_loc_radio_btn);
-		myLocationRadio.setChecked(true);
-	}
 
 	private String getIMEI(Context context) {
 
@@ -197,43 +201,13 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 		String imei = mngr.getDeviceId();
 		return imei;
 
-
-		//Inner class to configure the post button
-
 	}
 
-	//Inner class to configure the post button
-	public OnClickListener postButtonListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			latitude = coordinates.get(0);
-			longitude = coordinates.get(1);
-			if(isLocalChecked){
-				if(tr1.getVirtualChildAt(1) != null && tr2.getVirtualChildAt(1)!= null) {
-					TextView tv1 = (TextView) tr1.getVirtualChildAt(1);
-					TextView tv2 = (TextView) tr2.getVirtualChildAt(1);
-					if(!tv1.getText().toString().equals("") && !tv2.getText().toString().equals("")){
-						latitude = tv1.getText().toString();
-						longitude = tv2.getText().toString();
-						sendInformation();
-					}else {
-						Toast.makeText(getApplicationContext(), "Latititude e Longitude obrigatórios!", Toast.LENGTH_LONG).show();
-					}
-
-				}else {
-					Toast.makeText(getApplicationContext(), "Latititude e Longitude obrigatórios!", Toast.LENGTH_LONG).show();
-				}
-
-			}else {
-				sendInformation();
-			}
-		}
-	};
 
 	public void sendInformation(){
-		if (mLastLocation2 != null) {
-			double latitude = mLastLocation2.getLatitude();
-			double longitude = mLastLocation2.getLongitude();
+		if (mLastLocation != null) {
+			double latitude = mLastLocation.getLatitude();
+			double longitude = mLastLocation.getLongitude();
 			LocationAddress locationAddress = new LocationAddress();
 			endereco = locationAddress.getAddressFromLocation(latitude, longitude,	getApplicationContext());
 		}
@@ -264,13 +238,13 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 		String result = null;
 		String line = "";
 		String id = String.valueOf(generateUniqueId(getApplicationContext()));
-        String title = spinner.getSelectedItem().toString();
-		Entity entity = new Entity();
+        String title = OCCURRENCES[selectedOccurence];
+        Entity entity = new Entity();
 		List<Attributes> attributes = new ArrayList<Attributes>();
 		attributes.add(new Attributes("title", "String", title, null));
 		List<Metadata> metadatas = new ArrayList<Metadata>();
 		metadatas.add(new Metadata("location", "String", "WGS84"));
-		attributes.add(new Attributes("GPSCoord","coords", latitude + ", " + longitude , metadatas));
+		attributes.add(new Attributes("GPSCoord","coords", latLngLast.latitude + ", " + latLngLast.longitude , metadatas));
 		attributes.add(new Attributes("endereco", "String", endereco, null));
 		attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null));
 		attributes.add(new Attributes("userId", "String", "1",null));
@@ -380,13 +354,13 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
     @Override
 	protected void onStop(){
 		super.onStop();
-		mGoogleApiClient2.disconnect();
+		mGoogleApiClient.disconnect();
 
 	}
 	@Override
 	protected void onDestroy(){
 		super.onDestroy();
-		mGoogleApiClient2.disconnect();
+		mGoogleApiClient.disconnect();
 
 	}
 
@@ -405,61 +379,15 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 		return date;
 	}
 
-	//Sets the spinner with the desired occurrences
 
-	public void onRadioButtonClicked(View view) {
-		// Is the button now checked?
-		View v;
-		boolean checked = ((RadioButton) view).isChecked();
-		tr1 = (TableRow) findViewById(R.id.latitude_table_row);
-		tr2 = (TableRow) findViewById(R.id.longitude_table_row);
-		// Check which radio button was clicked
-		switch (view.getId()) {
-			case R.id.my_loc_radio_btn:
-				if (checked) {
-					tr1.setVisibility(View.INVISIBLE);
-					tr2.setVisibility(View.INVISIBLE);
-					v = findViewById(R.id.choose_loc_radio_btn);
-					((RadioButton) v).setChecked(false);
-					isLocalChecked = false;
-					break;
-				}
-			case R.id.choose_loc_radio_btn:
-				if (checked) {
-					tr1.setVisibility(View.VISIBLE);
-					tr2.setVisibility(View.VISIBLE);
-					v = findViewById(R.id.my_loc_radio_btn);
-					((RadioButton) v).setChecked(false);
-					isLocalChecked = true;
-					break;
-				}
-		}
-	}
-
-
-	private void setSpinner() {
-
-		spinner = (Spinner) findViewById(R.id.menu_spinner);
-		spinner.setBackgroundResource(R.drawable.green_spinner_default_holo_light);
-		//spinner.setPopupBackgroundResource(android.R.color.white);
-
-		String[] occurrences = { "Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada",
-				"Situação de imprudência"};
-
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_dropdown_item, occurrences);
-		spinner.setAdapter(adapter);
-	}
-
-
-	private synchronized void callConnection(){
-		Log.i("LOG", "AddressLocationActivity.callConnection()");
-		mGoogleApiClient2 = new GoogleApiClient.Builder(this)
+	private synchronized void callConnection() {
+        Log.i("LOG", "AddressLocationActivity.callConnection()");
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
 				.addOnConnectionFailedListener(this)
 				.addConnectionCallbacks(this)
 				.addApi(LocationServices.API)
 				.build();
-		mGoogleApiClient2.connect();
+		mGoogleApiClient.connect();
 	}
 
 
@@ -468,10 +396,17 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 	public void onConnected(Bundle bundle) {
 		Log.i("LOG", "AddressLocationActivity.onConnected(" + bundle + ")");
 
-		mLastLocation2 = LocationServices
+		mLastLocation = LocationServices
 				.FusedLocationApi
-				.getLastLocation(mGoogleApiClient2);
-	}
+				.getLastLocation(mGoogleApiClient);
+        if(mLastLocation !=null){
+            LatLng currentLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
+        }
+
+        startLocationUpdates();
+
+    }
 
 	@Override
 	public void onConnectionSuspended(int i) {
@@ -511,4 +446,100 @@ public class MapDisplayActivity extends AppCompatActivity implements GoogleApiCl
 
         return bitmap;
     }
+
+
+    // #### Tracking properties
+
+    LocationRequest mLocationRequest;
+    String mLastUpdateTime;
+    Location mCurrentLocation;
+    Polyline polyline;
+                                        //mili * sec * minute
+                                        //1000 * 60 * 1
+    private static final long INTERVAL = 500; // 0,5 seconds
+    private static final long FASTEST_INTERVAL = 250; // 0,25 second
+ //   private GoogleApiClient mGoogleApiClient;
+
+    private void setLocationService() {
+        createLocationRequest();
+    }
+
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if(isStarted) {
+            mCurrentLocation = location;
+            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+            LatLng currentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+
+            //Toast.makeText(getApplicationContext(), currentLatLng.toString(), Toast.LENGTH_LONG).show();
+
+            if (polyline == null) {
+                polyline = googleMap.addPolyline(new PolylineOptions().width(8).color(ContextCompat.getColor(getApplicationContext(), R.color.red_smooth)).geodesic(true));
+            } else { //update polyline
+                List points = polyline.getPoints();
+                points.add(currentLatLng);
+                polyline.setPoints(points);
+            }
+
+            getRunStatus();
+        }else{
+            if(polyline !=null) {
+                polyline.remove();
+                polyline=null;
+            }
+        }
+    }
+
+    public String getRunStatus(){
+        String info ="";
+        List<LatLng> points = new ArrayList<>(polyline.getPoints());
+        Double distance = SphericalUtil.computeLength(points);
+        TextView textView = (TextView) findViewById(R.id.run_status);
+        double currentTime = getTimeInSeconds();
+        textView.setText("c Distance: " + roundUp2(distance)+
+                "\nTime: "+roundUp2((currentTime-startTime))+"s" +
+                "\nVm: "+roundUp2((distance/(double)(currentTime-startTime))*3.6)+"km");
+
+        return info;
+    }
+
+    private double roundUp2(double value){
+        DecimalFormat df = new DecimalFormat("#.##");
+        value = Double.valueOf(df.format(value));
+        return value;
+    }
+
+    private double getTimeInSeconds(){
+        double time = Calendar.getInstance().getTime().getTime();
+        time /=1000;
+        return roundUp2(time);
+    }
+
+    private boolean isGooglePlayServicesAvailable() {
+        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (ConnectionResult.SUCCESS == status) {
+            return true;
+        } else {
+            GooglePlayServicesUtil.getErrorDialog(status, this, 0).show();
+            return false;
+        }
+    }
+
+    protected void startLocationUpdates() {
+        PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient, this);
+    }
+
 }
