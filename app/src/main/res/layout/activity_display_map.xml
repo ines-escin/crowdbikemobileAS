@@ -3,103 +3,67 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:padding="30dp"
     android:background="#fff">
-
-    <Spinner
-        android:id="@+id/menu_spinner"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:spinnerMode="dialog" />
+        android:layout_height="match_parent"
+        android:layout_weight="0.2">
 
-    <RadioButton
-        android:id="@+id/my_loc_radio_btn"
-        android:layout_width="251dp"
-        android:layout_height="wrap_content"
-        android:onClick="onRadioButtonClicked"
-        android:text="Meu Local"
-        android:textColor="@color/preto" />
-
-    <RadioButton
-        android:id="@+id/choose_loc_radio_btn"
-        android:layout_width="253dp"
-        android:layout_height="wrap_content"
-        android:onClick="onRadioButtonClicked"
-        android:text="Escolher local"
-        android:textColor="@color/preto" />
-
-    <TableRow
-        android:id="@+id/latitude_table_row"
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment" />
+    </LinearLayout>
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_marginTop="16dp"
-        android:layout_weight="0.00"
-        android:visibility="invisible" >
-
+        android:background="@color/yellow_smooth"
+        android:alpha="0.7"
+        android:layout_height="wrap_content">
         <TextView
-            android:id="@+id/latitude_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Latitude"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/long_click_tip"
             android:textColor="@color/preto"
-            android:textColorHint="@color/branco" />
+            android:typeface="serif"
+            android:textAlignment="center"
+            android:gravity="center"
+            />
+    </LinearLayout>
 
-        <EditText
-            android:id="@+id/latitude_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:background="@drawable/border_edit_text"
-            android:ems="10"
-            android:inputType="numberDecimal|numberSigned"
-            android:layout_marginTop="-5dp">
-            <requestFocus />
-        </EditText>
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/longitude_table_row"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="16dp"
-        android:layout_weight="0.10"
-        android:visibility="invisible" >
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_weight="0.7">
 
-        <TextView
-            android:id="@+id/longitude_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Longitude"
-            android:textColor="@color/preto"
-            android:textColorHint="@color/branco" />
 
-        <EditText
-            android:id="@+id/longitude_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:background="@drawable/border_edit_text"
-            android:ems="10"
-            android:inputType="numberDecimal|numberSigned" />
-    </TableRow>
+        <Button
+            android:id="@+id/start_button"
+            android:drawableStart="@drawable/ic_flag_white_48dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/start_run"
+            android:textColor="@color/gray_white"
+            android:layout_weight="0.5"/>
 
-    <ImageView
-        android:id="@+id/splash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/logo1" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="0.5">
+            <TextView
+                android:id="@+id/run_status"
+                android:paddingTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="top|center_horizontal"
+                android:text="Foo"/>
 
-    <Button
-        android:id="@+id/send_issue_btn"
-        android:layout_width="223dp"
-        android:layout_height="wrap_content"
-		android:layout_marginLeft="35dp"
-        android:layout_marginTop="20dp"
-		android:text="Enviar"
-        android:textColor="#000" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
 
 </LinearLayout>

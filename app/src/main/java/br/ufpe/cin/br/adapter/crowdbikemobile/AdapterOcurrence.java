@@ -22,7 +22,7 @@ public class AdapterOcurrence {
 	
 	public static final DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"); 
     
-    public static Entity parseEntity(String s) {
+    private static Entity parseEntity(String s) {
     	Entity e = new Entity(); 
     	Gson gson = new Gson();
     	List<Attributes> lAtt = new ArrayList<Attributes>();
@@ -43,6 +43,7 @@ public class AdapterOcurrence {
 		return e;
 
     }
+
     
    
     public static List<Entity> parseListEntity(String s) throws Exception {
@@ -62,5 +63,37 @@ public class AdapterOcurrence {
 		return listEntity;
 
     }
+	public static Ocorrencia toOcurrence(Entity e) throws ParseException {
+		Ocorrencia o = new Ocorrencia();
+		o.setIdOcorrencia(Long.parseLong(e.getId()));
+		for (Attributes att : e.getAttributes()) {
+			switch (att.getName()) {
+				case "title":
+					o.setTitle(att.getValue());
+					break;
+				case "GPSCoord":
+					String[] tokensVal = att.getValue().split(",");
+					o.setLat(tokensVal[0].trim());
+					o.setLng(tokensVal[1].trim());
+					break;
+				case "endereco":
+					o.setEndereco(att.getValue());
+					break;
+				case "dataOcorrencia":
+					Date date = null;
+					date = df.parse(att.getValue());
+					o.setDataOcorrencia(date);
+					break;
+				case "userId":
+					User u = new User();
+					u.setId(Long.parseLong(att.getValue()));
+					o.setUser(u);
+					break;
+			}
+
+		}
+		return o;
+
+	}
 
 }
