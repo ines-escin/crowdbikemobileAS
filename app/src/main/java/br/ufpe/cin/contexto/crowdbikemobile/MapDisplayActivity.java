@@ -8,8 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -18,8 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.example.crowdbikemobile.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -37,11 +33,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
-import com.google.maps.android.SphericalUtil;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -51,11 +46,10 @@ import com.squareup.okhttp.Response;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
@@ -81,9 +75,12 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
 	public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada"};
 	int selectedOccurence;
+    private Marker marker;
+
+    private HashMap<String,String> markers;
 
 
-	@Override
+    @Override
 	protected void onCreate(Bundle icicle) {
 
 		super.onCreate(icicle);
@@ -93,6 +90,8 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         setLocationService();
 //        setStartButton();
         callConnection();
+
+        markers = new HashMap<String,String>();
 
 		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map);
@@ -138,6 +137,19 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         } catch (Exception e) {
             e.printStackTrace();
         }
+        this.googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                // Remove the marker
+               // marker.remove();
+                try {
+                    removeMarker(marker);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
 	protected OnClickListener report = new OnClickListener() {
@@ -193,6 +205,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
     }
 
 
+
 	private String getIMEI(Context context) {
 
 		TelephonyManager mngr = (TelephonyManager) context
@@ -213,9 +226,10 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
 		try {
 			if (endereco != null && !endereco.equals("")) {
-			    String code = postInfo();
-                if(code!=null){ // it means the object was added
-                    this.addMarker(latLngLast, selectedOccurence);
+               Marker marker = this.addMarker(latLngLast, selectedOccurence);
+			    String code = postInfo(marker);
+                if(code == null){ // it means the object was added
+                    marker.remove();
                 }
 			}
 			//backToMainPage(v);
@@ -233,7 +247,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		this.endereco = endereco;
 	}
 
-	public String postInfo() throws JSONException {
+	public String postInfo(Marker marker) throws JSONException {
 		String result = null;
 		String line = "";
 		String id = String.valueOf(generateUniqueId(getApplicationContext()));
@@ -290,15 +304,17 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         for(Ocorrencia occurrence: occurrences){
 
             LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
-            this.addMarker(latLng, occurrence.getOccurenceCode());
-
+            Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
+            markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
         }
 
     }
 
-    public void addMarker(LatLng latLng, int occurenceTypeID){
+    public Marker addMarker(LatLng latLng, int occurenceTypeID){
+
         MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(OCCURRENCES[occurenceTypeID]).icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon(occurenceTypeID)));
-        googleMap.addMarker(markerOptions);
+        markerOptions.snippet("Toque aqui para remover marcador");
+        return googleMap.addMarker(markerOptions);
     }
 
     public List<Ocorrencia> getAllOccurrences() throws Exception {
@@ -563,6 +579,45 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
+    }
+
+
+
+
+
+    public String removeMarker(Marker marker) throws JSONException {
+        String result = null;
+        String line = "";
+        String id =  markers.get(marker.getId());// pegar id do objeto marcador---------------------------------
+
+        Gson gson = new Gson();
+        String uri = "http://148.6.80.19:1026/v1/contextEntities/";
+        uri += id;
+
+        try
+        {
+            OkHttpClient client = new OkHttpClient();
+           // RequestBody body = RequestBody.create(JSON, gson.toJson(entity));
+            Request  request = new Request.Builder().url(uri).delete().build();
+            Response response;
+
+            int executeCount = 0;
+            do
+            {
+                response = client.newCall(request).execute();
+                executeCount++;
+            }
+            while(response.code() == 408 && executeCount < 5);
+            if( response.code()==200){
+               marker.remove(); //remove marcador da tela
+            }
+
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+        return result;
     }
 
 }
