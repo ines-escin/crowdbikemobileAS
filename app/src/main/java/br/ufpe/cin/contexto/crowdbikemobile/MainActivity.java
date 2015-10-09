@@ -123,9 +123,8 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
 
-		super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);

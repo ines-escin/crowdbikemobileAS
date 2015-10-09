@@ -42,7 +42,7 @@
 
         <activity
             android:name="br.ufpe.cin.contexto.crowdbikemobile.MainActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="fullSensor"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
             <intent-filter>
                 <action android:name="MAIN_ACTIVITY" />

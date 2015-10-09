@@ -6,6 +6,6 @@
         <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/mark_danger" />
+            android:src="@drawable/mark_bad_sinalization" />
 
 </RelativeLayout>
