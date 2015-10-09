@@ -14,11 +14,12 @@ public class Ocorrencia {
       private String lat;
       
 	  private String lng;
-	  
 
 	  private Date dataOcorrencia;
 
 	  private User user;
+
+	  private Integer occurrenceCode;
 
 	public Long getIdOcorrencia() {
 		return idOcorrencia;
@@ -75,8 +76,12 @@ public class Ocorrencia {
 	public void setEndereco(String endereco) {
 		this.endereco = endereco;
 	}
-	  
-	  
-	  
 
+	public void setOccurenceCode(Integer occurenceCode) {
+		this.occurrenceCode = occurenceCode;
+	}
+
+	public Integer getOccurenceCode() {
+		return occurrenceCode;
+	}
 }

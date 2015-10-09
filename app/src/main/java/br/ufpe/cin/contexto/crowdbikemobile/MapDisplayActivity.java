@@ -20,7 +20,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.crowdbikemobile.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -80,8 +79,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 	public String endereco;
 
 
-	public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada",
-			"Situação de imprudência"};
+	public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada"};
 	int selectedOccurence;
 
 
@@ -93,7 +91,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		intent = getIntent();
 
         setLocationService();
-        setStartButton();
+//        setStartButton();
         callConnection();
 
 		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -101,30 +99,30 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		mapFragment.getMapAsync(this);
 	}
 
-    public void setStartButton(){
-        Button startButton = (Button) findViewById(R.id.start_button);
-        startButton.setOnClickListener(startButtonListener);
-    }
+//    public void setStartButton(){
+//        Button startButton = (Button) findViewById(R.id.start_button);
+//        startButton.setOnClickListener(startButtonListener);
+//    }
     boolean isStarted = false;
     double stopTime;
     double startTime;
-    public OnClickListener startButtonListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Button startButton = (Button) findViewById(R.id.start_button);
-            double seconds = getTimeInSeconds();
-            if(isStarted){ //then stop and show start button
-                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.green_smooth));
-                startButton.setText(getResources().getText(R.string.start_run));
-                stopTime = seconds;
-            }else{
-                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.red_smooth));
-                startButton.setText(getResources().getText(R.string.stop_run));
-                startTime = seconds;
-            }
-            isStarted = !isStarted;
-        }
-    };
+//    public OnClickListener startButtonListener = new OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            Button startButton = (Button) findViewById(R.id.start_button);
+//            double seconds = getTimeInSeconds();
+//            if(isStarted){ //then stop and show start button
+//                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.green_smooth));
+//                startButton.setText(getResources().getText(R.string.start_run));
+//                stopTime = seconds;
+//            }else{
+//                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.red_smooth));
+//                startButton.setText(getResources().getText(R.string.stop_run));
+//                startTime = seconds;
+//            }
+//            isStarted = !isStarted;
+//        }
+//    };
 
     @Override
 	public void onMapReady(GoogleMap map) {
@@ -151,6 +149,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
 	public void showReportDialog(){
 
+        selectedOccurence = 0;
 		AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
 		// Set the dialog title
 		builder.setTitle("Report an issue")
@@ -158,7 +157,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 				// and the listener through which to receive callbacks when items are selected
 //	    	.setMessage("helper message")
 
-				.setSingleChoiceItems(OCCURRENCES, 0,
+				.setSingleChoiceItems(OCCURRENCES, selectedOccurence,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
@@ -214,9 +213,9 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
 		try {
 			if (endereco != null && !endereco.equals("")) {
-			    String title = postInfo();
-                if(title!=null){ // it means the object was added
-                    this.addMarker(latLngLast, title);
+			    String code = postInfo();
+                if(code!=null){ // it means the object was added
+                    this.addMarker(latLngLast, selectedOccurence);
                 }
 			}
 			//backToMainPage(v);
@@ -248,6 +247,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		attributes.add(new Attributes("endereco", "String", endereco, null));
 		attributes.add(new Attributes("dataOcorrencia", "String",AdapterOcurrence.df.format(Calendar.getInstance().getTime()),null));
 		attributes.add(new Attributes("userId", "String", "1",null));
+        attributes.add(new Attributes("occurrenceCode", "String", selectedOccurence+"",null));
 
 		entity.setType("Ocurrence");
 		entity.setId(id);
@@ -272,7 +272,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 			}
 			while(response.code() == 408 && executeCount < 5);
             if( response.code()==200){
-                result = title;
+                result = selectedOccurence+"";
             }
 
 		}
@@ -290,14 +290,14 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         for(Ocorrencia occurrence: occurrences){
 
             LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
-            this.addMarker(latLng, occurrence.getTitle());
+            this.addMarker(latLng, occurrence.getOccurenceCode());
 
         }
 
     }
 
-    public void addMarker(LatLng latLng, String title){
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(title).icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon()));
+    public void addMarker(LatLng latLng, int occurenceTypeID){
+        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(OCCURRENCES[occurenceTypeID]).icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon(occurenceTypeID)));
         googleMap.addMarker(markerOptions);
     }
 
@@ -418,17 +418,40 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		Log.i("LOG", "AddressLocationActivity.onConnectionFailed(" + connectionResult + ")");
 	}
 
-    public Bitmap getBitmapIcon(){
-        View markerView = getMarkerView();
+    public Bitmap getBitmapIcon(int occurenceTypeID){
+        View markerView = getMarkerView(occurenceTypeID);
         Bitmap markerBmp =  createDrawableFromView(markerView);
         return markerBmp;
     }
 
-    public View getMarkerView(){
+    public View getMarkerView(int occurenceTypeID){
+        //OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada"};
 
-        View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.mark_layout, null);
+        View marker = null;
+        int markerViewTypeID = getMarkViewTypeID(occurenceTypeID);
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(markerViewTypeID, null);
         return marker;
 
+    }
+
+    private int getMarkViewTypeID(int occurenceTypeID){
+        int markerViewTypeID = R.layout.mark_layout;
+
+        switch (occurenceTypeID){
+            case 0:
+                markerViewTypeID = R.layout.accident_spot;
+                break;
+            case 1:
+                markerViewTypeID = R.layout.heavy_traffic;
+                break;
+            case 2:
+                markerViewTypeID = R.layout.bad_sinalization;
+                break;
+            case 3:
+                markerViewTypeID = R.layout.rout_damaged;
+                break;
+        }
+        return markerViewTypeID;
     }
 
     public Bitmap createDrawableFromView(View view) {
@@ -473,42 +496,42 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
     @Override
     public void onLocationChanged(Location location) {
-        if(isStarted) {
-            mCurrentLocation = location;
-            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-            LatLng currentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-
-            //Toast.makeText(getApplicationContext(), currentLatLng.toString(), Toast.LENGTH_LONG).show();
-
-            if (polyline == null) {
-                polyline = googleMap.addPolyline(new PolylineOptions().width(8).color(ContextCompat.getColor(getApplicationContext(), R.color.red_smooth)).geodesic(true));
-            } else { //update polyline
-                List points = polyline.getPoints();
-                points.add(currentLatLng);
-                polyline.setPoints(points);
-            }
-
-            getRunStatus();
-        }else{
-            if(polyline !=null) {
-                polyline.remove();
-                polyline=null;
-            }
-        }
+//        if(isStarted) {
+//            mCurrentLocation = location;
+//            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+//            LatLng currentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+//
+//            //Toast.makeText(getApplicationContext(), currentLatLng.toString(), Toast.LENGTH_LONG).show();
+//
+//            if (polyline == null) {
+//                polyline = googleMap.addPolyline(new PolylineOptions().width(8).color(ContextCompat.getColor(getApplicationContext(), R.color.red_smooth)).geodesic(true));
+//            } else { //update polyline
+//                List points = polyline.getPoints();
+//                points.add(currentLatLng);
+//                polyline.setPoints(points);
+//            }
+//
+//            getRunStatus();
+//        }else{
+//            if(polyline !=null) {
+//                polyline.remove();
+//                polyline=null;
+//            }
+//        }
     }
 
-    public String getRunStatus(){
-        String info ="";
-        List<LatLng> points = new ArrayList<>(polyline.getPoints());
-        Double distance = SphericalUtil.computeLength(points);
-        TextView textView = (TextView) findViewById(R.id.run_status);
-        double currentTime = getTimeInSeconds();
-        textView.setText("c Distance: " + roundUp2(distance)+
-                "\nTime: "+roundUp2((currentTime-startTime))+"s" +
-                "\nVm: "+roundUp2((distance/(double)(currentTime-startTime))*3.6)+"km");
-
-        return info;
-    }
+//    public String getRunStatus(){
+//        String info ="";
+//        List<LatLng> points = new ArrayList<>(polyline.getPoints());
+//        Double distance = SphericalUtil.computeLength(points);
+//        TextView textView = (TextView) findViewById(R.id.run_status);
+//        double currentTime = getTimeInSeconds();
+//        textView.setText("c Distance: " + roundUp2(distance)+
+//                "\nTime: "+roundUp2((currentTime-startTime))+"s" +
+//                "\nVm: "+roundUp2((distance/(double)(currentTime-startTime))*3.6)+"km");
+//
+//        return info;
+//    }
 
     private double roundUp2(double value){
         DecimalFormat df = new DecimalFormat("#.##");
@@ -518,7 +541,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
     private double getTimeInSeconds(){
         double time = Calendar.getInstance().getTime().getTime();
-        time /=1000;
+        time /= 1000;
         return roundUp2(time);
     }
 

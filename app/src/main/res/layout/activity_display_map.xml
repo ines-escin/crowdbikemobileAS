@@ -4,16 +4,19 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:background="#fff">
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_weight="0.2" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="0.2">
 
-        <fragment
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +26,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/long_click_tip"
+            android:text="@string/long_press_tip"
             android:textColor="@color/preto"
             android:typeface="serif"
             android:textAlignment="center"
@@ -31,39 +34,40 @@
             />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:layout_weight="0.7">
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_weight="0.7">-->
 
 
-        <Button
-            android:id="@+id/start_button"
-            android:drawableStart="@drawable/ic_flag_white_48dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/start_run"
-            android:textColor="@color/gray_white"
-            android:layout_weight="0.5"/>
+        <!--<Button-->
+            <!--android:id="@+id/start_button"-->
+            <!--android:drawableStart="@drawable/ic_flag_white_48dp"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:text="@string/start_run"-->
+            <!--android:textColor="@color/gray_white"-->
+            <!--android:layout_weight="0.5"/>-->
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:layout_weight="0.5">
-            <TextView
-                android:id="@+id/run_status"
-                android:paddingTop="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="top|center_horizontal"
-                android:text="Foo"/>
+        <!--<LinearLayout-->
+            <!--android:visibility="invisible"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_weight="0.5">-->
+            <!--<TextView-->
+                <!--android:id="@+id/run_status"-->
+                <!--android:paddingTop="10dp"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:gravity="top|center_horizontal"-->
+                <!--android:text="Foo"/>-->
 
-        </LinearLayout>
+        <!--</LinearLayout>-->
 
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
 
 </LinearLayout>

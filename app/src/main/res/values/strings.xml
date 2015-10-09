@@ -18,6 +18,6 @@
 
     <string name="start_run">Start run</string>
     <string name="stop_run">Stop run</string>
-    <string name="long_click_tip">Long click for reporting</string>
+    <string name="long_press_tip">Long press for reporting</string>
 
 </resources>
