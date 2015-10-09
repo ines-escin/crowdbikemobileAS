@@ -119,7 +119,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 	private String registered = "";
 	private GoogleApiClient mGoogleApiClient;
 	private LocationRequest mLocationRequest;
-
+    private boolean threadsAlive = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -232,7 +232,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 		if(mGoogleApiClient != null){
 			stopLocationUpdate();
 		}
-
+		threadsAlive = false;
 	}
 
 	@Override
@@ -247,12 +247,13 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 	@Override
 	protected void onStop(){
 		super.onStop();
-
+		threadsAlive = false;
 	}
 
 	@Override
 	protected void onStart(){
 		super.onStart();
+		threadsAlive = true;
 	}
 
 	@Override
@@ -282,6 +283,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
 
 	private void startGenerating() {
+		threadsAlive = true;
 		randomWork = new DoSomethingThread();
 		randomWork.start();
 	}
@@ -419,10 +421,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 					if ((Double.parseDouble(distance) <= 100.0)) {
 						if (first) {
 							anterior = atual;
-							notificacaoVoz(title,distance);
+							if(threadsAlive) {
+								notificacaoVoz(title, distance);
+							}
 							first = false;
 						} else if (atual - anterior > 30000000000.0f) {
-							notificacaoVoz(title,distance);
+							if(threadsAlive) {
+								notificacaoVoz(title, distance);
+							}
 							anterior = atual;
 						}
 					}
@@ -437,7 +443,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 	}
 
     private void notificacaoVoz(String title, String distance){
-        String mensagem = "Alerta: "+title + String.format("%.1f", Double.parseDouble(distance))
+        String mensagem = "Alerta: "+title + ((int)Double.parseDouble(distance))
                 + "metros";
         //definir scopo de quando mandar a mensagem de voz, como identificar quando mandar.
         TTS.setPitch(1); // Afina??o da Voz
@@ -508,10 +514,10 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 			// Exibindo a temperatura
 			txtTemp.setText(temperatura.toString());
 
-			// Exibindo ?C
+			// Exibindo ˚C
 			txtUom.setText("˚C");
 
-			// Exibindo a descri??o
+			// Exibindo a descricao
 			txtDesc.setText(tempoLocal.getDescricao());
 		}
 	}

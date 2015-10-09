@@ -89,6 +89,8 @@ public class AdapterOcurrence {
 					u.setId(Long.parseLong(att.getValue()));
 					o.setUser(u);
 					break;
+				case "occurrenceCode":
+					o.setOccurenceCode((int)Long.parseLong(att.getValue()));
 			}
 
 		}
