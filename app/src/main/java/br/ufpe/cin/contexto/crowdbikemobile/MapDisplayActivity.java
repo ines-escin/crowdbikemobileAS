@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -85,9 +86,12 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
 	@Override
 	protected void onCreate(Bundle icicle) {
-
 		super.onCreate(icicle);
 		setContentView(R.layout.activity_display_map);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
 		intent = getIntent();
 
         setLocationService();

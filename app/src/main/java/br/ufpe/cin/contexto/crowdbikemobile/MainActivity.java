@@ -7,23 +7,33 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +43,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -51,16 +66,17 @@ import java.util.List;
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
+import br.ufpe.cin.br.adapter.crowdbikemobile.Ocorrencia;
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
 import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
 import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 
 
 @SuppressLint("NewApi")
-public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener,
-		LocationListener {
-
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
+        LocationListener {
+    private GoogleMap googleMap;
 	private Point p;
 	private String latitudeString = "";
 	private String longitudeString = "";
@@ -123,10 +139,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.activity_main);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
 		IMEI = getIMEI(this);
 
@@ -172,7 +192,41 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
 	}
 
-	@Override
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.view_map_action:
+                displayMapActivity();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        // Add a marker in Sydney, Australia, and move the camera.
+        this.googleMap = map;
+
+        //this.googleMap.setOnMapLongClickListener(this);
+        this.googleMap.setMyLocationEnabled(true);
+        this.googleMap.setBuildingsEnabled(true);
+        this.googleMap.getUiSettings().setZoomControlsEnabled(true);
+
+    }
+
+
+    @Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 
 		int[] location = new int[2];
@@ -265,18 +319,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
 	public void setarCorDeFundo(int intColor) {
 		setBgColor(intColor);
-
+		//int color = R.color.yellow_smooth;
 		String stringColor = getResources().getString(intColor);
-		LinearLayout layoutApp = (LinearLayout) findViewById(R.id.backgroundApp);
-        layoutApp.setBackgroundColor(Color.parseColor(stringColor));
+		CardView cardView = (CardView) findViewById(R.id.cv);
+		cardView.setCardBackgroundColor(Color.parseColor(stringColor));
 	}
 
-	public void displayMapActivity(View v){
+	public void displayMapActivity(){
 		Intent intent = new Intent(this, MapDisplayActivity.class);
-		ArrayList<String> coordinates = new ArrayList<String>();
-		coordinates.add(latitudeString);
-		coordinates.add(longitudeString);
-		intent.putExtra("COORDINATES", coordinates);
 		startActivity(intent);
 	}
 
@@ -409,12 +459,12 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 		String noValues = "{\"errorCode\":{\"code\":\"404\",\"reasonPhrase\":\"No context element found\"}}";
 		if (!retorno.equals(noValues) && !retorno.equals("")) {
 			String distance = getDistanceLocation(retorno);
-			String title = getTipoOcorrencia(retorno);
+            Ocorrencia occ = getTipoOcorrencia(retorno);
+			String title = occ.getTitle();
 			if (distance != null && Double.valueOf(distance) <= 100) {
-				txtMensagem.setText("Alerta: "
-						+ String.format("%.1f", Double.parseDouble(distance))
-						+ "m");
-				setarCorDeFundo(R.color.vermelho);
+
+                setOccurenceCard(occ, distance);
+
 				if (doVoiceAlert) {
 					atual = System.nanoTime();
 					if ((Double.parseDouble(distance) <= 100.0)) {
@@ -440,6 +490,68 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 		}
 
 	}
+
+    private void setOccurenceCard(Ocorrencia occ, String distance) {
+
+        int occurenceTypeID = occ.getOccurenceCode();
+
+        setarCorDeFundo(getOcurrenceColor(occurenceTypeID));
+
+        ImageView iconWeather = (ImageView) findViewById(R.id.alert_img);
+        iconWeather.setImageResource(getMarkViewTypeID(occurenceTypeID));
+
+        TextView textView = (TextView) findViewById(R.id.txtMensagem);
+        textView.setText(occ.getTitle()+": "+ (int)Double.parseDouble(distance)+"m");
+        if(getOcurrenceColor(occurenceTypeID)==R.color.red_smooth){
+
+            textView.setTextColor(ContextCompat.getColor(this, R.color.gray_white));
+
+            TextView alertDetailsView = (TextView) findViewById(R.id.alert_details);
+            alertDetailsView.setTextColor(ContextCompat.getColor(this, R.color.branco));
+        }
+//        v.height = h;
+//        v.width = w;
+//        iconWeather.setLayoutParams(v);
+    }
+    private int getOcurrenceColor(int occurenceTypeID){
+        int markColor = R.color.branco;
+
+        switch (occurenceTypeID){
+            case 0:
+                markColor = R.color.red_smooth;
+                break;
+            case 1:
+                markColor = R.color.yellow_smooth;
+                break;
+            case 2:
+                markColor = R.color.yellow_smooth;
+                break;
+            case 3:
+                markColor = R.color.yellow_smooth;
+                break;
+        }
+        return markColor;
+    }
+
+    private int getMarkViewTypeID(int occurenceTypeID){
+        int markerViewTypeID = R.layout.mark_layout;
+
+        switch (occurenceTypeID){
+            case 0:
+                markerViewTypeID = R.drawable.mark_accident_spot;
+                break;
+            case 1:
+                markerViewTypeID = R.drawable.mark_heavy_traffic;
+                break;
+            case 2:
+                markerViewTypeID = R.drawable.mark_bad_sinalization;
+                break;
+            case 3:
+                markerViewTypeID = R.drawable.mark_rout_damaged;
+                break;
+        }
+        return markerViewTypeID;
+    }
 
     private void notificacaoVoz(String title, String distance){
         String mensagem = "Alerta: "+title + ((int)Double.parseDouble(distance))
@@ -478,19 +590,15 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 		return String.valueOf(minDistance);
 	}
 
-	public String getTipoOcorrencia(String result) throws Exception {
+	public Ocorrencia getTipoOcorrencia(String result) throws Exception {
 		List<Entity> listEntity = AdapterOcurrence.parseListEntity(result);
 		boolean isFirst = true;
+        Ocorrencia occ = new Ocorrencia();
 		String title = "";
 		for (Entity entity : listEntity) {
-			for (Attributes att : entity.getAttributes()) {
-				if (att.getName().equalsIgnoreCase("title")) {
-					String[] tokensVal = att.getValue().split(",");
-					title = String.valueOf(tokensVal[0].trim());
-				}
-			}
+            occ = AdapterOcurrence.toOcurrence(entity);
 		}
-		return title;
+		return occ;
 	}
 
 
@@ -501,23 +609,23 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 			ImageView iconWeather = (ImageView) findViewById(R.id.iconWeather);
 			TextView txtTemp = (TextView) findViewById(R.id.temperatura);
 			TextView txtDesc = (TextView) findViewById(R.id.previsao);
-			TextView txtUom = (TextView) findViewById(R.id.txt_uom_temp);
+//			TextView txtUom = (TextView) findViewById(R.id.txt_uom_temp);
 
 			Integer temperatura = Double.valueOf(tempoLocal.getTemperatura())
 					.intValue();
 
 			// Exibindo o ?cone
-			iconWeather.setBackgroundDrawable(getResources().getDrawable(
-					tempoLocal.getIcone()));
+			iconWeather.setImageResource(
+                    tempoLocal.getIcone());
 
 			// Exibindo a temperatura
-			txtTemp.setText(temperatura.toString());
+			txtTemp.setText(temperatura.toString()+"\u2103");
 
 			// Exibindo ˚C
-			txtUom.setText("˚C");
+			//txtUom.setText("˚C");
 
 			// Exibindo a descricao
-			txtDesc.setText(tempoLocal.getDescricao());
+			txtDesc.setText(tempoLocal.getDescricao().trim());
 		}
 	}
 
@@ -539,7 +647,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 			if (resultCode == Activity.RESULT_OK) {
 				Toast.makeText(getApplicationContext(), "Retorno",
 						Toast.LENGTH_LONG).show();
-				setarCorDeFundo(R.color.vermelho);
+				setarCorDeFundo(R.color.red_smooth);
 			}
 		}
 	}
@@ -729,9 +837,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 	public void onConnected(Bundle bundle) {
 		Log.i("LOG", "UpdateLocationActivity.onConnected(" + bundle + ")");
 
-		Location l = LocationServices
+		Location mLastLocation = LocationServices
 				.FusedLocationApi
 				.getLastLocation(mGoogleApiClient); // PARA JÁ TER UMA COORDENADA PARA O UPDATE FEATURE UTILIZAR
+
+        if(mLastLocation !=null){
+            LatLng currentLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
+        }
 
 		startLocationUpdate();
 	}

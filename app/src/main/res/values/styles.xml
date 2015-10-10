@@ -1,10 +1,11 @@
  <resources>
 
      <style name="AppTheme" parent="Theme.AppCompat.Light">
-         <item name="colorPrimary">@color/teal</item>
-         <item name="colorPrimaryDark">@color/teal_dark</item>
+         <item name="colorPrimary">@color/branco</item>
+         <item name="colorPrimaryDark">@color/preto</item>
          <item name="colorAccent">@color/teal_accent</item>
-         <item name="colorButtonNormal">@color/green_smooth</item>
+
+         <!--<item name="colorButtonNormal">@color/green_smooth</item>-->
      </style>
     
     
