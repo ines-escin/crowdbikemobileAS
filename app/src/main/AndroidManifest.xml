@@ -42,8 +42,7 @@
 
         <activity
             android:name="br.ufpe.cin.contexto.crowdbikemobile.MainActivity"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="MAIN_ACTIVITY" />
 
@@ -61,7 +60,11 @@
         </activity>
         <activity
             android:name="br.ufpe.cin.contexto.crowdbikemobile.MapDisplayActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:parentActivityName="br.ufpe.cin.contexto.crowdbikemobile.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="br.ufpe.cin.contexto.crowdbikemobile.MainActivity"/>
         </activity>
         <activity
             android:name="br.ufpe.cin.contexto.crowdbikemobile.SplashScreenActivity"
