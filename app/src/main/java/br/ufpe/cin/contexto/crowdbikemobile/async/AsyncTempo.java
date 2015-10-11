@@ -59,7 +59,9 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 		 * Aqui est� o endere�o do servi�o de tempo
 		 * 
 		 */
-		String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude+"&APPID=cdef8f1ee6fe0e253ca55193ace6349a";
+		String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude+
+				"&APPID=cdef8f1ee6fe0e253ca55193ace6349a"+
+				"&lang=pt";
 		
 		int responseCode = 0;
 		

@@ -14,6 +14,8 @@
     <color name="red_smooth">#c83737</color>
     <color name="yellow_smooth">#ffc107</color>
     <color name="green_smooth">#077375</color>
-    <color name="gray_white">#eee</color>
+    <color name="gray_1">#eee</color>
+    <color name="gray_9">#888</color>
+    <color name="gray_11">#666</color>
 
 </resources>
