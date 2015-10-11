@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,7 +14,6 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.telephony.TelephonyManager;
@@ -26,16 +24,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.example.crowdbikemobile.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -55,13 +52,14 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
@@ -77,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
         LocationListener {
     private GoogleMap googleMap;
-	private Point p;
 	private String latitudeString = "";
 	private String longitudeString = "";
 	private Tempo tempoLocal = new Tempo();
@@ -156,16 +153,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			}
 		});
 
-		Button btn_show = (Button) findViewById(R.id.btn_pop_up);
-		btn_show.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				//Open popup window
-				if (p != null)
-					pop_upMenu(MainActivity.this, p);
-			}
-		});
-
+        setToggleVoiceAlert();
 		txtResultado = (TextView) findViewById(R.id.txtResultado);
 
 		// Setando a cor de fundo. Padrao: branco
@@ -226,58 +214,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-    @Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-
-		int[] location = new int[2];
-		Button button = (Button) findViewById(R.id.btn_pop_up);
-
-		// Get the x, y location and store it in the location[] array
-		// location[0] = x, location[1] = y.
-		button.getLocationOnScreen(location);
-
-		//Initialize the Point with x, and y positions
-		p = new Point();
-		p.x = location[0];
-		p.y = location[1];
-	}
-
-	public void pop_upMenu(final Activity context, Point p){
-		int popupWidth = 300;
-		int popupHeight = 280;
-
-		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.pop_up);
-		LayoutInflater layoutInflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View layout = layoutInflater.inflate(R.layout.pop_up, viewGroup);
-		CheckBox voice_control = (CheckBox) layout.findViewById(R.id.VoiceAlert);
-		voice_control.setChecked(doVoiceAlert);
-		voice_control.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton group, boolean isChecked) {
-				doVoiceAlert = isChecked;
-			}
-		});
-
-		// Creating the PopupWindow
-		final PopupWindow popup = new PopupWindow(context);
-		popup.setContentView(layout);
-		popup.setWidth(popupWidth);
-		popup.setHeight(popupHeight);
-		popup.setFocusable(true);
-
-		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-		int OFFSET_X = -20;
-		int OFFSET_Y = 290;
-
-		// Clear the default translucent background
-		popup.setBackgroundDrawable(new BitmapDrawable());
-
-		// Displaying the popup at the specified location, + offsets.
-		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y - OFFSET_Y);
-
-	}
 
 	@Override
 	protected void onPause() {
@@ -485,8 +421,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			}
 			Log.v("DIST", distance);
 		} else {
-			txtMensagem.setText("");
+			txtMensagem.setText("Nenhum alerta");
+            TextView textAlertDetailsView = (TextView) findViewById(R.id.alert_details);
+            textAlertDetailsView.setText("");
+            ImageView iconWeather = (ImageView) findViewById(R.id.alert_img);
+            iconWeather.setImageResource(R.drawable.no_alert);
 			setarCorDeFundo(R.color.branco);
+			setOccurenceCardTextColor(R.color.branco);
 		}
 
 	}
@@ -494,25 +435,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void setOccurenceCard(Ocorrencia occ, String distance) {
 
         int occurenceTypeID = occ.getOccurenceCode();
+		int occurenceColor = getOcurrenceColor(occurenceTypeID);
 
-        setarCorDeFundo(getOcurrenceColor(occurenceTypeID));
+        setarCorDeFundo(occurenceColor);
 
         ImageView iconWeather = (ImageView) findViewById(R.id.alert_img);
         iconWeather.setImageResource(getMarkViewTypeID(occurenceTypeID));
 
-        TextView textView = (TextView) findViewById(R.id.txtMensagem);
-        textView.setText(occ.getTitle()+": "+ (int)Double.parseDouble(distance)+"m");
-        if(getOcurrenceColor(occurenceTypeID)==R.color.red_smooth){
+        TextView textMessageView = (TextView) findViewById(R.id.txtMensagem);
+        textMessageView.setText(occ.getTitle() + ": " + (int) Double.parseDouble(distance) + "m");
 
-            textView.setTextColor(ContextCompat.getColor(this, R.color.gray_white));
+        TextView textAlertDetailsView = (TextView) findViewById(R.id.alert_details);
+        textAlertDetailsView.setText("Mantenha-se atento");
 
-            TextView alertDetailsView = (TextView) findViewById(R.id.alert_details);
-            alertDetailsView.setTextColor(ContextCompat.getColor(this, R.color.branco));
-        }
-//        v.height = h;
-//        v.width = w;
-//        iconWeather.setLayoutParams(v);
+		setOccurenceCardTextColor(occurenceColor);
+
     }
+
+	private void setOccurenceCardTextColor(int color){
+
+		TextView textMessageView = (TextView) findViewById(R.id.txtMensagem);
+		TextView alertDetailsView = (TextView) findViewById(R.id.alert_details);
+
+		if(color==R.color.branco){
+			textMessageView.setTextColor(ContextCompat.getColor(this, R.color.gray_11));
+			alertDetailsView.setTextColor(ContextCompat.getColor(this, R.color.gray_9));
+		}else{
+			textMessageView.setTextColor(ContextCompat.getColor(this, R.color.branco));
+			alertDetailsView.setTextColor(ContextCompat.getColor(this, R.color.gray_1));
+		}
+
+	}
     private int getOcurrenceColor(int occurenceTypeID){
         int markColor = R.color.branco;
 
@@ -559,6 +512,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //definir scopo de quando mandar a mensagem de voz, como identificar quando mandar.
         TTS.setPitch(1); // Afina??o da Voz
         TTS.setSpeechRate(1);//Velocidade da Voz
+        TTS.setLanguage(new Locale("pt", "BR"));
         TTS.speak(mensagem, TextToSpeech.QUEUE_FLUSH, null);
     }
 
@@ -625,7 +579,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			//txtUom.setText("˚C");
 
 			// Exibindo a descricao
-			txtDesc.setText(tempoLocal.getDescricao().trim());
+			txtDesc.setText(StringUtils.capitalize(tempoLocal.getDescricao().trim()));
 		}
 	}
 
@@ -828,7 +782,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 	private void stopLocationUpdate(){
-		LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,  this);
+		LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 	}
 
 
@@ -909,7 +863,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	}
 
-
+    private void setToggleVoiceAlert(){
+        ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_voice);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                doVoiceAlert = isChecked;
+            }
+        });
+    }
 
 
 }

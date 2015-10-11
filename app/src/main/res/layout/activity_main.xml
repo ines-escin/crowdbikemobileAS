@@ -6,7 +6,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="@color/gray_white"
+    android:background="@color/gray_1"
     android:padding="16dp">
 
     <LinearLayout
@@ -43,7 +43,7 @@
                     android:layout_toRightOf="@+id/alert_img"
                     android:layout_alignParentTop="true"
                     android:textSize="20dp"
-                    android:textColor="#666"
+
                     />
 
                 <TextView
@@ -52,16 +52,18 @@
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@+id/alert_img"
                     android:layout_below="@+id/txtMensagem"
-                    android:text="Mantenha-se atento"
+                    android:textColor="@color/gray_1"
                     />
-                <Button
+                <ToggleButton
+                    android:id="@+id/toggle_voice"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:id="@+id/btn_pop_up"
-                    android:onClick="pop_upMenu"
+                    android:background="@drawable/toggle_voice_alert_sound"
                     android:layout_alignParentRight="true"
                     android:layout_alignBottom="@id/alert_img"
-                    android:background="@drawable/ic_volume_up_black_48dp" />
+                    android:text=""
+                    android:textOff=""
+                    android:textOn=""/>
             </RelativeLayout>
 
         </android.support.v7.widget.CardView>
@@ -94,12 +96,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:layout_marginRight="16dp"
                     >
                     <ImageView
                         android:id="@+id/iconWeather"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/icon01d"
                         android:layout_gravity="center"/>
                     <TextView
                         android:id="@+id/temperatura"
@@ -120,8 +122,8 @@
                         android:id="@+id/previsao"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="22sp"
-                        android:textColor="#666" />
+                        android:textSize="20dp"
+                        android:textColor="@color/gray_11" />
                         <!--android:text="overcast clouds"-->
                 </LinearLayout>
             </RelativeLayout>
