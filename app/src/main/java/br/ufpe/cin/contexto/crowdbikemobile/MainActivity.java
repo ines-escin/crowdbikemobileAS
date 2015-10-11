@@ -4,9 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,19 +17,16 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -44,7 +41,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
@@ -56,8 +56,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -74,8 +77,12 @@ import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
 		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
         LocationListener {
+    public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização ruim", "Via danificada"};
     private GoogleMap googleMap;
-	private String latitudeString = "";
+    private HashMap<String,String> markers;
+
+
+    private String latitudeString = "";
 	private String longitudeString = "";
 	private Tempo tempoLocal = new Tempo();
 	private int bgColor = 0;
@@ -142,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        markers = new HashMap<String,String>();
 
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
 		IMEI = getIMEI(this);
@@ -210,6 +217,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         this.googleMap.setMyLocationEnabled(true);
         this.googleMap.setBuildingsEnabled(true);
         this.googleMap.getUiSettings().setZoomControlsEnabled(true);
+
+        try {
+            showAllMarkers();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -440,7 +453,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setarCorDeFundo(occurenceColor);
 
         ImageView iconWeather = (ImageView) findViewById(R.id.alert_img);
-        iconWeather.setImageResource(getMarkViewTypeID(occurenceTypeID));
+        iconWeather.setImageResource(getImageViewTypeID(occurenceTypeID));
 
         TextView textMessageView = (TextView) findViewById(R.id.txtMensagem);
         textMessageView.setText(occ.getTitle() + ": " + (int) Double.parseDouble(distance) + "m");
@@ -486,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return markColor;
     }
 
-    private int getMarkViewTypeID(int occurenceTypeID){
+    private int getImageViewTypeID(int occurenceTypeID){
         int markerViewTypeID = R.layout.mark_layout;
 
         switch (occurenceTypeID){
@@ -872,5 +885,124 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
     }
 
+
+    public void showAllMarkers() throws Exception {
+
+        List<Ocorrencia> occurrences = getAllOccurrences();
+
+        for(Ocorrencia occurrence: occurrences){
+
+            LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
+            Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
+            markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
+        }
+
+    }
+
+    public List<Ocorrencia> getAllOccurrences() throws Exception {
+
+        ////////////////
+        String result = "";
+        String line = "";
+        Gson gson = new Gson();
+
+
+        String uri = "http://148.6.80.19:1026/v1/queryContext";
+        String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}]}";
+        OkHttpClient client = new OkHttpClient();
+        try
+        {
+            RequestBody body = RequestBody.create(JSON, getAll);
+            Request request = new Request.Builder()
+                    .url(uri)
+                    .post(body)
+                    .addHeader("Accept","application/json")
+                    .build();
+
+            int executeCount = 0;
+            Response response;
+
+            do
+            {
+                response = client.newCall(request).execute();
+                executeCount++;
+            }
+            while(response.code() == 408 && executeCount < 5);
+
+            result = response.body().string();
+
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+        /////////////////////////////////////////
+
+        List<Entity> contextElement = AdapterOcurrence.parseListEntity(result);
+        List<Ocorrencia> ocurrences = new ArrayList<Ocorrencia>();
+        for (Entity entity : contextElement) {
+            ocurrences.add(AdapterOcurrence.toOcurrence(entity));
+        }
+
+        // TODO Auto-generated method stub
+        return ocurrences;
+    }
+    public Marker addMarker(LatLng latLng, int occurenceTypeID){
+
+        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(OCCURRENCES[occurenceTypeID]).icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon(occurenceTypeID)));
+        return googleMap.addMarker(markerOptions);
+    }
+
+    public Bitmap getBitmapIcon(int occurenceTypeID){
+        View markerView = getMarkerView(occurenceTypeID);
+        Bitmap markerBmp =  createDrawableFromView(markerView);
+        return markerBmp;
+    }
+
+    public View getMarkerView(int occurenceTypeID){
+        //OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada"};
+
+        View marker = null;
+        int markerViewTypeID = getMarkViewTypeID(occurenceTypeID);
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(markerViewTypeID, null);
+        return marker;
+
+    }
+
+    public Bitmap createDrawableFromView(View view) {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        this.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
+    private int getMarkViewTypeID(int occurenceTypeID){
+        int markerViewTypeID = R.layout.mark_layout;
+
+        switch (occurenceTypeID){
+            case 0:
+                markerViewTypeID = R.layout.accident_spot;
+                break;
+            case 1:
+                markerViewTypeID = R.layout.heavy_traffic;
+                break;
+            case 2:
+                markerViewTypeID = R.layout.bad_sinalization;
+                break;
+            case 3:
+                markerViewTypeID = R.layout.rout_damaged;
+                break;
+        }
+        return markerViewTypeID;
+    }
 
 }

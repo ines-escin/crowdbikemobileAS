@@ -82,7 +82,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 	public String endereco;
 
 
-	public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada"};
+	public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização ruim", "Via danificada"};
 	int selectedOccurence;
     private Marker marker;
 
