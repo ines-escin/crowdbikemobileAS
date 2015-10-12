@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	private String registered = "";
 	private GoogleApiClient mGoogleApiClient;
 	private LocationRequest mLocationRequest;
-    private boolean threadsAlive = false;
+    public boolean threadsAlive = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -199,6 +199,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
+		threadsAlive = false;
+		if(mGoogleApiClient != null){
+			stopLocationUpdate();
+		}
         switch (item.getItemId()) {
             case R.id.view_map_action:
                 displayMapActivity();
@@ -231,10 +235,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if(mGoogleApiClient != null){
-			stopLocationUpdate();
-		}
-		threadsAlive = false;
 	}
 
 	@Override
@@ -249,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	@Override
 	protected void onStop(){
 		super.onStop();
-		threadsAlive = false;
 	}
 
 	@Override
@@ -333,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			String uri = "http://148.6.80.19:1026/v1/queryContext";
             String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}],\"restriction\": " +
                     "{\"scopes\": [{\"type\" : \"FIWARE::Location\",\"value\" : {\"circle\": {\"centerLatitude\": \"" +
-                    latitudeString +"\",\"centerLongitude\": \"" +longitudeString +"\",\"radius\": \"100\"}}}]}}";
+                    latitudeString +"\",\"centerLongitude\": \"" +longitudeString +"\",\"radius\": \"30\"}}}]}}";
 			OkHttpClient client = new OkHttpClient();
 			RequestBody body = RequestBody.create(JSON, getAll);
             Request request = new Request.Builder()
@@ -410,13 +409,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			String distance = getDistanceLocation(retorno);
             Ocorrencia occ = getTipoOcorrencia(retorno);
 			String title = occ.getTitle();
-			if (distance != null && Double.valueOf(distance) <= 100) {
+			if (distance != null && Double.valueOf(distance) <= 30) {
 
                 setOccurenceCard(occ, distance);
 
 				if (doVoiceAlert) {
 					atual = System.nanoTime();
-					if ((Double.parseDouble(distance) <= 100.0)) {
+					if ((Double.parseDouble(distance) <= 30.0)) {
 						if (first) {
 							anterior = atual;
 							if(threadsAlive) {
