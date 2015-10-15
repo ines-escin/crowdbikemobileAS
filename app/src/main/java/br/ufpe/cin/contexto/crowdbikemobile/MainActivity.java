@@ -235,14 +235,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	@Override
 	protected void onPause() {
 		super.onPause();
+		mGoogleApiClient.disconnect();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mGoogleApiClient.connect();
 		if(mGoogleApiClient !=null && mGoogleApiClient.isConnected()){
 			startLocationUpdate();
 		}
+		firstForecast = true;
 	}
 
 
@@ -384,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 tempo.execute(latitudeString, longitudeString);
                 try {
                     Tempo respostaTempo = tempo.get();
-                    if(respostaTempo != null)
+                    if(respostaTempo.getDescricao() != null && respostaTempo.getTemperatura() != null)
                     {
                         findFirst = true;
                     }
