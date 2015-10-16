@@ -146,11 +146,8 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
             public void onInfoWindowClick(Marker marker) {
                 // Remove the marker
                // marker.remove();
-                try {
-                    removeMarker(marker);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                    showConfirmDialog(marker);
+
             }
         });
 
@@ -166,39 +163,68 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 	public void showReportDialog(){
 
         selectedOccurence = 0;
-		AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
-		// Set the dialog title
-		builder.setTitle("Report an issue")
-				// Specify the list array, the items to be selected by default (null for none),
-				// and the listener through which to receive callbacks when items are selected
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
+        // Set the dialog title
+        builder.setTitle("Reportar um problema")
+                // Specify the list array, the items to be selected by default (null for none),
+                // and the listener through which to receive callbacks when items are selected
 //	    	.setMessage("helper message")
 
-				.setSingleChoiceItems(OCCURRENCES, selectedOccurence,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								selectedOccurence = which;
+                .setSingleChoiceItems(OCCURRENCES, selectedOccurence,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                selectedOccurence = which;
                                 //Toast.makeText(getApplicationContext(), OCCURRENCES[selectedOccurence], Toast.LENGTH_LONG).show();
 
                             }
-						})
-						// Set the action buttons
-				.setPositiveButton("Send report", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
+                        })
+                        // Set the action buttons
+                .setPositiveButton("Enviar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
 
-						sendInformation();
-					}
-				})
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        sendInformation();
+                    }
+                })
+                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                     }
                 })
-		;
+        ;
 
-		builder.create().show();
-	}
+        builder.create().show();
+    }
+
+
+    public void showConfirmDialog(final Marker marker){
+
+        selectedOccurence = 0;
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
+        // Set the dialog title
+        builder.setTitle("Deseja remover?")
+                // Specify the list array, the items to be selected by default (null for none),
+                // and the listener through which to receive callbacks when items are selected
+            .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    try {
+                        removeMarker(marker);
+                    } catch (Exception e){
+
+                    }
+                }
+            })
+            .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                }
+            })
+        ;
+
+        builder.create().show();
+    }
 
 
     LatLng latLngLast;

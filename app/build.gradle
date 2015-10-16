@@ -61,7 +61,7 @@ android {
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion 23
-        applicationId "com.example.crowdbikemobile"
+        applicationId "br.ufpe.cin.contexto.crowdbikemobile"
 
         testApplicationId "com.example.crowdbikemobile.test"
         //testInstrumentationRunner "android.test.InstrumentationTestRunner"

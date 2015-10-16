@@ -18,7 +18,7 @@
 
     <string name="start_run">Start run</string>
     <string name="stop_run">Stop run</string>
-    <string name="long_press_tip">Long press for reporting</string>
+    <string name="long_press_tip">Pressione no mapa para reportar</string>
     <string name="map_action">View map</string>
 
 </resources>

@@ -17,15 +17,15 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:background="@color/yellow_smooth"
-        android:alpha="0.6"
+        android:background="@color/red_smooth"
+        android:alpha="0.8"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/long_press_tip"
-            android:textColor="@color/preto"
+            android:textColor="@color/branco"
             android:typeface="serif"
             android:textAlignment="center"
             android:gravity="center"
