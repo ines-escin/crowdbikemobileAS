@@ -1,5 +1,5 @@
-import br.ufpe.cin.contexto.crowdbikemobile.MapDisplayActivity
-import br.ufpe.cin.contexto.crowdbikemobile.RegisterActivity
+import br.ufpe.cin.contexto.bikecidadao.MapDisplayActivity
+import br.ufpe.cin.contexto.bikecidadao.RegisterActivity
 import br.ufpe.cin.crowdbike.specs.AuxiliarTestClasses.ServerResponse
 import com.squareup.okhttp.Response
 import org.robolectric.annotation.Config

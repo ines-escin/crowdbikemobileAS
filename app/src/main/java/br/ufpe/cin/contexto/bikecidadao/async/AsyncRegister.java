@@ -1,4 +1,4 @@
-package br.ufpe.cin.contexto.crowdbikemobile.async;
+package br.ufpe.cin.contexto.bikecidadao.async;
 
 import android.os.AsyncTask;
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.crowdbikemobile"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    package="com.example.bikecidadao"
+    android:versionCode="4"
+    android:versionName="4.0" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -41,7 +41,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name="br.ufpe.cin.contexto.crowdbikemobile.MainActivity"
+            android:name="br.ufpe.cin.contexto.bikecidadao.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="MAIN_ACTIVITY" />
@@ -54,20 +54,20 @@
         <uses-library android:name="android.test.runner" />
 
         <activity
-            android:name="br.ufpe.cin.contexto.crowdbikemobile.ActivitySendNotification"
+            android:name="br.ufpe.cin.contexto.bikecidadao.ActivitySendNotification"
             android:label="@string/app_name"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name="br.ufpe.cin.contexto.crowdbikemobile.MapDisplayActivity"
+            android:name="br.ufpe.cin.contexto.bikecidadao.MapDisplayActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName="br.ufpe.cin.contexto.crowdbikemobile.MainActivity">
+            android:parentActivityName="br.ufpe.cin.contexto.bikecidadao.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="br.ufpe.cin.contexto.crowdbikemobile.MainActivity"/>
+                android:value="br.ufpe.cin.contexto.bikecidadao.MainActivity"/>
         </activity>
         <activity
-            android:name="br.ufpe.cin.contexto.crowdbikemobile.SplashScreenActivity"
+            android:name="br.ufpe.cin.contexto.bikecidadao.SplashScreenActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
@@ -84,14 +84,14 @@
             android:value="7895000" />
 
         <activity
-            android:name="br.ufpe.cin.contexto.crowdbikemobile.LoginActivity"
+            android:name="br.ufpe.cin.contexto.bikecidadao.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="stateAlwaysHidden"/>
 
         <activity
-            android:name="br.ufpe.cin.contexto.crowdbikemobile.RegisterActivity"
+            android:name="br.ufpe.cin.contexto.bikecidadao.RegisterActivity"
             android:label="@string/title_activity_register"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"

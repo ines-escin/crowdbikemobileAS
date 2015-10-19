@@ -1,4 +1,4 @@
-package br.ufpe.cin.br.adapter.crowdbikemobile;
+package br.ufpe.cin.br.adapter.bikecidadao;
 
 public class User {
 

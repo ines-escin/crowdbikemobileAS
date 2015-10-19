@@ -40,8 +40,8 @@ Moved Files:
 Android Gradle projects use a different directory structure than ADT
 Eclipse projects. Here's how the projects were restructured:
 
-* /Users/danielmaida/Desktop/Android/crowdbike/CrowdbikemobileTest/res/ => app/src/androidTest/res/
-* /Users/danielmaida/Desktop/Android/crowdbike/CrowdbikemobileTest/src/ => app/src/androidTest/java/
+* /Users/danielmaida/Desktop/Android/crowdbike/bikecidadaoTest/res/ => app/src/androidTest/res/
+* /Users/danielmaida/Desktop/Android/crowdbike/bikecidadaoTest/src/ => app/src/androidTest/java/
 * AndroidManifest.xml => app/src/main/AndroidManifest.xml
 * libs/AmarinoLibrary_v0_55.jar => app/libs/AmarinoLibrary_v0_55.jar
 * libs/commons-cli-1.1.jar => app/libs/commons-cli-1.1.jar

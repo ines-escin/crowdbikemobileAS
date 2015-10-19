@@ -1,4 +1,4 @@
-package br.ufpe.cin.contexto.crowdbikemobile;
+package br.ufpe.cin.contexto.bikecidadao;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,7 +18,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
-import com.example.crowdbikemobile.R;
+import com.example.bikecidadao.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -53,12 +53,12 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
-import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Metadata;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Ocorrencia;
-import br.ufpe.cin.util.crowdbikemobile.LocationAddress;
+import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
+import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
+import br.ufpe.cin.br.adapter.bikecidadao.Entity;
+import br.ufpe.cin.br.adapter.bikecidadao.Metadata;
+import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
+import br.ufpe.cin.util.bikecidadao.LocationAddress;
 
 public class MapDisplayActivity extends AppCompatActivity implements LocationListener, GoogleApiClient.ConnectionCallbacks,
 		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnMapLongClickListener{
@@ -112,8 +112,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 //    public OnClickListener startButtonListener = new OnClickListener() {
 //        @Override
 //        public void onClick(View v) {
-//            Button startButton = (Button) findViewById(R.id.start_button);
-//            double seconds = getTimeInSeconds();
+//            Button startButton = (Button) findViewById(R.id.start_button);//            double seconds = getTimeInSeconds();
 //            if(isStarted){ //then stop and show start button
 //                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.green_smooth));
 //                startButton.setText(getResources().getText(R.string.start_run));
@@ -251,8 +250,8 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
 	public void sendInformation(){
 		if (mLastLocation != null) {
-			double latitude = mLastLocation.getLatitude();
-			double longitude = mLastLocation.getLongitude();
+			double latitude = latLngLast.latitude;//mLastLocation.getLatitude();
+			double longitude = latLngLast.longitude;
 			LocationAddress locationAddress = new LocationAddress();
 			endereco = locationAddress.getAddressFromLocation(latitude, longitude,	getApplicationContext());
 		}

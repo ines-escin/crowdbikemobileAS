@@ -1,4 +1,4 @@
-package br.ufpe.cin.br.adapter.crowdbikemobile;
+package br.ufpe.cin.br.adapter.bikecidadao;
 
 import java.lang.reflect.Type;
 import java.text.DateFormat;
@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import java.util.UUID;
 
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONArray;

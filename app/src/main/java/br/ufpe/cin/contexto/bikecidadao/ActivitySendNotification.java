@@ -1,4 +1,4 @@
-package br.ufpe.cin.contexto.crowdbikemobile;
+package br.ufpe.cin.contexto.bikecidadao;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,9 +11,9 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.example.crowdbikemobile.R;
+import com.example.bikecidadao.R;
 
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncSendNotification;
 
 public class ActivitySendNotification extends Activity {
 	

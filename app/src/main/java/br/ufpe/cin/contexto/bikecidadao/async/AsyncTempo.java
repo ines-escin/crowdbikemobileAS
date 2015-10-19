@@ -1,10 +1,6 @@
-package br.ufpe.cin.contexto.crowdbikemobile.async;
+package br.ufpe.cin.contexto.bikecidadao.async;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -13,10 +9,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import br.ufpe.cin.contexto.crowdbikemobile.MainActivity;
-import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
+import br.ufpe.cin.contexto.bikecidadao.MainActivity;
+import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
 
-import com.example.crowdbikemobile.R;
+import com.example.bikecidadao.R;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;

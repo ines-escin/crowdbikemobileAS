@@ -1,9 +1,9 @@
 import android.content.Intent
 import android.widget.Button
 import android.widget.EditText
-import br.ufpe.cin.contexto.crowdbikemobile.LoginActivity
+import br.ufpe.cin.contexto.bikecidadao.LoginActivity
 import br.ufpe.cin.crowdbike.specs.AuxiliarTestClasses.ServerResponse
-import com.example.crowdbikemobile.R
+import com.example.bikecidadao.R
 import com.squareup.okhttp.Response
 import org.robolectric.Robolectric
 import org.robolectric.Shadows

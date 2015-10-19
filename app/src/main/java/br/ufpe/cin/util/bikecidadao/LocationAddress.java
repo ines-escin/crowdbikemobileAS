@@ -1,4 +1,4 @@
-package br.ufpe.cin.util.crowdbikemobile;
+package br.ufpe.cin.util.bikecidadao;
 
 import android.content.Context;
 import android.location.Address;

@@ -1,8 +1,7 @@
-package br.ufpe.cin.contexto.crowdbikemobile;
+package br.ufpe.cin.contexto.bikecidadao;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,10 +10,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.crowdbikemobile.R;
+import com.example.bikecidadao.R;
 import com.squareup.okhttp.Response;
 
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncLogin;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncLogin;
 
 public class RegisterActivity extends Activity {
 

@@ -1,4 +1,4 @@
-package br.ufpe.cin.contexto.crowdbikemobile;
+package br.ufpe.cin.contexto.bikecidadao;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -31,7 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.example.crowdbikemobile.R;
+import com.example.bikecidadao.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -64,13 +64,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import br.ufpe.cin.br.adapter.crowdbikemobile.AdapterOcurrence;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Attributes;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Entity;
-import br.ufpe.cin.br.adapter.crowdbikemobile.Ocorrencia;
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncSendNotification;
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncTempo;
-import br.ufpe.cin.contexto.crowdbikemobile.pojo.Tempo;
+import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
+import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
+import br.ufpe.cin.br.adapter.bikecidadao.Entity;
+import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncSendNotification;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
+import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
 
 
 @SuppressLint("NewApi")

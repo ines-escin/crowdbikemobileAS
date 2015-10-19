@@ -1,4 +1,4 @@
-package br.ufpe.cin.util.crowdbikemobile;
+package br.ufpe.cin.util.bikecidadao;
 
 /**
  * Created by danielmaida on 03/09/15.

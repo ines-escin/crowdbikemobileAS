@@ -1,6 +1,6 @@
 import android.support.v7.appcompat.R
 import android.widget.Spinner
-import br.ufpe.cin.contexto.crowdbikemobile.MapDisplayActivity
+import br.ufpe.cin.contexto.bikecidadao.MapDisplayActivity
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricGradleTestRunner
@@ -25,7 +25,7 @@ public class PostLocationActivitySpec extends RoboSpecification {
         given:
 
         def activity = Robolectric.buildActivity(MapDisplayActivity.class).create().get()
-        Spinner occurrenceSpinner = (Spinner) activity.findViewById(com.example.crowdbikemobile.R.id.menu_spinner)
+        Spinner occurrenceSpinner = (Spinner) activity.findViewById(com.example.bikecidadao.R.id.menu_spinner)
         occurrenceSpinner.setSelection(1)
         activity.latitude = "-8.032943"
         activity.longitude = "-34.901065"

@@ -1,6 +1,6 @@
-package br.ufpe.cin.contexto.crowdbikemobile;
+package br.ufpe.cin.contexto.bikecidadao;
 
-import com.example.crowdbikemobile.R;
+import com.example.bikecidadao.R;
 
 import android.app.Activity;
 import android.content.Intent;

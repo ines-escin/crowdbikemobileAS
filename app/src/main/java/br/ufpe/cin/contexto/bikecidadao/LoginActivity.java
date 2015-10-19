@@ -1,4 +1,4 @@
-package br.ufpe.cin.contexto.crowdbikemobile;
+package br.ufpe.cin.contexto.bikecidadao;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,11 +12,11 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.crowdbikemobile.R;
+import com.example.bikecidadao.R;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Response;
 
-import br.ufpe.cin.contexto.crowdbikemobile.async.AsyncLogin;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncLogin;
 
 public class LoginActivity extends Activity {
 

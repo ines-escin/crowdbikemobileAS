@@ -1,4 +1,4 @@
-package br.ufpe.cin.contexto.crowdbikemobile.pojo;
+package br.ufpe.cin.contexto.bikecidadao.pojo;
 
 public class MsgResponse {
 	
