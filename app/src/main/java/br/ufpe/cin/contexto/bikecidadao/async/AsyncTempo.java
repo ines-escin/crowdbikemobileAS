@@ -27,6 +27,8 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 	
 	private Context contexto;
 	private Map<String, Integer> icone = new HashMap<String, Integer>();
+
+	//private final Handler mHandler = new Handler();
 	
 	public AsyncTempo(Context ctx) {
 		this.contexto = ctx;
@@ -39,59 +41,69 @@ public class AsyncTempo extends AsyncTask <String, Void, Tempo> {
 
 	@Override
 	protected Tempo doInBackground(String... params) {
-		
+
 		/* 
 		 * As duas linhas seguintes recebem a atual coordenada geogr�fica da bike 
 		 *  
 		 */
 		String latitude  = params[0];
 		String longitude = params[1];
-		
-		String line;
-		String result = "false";
-		String resultado = "";
-		
+		Tempo respostaTempo = new Tempo();
+
+		while(true) {
+			String result = "false";
+
 		/*
 		 * Aqui est� o endere�o do servi�o de tempo
 		 * 
 		 */
-		String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude+
-				"&APPID=cdef8f1ee6fe0e253ca55193ace6349a"+
-				"&lang=pt";
-		
-		int responseCode = 0;
-		
-		try {
-			OkHttpClient client = new OkHttpClient();
-            RequestBody body = new FormEncodingBuilder()
-                    .add("latitude", latitude)
-                    .add("longitude",longitude)
-                    .build();
+			String uri = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude +
+					"&APPID=cdef8f1ee6fe0e253ca55193ace6349a" +
+					"&lang=pt";
 
-            Request request = new Request.Builder()
-                    .url(uri)
-                    .post(body)
-                    .build();
+			int responseCode = 0;
 
-            int executeCount = 0;
-            Response response;
+			try {
+				OkHttpClient client = new OkHttpClient();
+				RequestBody body = new FormEncodingBuilder()
+						.add("latitude", latitude)
+						.add("longitude", longitude)
+						.build();
 
-            do
-            {
-                response = client.newCall(request).execute();
-                executeCount++;
+				Request request = new Request.Builder()
+						.url(uri)
+						.post(body)
+						.build();
+
+				int executeCount = 0;
+				Response response;
+
+				do {
+					response = client.newCall(request).execute();
+					executeCount++;
+				}
+				while (response.code() == 408 && executeCount < 5);
+
+				result = response.body().string();
+
+
+			} catch (Exception e) {
+				responseCode = 408;
+				e.printStackTrace();
+			}
+			respostaTempo = parseJson(result);
+
+            if(respostaTempo.getDescricao() != null && respostaTempo.getTemperatura() != null){
+                break;
+            }else{
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            while(response.code() == 408 && executeCount < 5);
-
-            result = response.body().string();
-
-
-		} catch (Exception e) {
-			responseCode = 408;
-			e.printStackTrace();
 		}
-
-		return parseJson(result);
+		return respostaTempo;
 		
 	}
 
