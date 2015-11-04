@@ -68,6 +68,7 @@ import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncSendNotification;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
 import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
@@ -223,7 +224,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         this.googleMap.getUiSettings().setZoomControlsEnabled(true);
 
         try {
-            showAllMarkers();
+            AsyncGetOcurrences asyncGetOcurrences = new AsyncGetOcurrences(MainActivity.this);
+            asyncGetOcurrences.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -377,31 +379,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 */
 	public void tarefaParalelaTempo() {
 			// Instanciando a asynktask para contato com o servi?o de tempo
+
+		tempo = new AsyncTempo(MainActivity.this);
+		tempo.execute(latitudeString, longitudeString);
 		if(firstForecast)
         {
-            boolean findFirst = false;
-
-            while(!findFirst) {
-
-                tempo = new AsyncTempo(MainActivity.this);
-                tempo.execute(latitudeString, longitudeString);
-                try {
-                    Tempo respostaTempo = tempo.get();
-                    if(respostaTempo.getDescricao() != null && respostaTempo.getTemperatura() != null)
-                    {
-                        findFirst = true;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+//            boolean findFirst = false;
+//
+//            while(!findFirst) {
+//
+//				tempo = new AsyncTempo(MainActivity.this);
+//				tempo.execute(latitudeString, longitudeString);
+//				try {
+//					Tempo respostaTempo = tempo.get();
+//					if(respostaTempo.getDescricao() != null && respostaTempo.getTemperatura() != null)
+//					{
+//						findFirst = true;
+//					}
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
             firstForecast = false;
         }
-        else
-        {
-            tempo = new AsyncTempo(MainActivity.this);
-            tempo.execute(latitudeString, longitudeString);
-        }
+
     }
 
 
@@ -831,19 +832,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	@Override
 	public void onLocationChanged(Location loc) {
-		loc.getLatitude();
-		loc.getLongitude();
 
-
-			// Do something
-			// Atualizando as informacoes do app
-			setLatitudeString(String.valueOf(loc.getLatitude()));
-			setLongitudeString(String.valueOf(loc.getLongitude()));
-			if (firstLocation) {
-				startGenerating();
-				firstLocation = false;
-			}
-
+		// Do something
+		// Atualizando as informacoes do app
+		setLatitudeString(String.valueOf(loc.getLatitude()));
+		setLongitudeString(String.valueOf(loc.getLongitude()));
+		if (firstLocation) {
+			startGenerating();
+			firstLocation = false;
+		}
 
 		// setando o momento da coordenada
 		setTimePosition(System.currentTimeMillis());
@@ -888,15 +885,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-    public void showAllMarkers() throws Exception {
+    public void showAllMarkers(List<Ocorrencia> occurrences){
+        if(occurrences!=null){
+            for(Ocorrencia occurrence: occurrences){
 
-        List<Ocorrencia> occurrences = getAllOccurrences();
-
-        for(Ocorrencia occurrence: occurrences){
-
-            LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
-            Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
-            markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
+                LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
+                Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
+                markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
+            }
         }
 
     }
