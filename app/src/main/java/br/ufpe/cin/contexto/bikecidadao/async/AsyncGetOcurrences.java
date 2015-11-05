@@ -20,7 +20,9 @@ import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
 import br.ufpe.cin.contexto.bikecidadao.MainActivity;
+import br.ufpe.cin.contexto.bikecidadao.MapDisplayActivity;
 import br.ufpe.cin.contexto.bikecidadao.pojo.BikePosition;
+import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 public class AsyncGetOcurrences extends AsyncTask <String, Void, List<Ocorrencia>> {
 
@@ -52,9 +54,9 @@ public class AsyncGetOcurrences extends AsyncTask <String, Void, List<Ocorrencia
 	protected void onPostExecute(List<Ocorrencia> occurrences) {
 		Log.v("AsyncGetOcurrences", "Retorno do servidor");
 	//	Toast.makeText(contexto, result, Toast.LENGTH_LONG).show();
-
 		super.onPostExecute(occurrences);
-		((MainActivity) contexto).showAllMarkers(occurrences);
+
+		((OnGetOccurrencesCompletedCallback) contexto).onGetOccurrencesCompleted(occurrences);
 	}
 
 	public List<Ocorrencia> getAllOccurrences() throws Exception {

@@ -72,12 +72,14 @@ import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncSendNotification;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
 import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
+import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
+import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 
 @SuppressLint("NewApi")
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
-        LocationListener {
+		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnGetOccurrencesCompletedCallback,
+		LocationListener {
     public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização ruim", "Via danificada"};
     private GoogleMap googleMap;
     private HashMap<String,String> markers;
@@ -186,6 +188,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			}
 		};
 
+		if(!ConnectivityUtil.isNetworkAvaiable(this)){
+			Toast.makeText(getApplicationContext(), getText(R.string.no_network_avaible), Toast.LENGTH_LONG).show();
+		}
 	}
 
     @Override
@@ -884,8 +889,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
     }
 
-
-    public void showAllMarkers(List<Ocorrencia> occurrences){
+	@Override
+    public void onGetOccurrencesCompleted(List<Ocorrencia> occurrences){
         if(occurrences!=null){
             for(Ocorrencia occurrence: occurrences){
 
@@ -894,7 +899,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
             }
         }
-
     }
 
     public List<Ocorrencia> getAllOccurrences() throws Exception {
