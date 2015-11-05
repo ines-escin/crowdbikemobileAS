@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.bikecidadao.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -58,10 +59,13 @@ import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Metadata;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
+import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
 import br.ufpe.cin.util.bikecidadao.LocationAddress;
+import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 public class MapDisplayActivity extends AppCompatActivity implements LocationListener, GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnMapLongClickListener{
+		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnMapLongClickListener, OnGetOccurrencesCompletedCallback{
 
 	public static final String LOCATION = "location";
 	private GoogleApiClient mGoogleApiClient;
@@ -100,6 +104,10 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
+
+        if(!ConnectivityUtil.isNetworkAvaiable(this)){
+            Toast.makeText(getApplicationContext(), getText(R.string.no_network_avaible), Toast.LENGTH_LONG).show();
+        }
 	}
 
 //    public void setStartButton(){
@@ -136,7 +144,8 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         this.googleMap.setBuildingsEnabled(true);
         this.googleMap.getUiSettings().setZoomControlsEnabled(true);
         try {
-            showAllMarkers();
+            AsyncGetOcurrences asyncGetOcurrences = new AsyncGetOcurrences(MapDisplayActivity.this);
+            asyncGetOcurrences.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -144,8 +153,8 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
             @Override
             public void onInfoWindowClick(Marker marker) {
                 // Remove the marker
-               // marker.remove();
-                    showConfirmDialog(marker);
+                // marker.remove();
+                showConfirmDialog(marker);
 
             }
         });
@@ -329,15 +338,14 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
       return result;
 	}
 
-    public void showAllMarkers() throws Exception {
+    public void onGetOccurrencesCompleted(List<Ocorrencia> occurrences) {
+        if(occurrences!=null) {
+            for (Ocorrencia occurrence : occurrences) {
 
-        List<Ocorrencia> occurrences = getAllOccurrences();
-
-        for(Ocorrencia occurrence: occurrences){
-
-            LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
-            Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
-            markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
+                LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
+                Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
+                markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
+            }
         }
 
     }
