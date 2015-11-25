@@ -8,9 +8,10 @@ import android.test.ActivityInstrumentationTestCase2;
  */
 public class TestActivity<T extends Activity> extends ActivityInstrumentationTestCase2{
 
-    public static final int LONG_TIME_OUT = 15000;
-    public static final int MEDIUM_TIMEOUT = 7000;
-    public static final int SHORT_TIMEOUT = 2000;
+    public static final int LONG_TIME = 15000;
+    public static final int MEDIUM_TIME = 7000;
+    public static final int SHORT_TIME = 2000;
+
 
     public TestActivity(Class<T> activityClass) {
         super(activityClass);

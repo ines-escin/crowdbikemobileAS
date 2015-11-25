@@ -3,6 +3,7 @@ package br.ufpe.cin.contexto.bikecidadao;
 import android.support.test.InstrumentationRegistry;
 import android.test.ActivityInstrumentationTestCase2;
 
+import com.example.bikecidadao.R;
 import com.robotium.solo.Solo;
 
 import org.junit.After;
@@ -29,19 +30,13 @@ public class SplashScreenTest
         ssActivity =  getActivity();
     }
 
-
-    public void testSplashScreenOpening() throws Exception {
-        assertThat(solo.waitForActivity(SplashScreenActivity.class.getName(), LONG_TIME_OUT), equalTo(true));
-
-        assertThat(solo.waitForActivity(MainActivity.class.getName(), LONG_TIME_OUT), equalTo(true));
-        MainActivity mainActivity = (MainActivity)solo.getCurrentActivity();
+    public void testSplashScreenLogoOpening() throws Exception {
+        assertThat(solo.waitForView(R.id.splash), equalTo(true));
     }
 
     @After
     public void tearDown() throws Exception{
         super.tearDown();
     }
-
-
 
 }
