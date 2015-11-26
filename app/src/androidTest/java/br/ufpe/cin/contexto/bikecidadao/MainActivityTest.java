@@ -32,7 +32,7 @@ public class MainActivityTest
         super(MainActivity.class);
     }
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         injectInstrumentation(InstrumentationRegistry.getInstrumentation());

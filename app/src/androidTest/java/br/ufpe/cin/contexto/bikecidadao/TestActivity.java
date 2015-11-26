@@ -1,9 +1,13 @@
 package br.ufpe.cin.contexto.bikecidadao;
 
 import android.app.Activity;
+import android.support.test.espresso.IdlingPolicies;
 import android.test.ActivityInstrumentationTestCase2;
 
 import org.junit.After;
+import org.junit.Before;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jal3 on 18/11/2015.
@@ -25,6 +29,15 @@ public class TestActivity<T extends Activity> extends ActivityInstrumentationTes
         return (T)super.getActivity();
     }
 
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        IdlingPolicies.setIdlingResourceTimeout(3, TimeUnit.MINUTES);
+        IdlingPolicies.setMasterPolicyTimeout(3, TimeUnit.MINUTES);
+
+    }
 
     @After
     public void tearDown() throws Exception{
