@@ -173,7 +173,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         selectedOccurence = 0;
         AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
         // Set the dialog title
-        builder.setTitle("Reportar um problema")
+        builder.setTitle(getString(R.string.report_an_issue))
                 // Specify the list array, the items to be selected by default (null for none),
                 // and the listener through which to receive callbacks when items are selected
 //	    	.setMessage("helper message")

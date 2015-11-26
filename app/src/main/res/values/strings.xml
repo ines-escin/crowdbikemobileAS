@@ -21,5 +21,6 @@
     <string name="long_press_tip">Pressione no mapa para reportar</string>
     <string name="map_action">View map</string>
     <string name="no_network_avaible">Sem conexão de internet</string>
+    <string name= "report_an_issue">Reportar um problema</string>
 
 </resources>

@@ -3,6 +3,8 @@ package br.ufpe.cin.contexto.bikecidadao;
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 
+import org.junit.After;
+
 /**
  * Created by jal3 on 18/11/2015.
  */
@@ -21,6 +23,12 @@ public class TestActivity<T extends Activity> extends ActivityInstrumentationTes
     @Override
     public T getActivity() {
         return (T)super.getActivity();
+    }
+
+
+    @After
+    public void tearDown() throws Exception{
+        super.tearDown();
     }
 }
 
