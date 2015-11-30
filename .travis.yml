@@ -13,15 +13,15 @@ before_script:
   - adb shell input keyevent 82 &
 
 script:
-  - android list target
+  #- android list target
   - ./gradlew connectedAndroidTest
 
 android:
   components:
     # Uncomment the lines below if you want to
     # use the latest revision of Android SDK Tools
-    - platform-tools
-    - tools
+    #- platform-tools
+    #- tools
 
     # The BuildTools version used by your project
     - build-tools-21.1.2
@@ -30,15 +30,17 @@ android:
     - android-23
 
     # Additional components
-    - extra-android-support
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository
-    - addon-google_apis-google-21
+    - extra
+    - addon
+    #- extra-android-support
+    #- extra-google-google_play_services
+    #- extra-google-m2repository
+    #- extra-android-m2repository
+    #- addon-google_apis-google-21
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-21
+    - sys-img-armeabi-v7a-android-19
     #- sys-img-armeabi-v7a-android-19
     #- sys-img-x86-android-17
 

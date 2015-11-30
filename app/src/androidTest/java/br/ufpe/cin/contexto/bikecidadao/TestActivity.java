@@ -16,7 +16,7 @@ public class TestActivity<T extends Activity> extends ActivityInstrumentationTes
 
     public static final int LONG_TIME = 15000;
     public static final int MEDIUM_TIME = 7000;
-    public static final int SHORT_TIME = 2000;
+    public static final int SHORT_TIME = 1000;
 
 
     public TestActivity(Class<T> activityClass) {
@@ -33,10 +33,6 @@ public class TestActivity<T extends Activity> extends ActivityInstrumentationTes
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        IdlingPolicies.setIdlingResourceTimeout(3, TimeUnit.MINUTES);
-        IdlingPolicies.setMasterPolicyTimeout(3, TimeUnit.MINUTES);
-
     }
 
     @After

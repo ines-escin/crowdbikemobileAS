@@ -34,9 +34,11 @@ public class MapActivityTest
         mapActivity =  getActivity();
     }
 
-    public void testLongClickToReport(){
+    public void testLongClickToReport() throws InterruptedException {
         //Given the MapDisplayActivity is opened
         //When I long click at the map view
+        Thread.sleep(SHORT_TIME);
+
         onView(withId(R.id.map)).perform(longClick());
 
         //Then a report dialog view is displayed
