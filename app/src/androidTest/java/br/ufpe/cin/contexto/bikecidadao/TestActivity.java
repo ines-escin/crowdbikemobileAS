@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TestActivity<T extends Activity> extends ActivityInstrumentationTestCase2{
 
-    public static final int LONG_TIME = 15000;
-    public static final int MEDIUM_TIME = 7000;
+    public static final int LONG_TIME = 10000;
+    public static final int MEDIUM_TIME = 5000;
     public static final int SHORT_TIME = 1000;
 
 

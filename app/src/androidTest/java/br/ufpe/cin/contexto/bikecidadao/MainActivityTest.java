@@ -51,7 +51,6 @@ public class MainActivityTest
     public void testUnmuteAlert() throws InterruptedException {
         //Given I'm at MainActivity
         //And the mute button is muted
-        Thread.sleep(SHORT_TIME);
         onView(withId(R.id.toggle_voice))
 
         //When I click the mute alert button
@@ -80,7 +79,7 @@ public class MainActivityTest
     }
 
     public void testClickOnMapActionItem() throws InterruptedException {
-        Thread.sleep(SHORT_TIME);
+        Thread.sleep(MEDIUM_TIME);
         onView(withId(R.id.view_map_action)).perform(click());
 
         onView(withId(R.id.map)).check(matches(isDisplayed()));

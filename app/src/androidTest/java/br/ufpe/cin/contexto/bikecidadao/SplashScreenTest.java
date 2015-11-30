@@ -39,10 +39,10 @@ public class SplashScreenTest
     }
 
     public void testSplashScreenLogoOpening() throws InterruptedException {
-        Thread.sleep(SHORT_TIME);
+        Thread.sleep(MEDIUM_TIME);
         //Given I open the app
         //Then a logo is displayed
-        assertThat(solo.waitForView(R.id.splash), equalTo(true));
+        assertThat(solo.waitForView(R.id.splash, 1, MEDIUM_TIME), equalTo(true));
     }
     
 }
