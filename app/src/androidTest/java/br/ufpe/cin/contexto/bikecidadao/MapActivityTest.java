@@ -40,7 +40,6 @@ public class MapActivityTest
 
         onView(withId(R.id.map)).perform(longClick());
 
-        Thread.sleep(MEDIUM_TIME);
         //Then a report dialog view is displayed
         onView(withText(mapActivity.getString(R.string.report_an_issue))).check(matches(isDisplayed()));
     }
