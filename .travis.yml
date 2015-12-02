@@ -19,7 +19,7 @@ before_script:
 
 script:
   #- android list target
-  - ./gradlew connectedAndroidTest --debug
+  - ./gradlew connectedAndroidTest --info
 
 android:
   components:
