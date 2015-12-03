@@ -1,5 +1,9 @@
 package br.ufpe.cin.contexto.bikecidadao;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
+import android.os.HandlerThread;
 import android.support.test.InstrumentationRegistry;
 
 import com.example.bikecidadao.R;
@@ -7,10 +11,14 @@ import com.robotium.solo.Solo;
 
 import org.junit.Before;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
@@ -19,6 +27,7 @@ import static android.support.test.espresso.Espresso.*;
 import static android.support.test.espresso.action.ViewActions.*;
 import static android.support.test.espresso.assertion.ViewAssertions.*;
 import static android.support.test.espresso.matcher.ViewMatchers.*;
+import static android.support.test.espresso.matcher.RootMatchers.*;
 import static org.junit.Assert.assertThat;
 
 public class MainActivityTest
@@ -38,6 +47,7 @@ public class MainActivityTest
         injectInstrumentation(InstrumentationRegistry.getInstrumentation());
         solo = new Solo(getInstrumentation());
         mainActivity =  getActivity();
+
     }
 
 
@@ -82,6 +92,13 @@ public class MainActivityTest
 
         onView(withId(R.id.map)).check(matches(isDisplayed()));
     }
+
+    public void testActivityToastWhenNotConnected(){
+
+        onView(withText(R.string.no_network_avaible)).inRoot(withDecorView(not(is(getActivity().getWindow().getDecorView())))).check(matches(isDisplayed()));
+
+    }
+
 
 
 }
