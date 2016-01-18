@@ -2,6 +2,9 @@ package br.ufpe.cin.contexto.bikecidadao;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,8 +15,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.telephony.TelephonyManager;
@@ -24,7 +31,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -42,10 +52,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.google.maps.android.SphericalUtil;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -57,6 +72,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,8 +94,8 @@ import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 @SuppressLint("NewApi")
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnGetOccurrencesCompletedCallback,
-		LocationListener {
+		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
+        LocationListener, OnClickListener , OnGetOccurrencesCompletedCallback{
     public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização ruim", "Via danificada"};
     private GoogleMap googleMap;
     private HashMap<String,String> markers;
@@ -142,7 +158,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	private String registered = "";
 	private GoogleApiClient mGoogleApiClient;
 	private LocationRequest mLocationRequest;
-    public boolean threadsAlive = false;
+	private Location mLastLocation;
+	public boolean threadsAlive = false;
+	Chronometer chronometer;
+	long time;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -191,6 +210,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		if(!ConnectivityUtil.isNetworkAvaiable(this)){
 			Toast.makeText(getApplicationContext(), getText(R.string.no_network_avaible), Toast.LENGTH_LONG).show();
 		}
+		chronometer = (Chronometer) findViewById(R.id.chronometer);
+        Button startButton = (Button)findViewById(R.id.start_button);
+        startButton.setOnClickListener(this);
 	}
 
     @Override
@@ -230,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         try {
             AsyncGetOcurrences asyncGetOcurrences = new AsyncGetOcurrences(MainActivity.this);
-            asyncGetOcurrences.execute();
+			asyncGetOcurrences.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -298,6 +320,53 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	public void updateResults(String resultado) throws Exception {
 		retornoServidorFiware(resultado);
 	}
+	boolean isStarted = false;
+
+    Location startLocation;
+
+
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()){
+
+		case R.id.start_button:
+			Button startButton = (Button) view;
+            if(isStarted){ //then stop and show start button
+                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.green_smooth));
+                startButton.setText(getResources().getText(R.string.start_run));
+                time = chronometer.getBase()-SystemClock.elapsedRealtime();
+                chronometer.stop();
+
+                if(polyline !=null) {
+                    greenPoint.remove();
+                    polyline.remove();
+                    polyline=null;
+                }
+
+            }else{
+                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.red_smooth));
+                startButton.setText(getResources().getText(R.string.stop_run));
+				chronometer.setBase(SystemClock.elapsedRealtime() + time);
+				chronometer.start();
+                startLocation = getLastLocation();
+                drawStartPoint(startLocation);
+                drawPolyline(startLocation);
+            }
+            isStarted = !isStarted;
+			break;
+
+		}
+	}
+
+    private void drawStartPoint(Location startLocation){
+        greenPoint = googleMap.addCircle(new CircleOptions()
+                .center(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()))
+                .radius(2)
+                .strokeColor(ContextCompat.getColor(getApplicationContext(), R.color.green_smooth))
+                .fillColor(ContextCompat.getColor(getApplicationContext(), R.color.green_smooth))
+                .strokeWidth(16)
+                .zIndex(2));
+    }
 
 	public class DoSomethingThread extends Thread {
 
@@ -786,12 +855,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		mGoogleApiClient.connect();
 	}
 
+										//mili * sec * minute
+										//1000 * 60 * 1
+	private static final long INTERVAL = 1000 * 2;
+	private static final long FASTEST_INTERVAL = 1000 * 2;
 
 	private void initLocationRequest(){
 		mLocationRequest = new LocationRequest();
-		mLocationRequest.setInterval(2000);
-		mLocationRequest.setFastestInterval(1000);
-		mLocationRequest.setSmallestDisplacement(1); // deslocamento mínimo em metros
+		mLocationRequest.setInterval(INTERVAL);
+		mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+		mLocationRequest.setSmallestDisplacement(6); // deslocamento mínimo em metros
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
 
@@ -812,16 +885,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	public void onConnected(Bundle bundle) {
 		Log.i("LOG", "UpdateLocationActivity.onConnected(" + bundle + ")");
 
-		Location mLastLocation = LocationServices
-				.FusedLocationApi
-				.getLastLocation(mGoogleApiClient); // PARA JÁ TER UMA COORDENADA PARA O UPDATE FEATURE UTILIZAR
+		mLastLocation = getLastLocation(); // PARA JÁ TER UMA COORDENADA PARA O UPDATE FEATURE UTILIZAR
 
         if(mLastLocation !=null){
             LatLng currentLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
-        }
+		}
 
 		startLocationUpdate();
+	}
+
+	private Location getLastLocation(){
+		if(mGoogleApiClient!=null && mGoogleApiClient.isConnected())
+			return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+		return null;
 	}
 
 	@Override
@@ -877,6 +954,69 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 				tarefaParalelaTempo();
 			}
 		}
+
+		updateTracking(loc);
+	}
+
+	String mLastUpdateTime;
+	Polyline polyline;
+    Circle greenPoint;
+
+	private void updateTracking(Location location){
+
+
+		if(isStarted) {
+			boolean valid = isLocationValid(mLastLocation, location);
+			//Toast.makeText(getApplicationContext(), "Valid "+valid, Toast.LENGTH_SHORT).show();
+			if(valid) {
+		        this.googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16));
+				mLastLocation = location;
+				mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
+				drawPolyline(location);
+
+			}
+            //getRunStatus();
+        }
+	}
+
+	private boolean isLocationValid(Location lastLocation, Location nextLocation){
+		double accuracy = nextLocation.getAccuracy();
+		if(accuracy==0.0) return false; // means there's no accuracy
+
+		double timeDelta = nextLocation.getElapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos();
+        timeDelta /= 1e9;
+		List<LatLng> points = new ArrayList<>();
+		points.add( new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+		points.add(new LatLng(nextLocation.getLatitude(), nextLocation.getLongitude()));
+
+		double path = SphericalUtil.computeLength(points);
+	//	if((path/timeDelta)>17) return false;
+
+		if(accuracy<15) return true;
+
+		return false;
+	}
+
+    public double getAverageSpeed(){
+        return ((int)(SphericalUtil.computeLength(polyline.getPoints()) / ((SystemClock.elapsedRealtime()-chronometer.getBase())/1000))) * 3.6;
+    }
+
+	private void drawPolyline(Location location){
+		LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+		//Toast.makeText(getApplicationContext(), currentLatLng.toString(), Toast.LENGTH_LONG).show();
+		if (polyline == null) {
+			polyline = googleMap.addPolyline(new PolylineOptions()
+                    .width(8)
+                    .color(ContextCompat.getColor(getApplicationContext(), R.color.red_smooth))
+                    .geodesic(true)
+                    .zIndex(1));
+		}
+		 //update polyline
+		List points = polyline.getPoints();
+		points.add(currentLatLng);
+		polyline.setPoints(points);
 
 	}
 

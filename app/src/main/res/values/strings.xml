@@ -16,8 +16,8 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_register">Sign up</string>
 
-    <string name="start_run">Start run</string>
-    <string name="stop_run">Stop run</string>
+    <string name="start_run">Iniciar</string>
+    <string name="stop_run">Parar</string>
     <string name="long_press_tip">Pressione no mapa para reportar</string>
     <string name="map_action">View map</string>
     <string name="no_network_avaible">Sem conexão de internet</string>
