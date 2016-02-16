@@ -53,7 +53,7 @@ public class MainActivityTest
 
 
     public void testFirstTimeActivityOpeningWithMutedAlert(){
-        //Given The MainActivity is opened for the first time
+        //Given The MainActivity is opened for the first startTime
         //Then the mute button is unchecked(muted)
         onView(withId(R.id.toggle_voice)).check(matches(isNotChecked()));
 
@@ -99,6 +99,20 @@ public class MainActivityTest
 
     }
 
+    public void testStartButton() {
 
+    }
+
+    public void testStopButton() {
+
+    }
+
+    public void testStartTrackingService() {
+
+    }
+
+    public void testStopTrackingService() {
+
+    }
 
 }
