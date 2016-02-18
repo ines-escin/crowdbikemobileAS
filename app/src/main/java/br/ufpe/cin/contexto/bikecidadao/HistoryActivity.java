@@ -1,6 +1,7 @@
 package br.ufpe.cin.contexto.bikecidadao;
 
 import android.content.SharedPreferences;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -11,11 +12,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Chronometer;
 import android.widget.TextView;
 
 import com.example.bikecidadao.R;
 import com.google.gson.Gson;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -104,10 +107,14 @@ public class HistoryActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(PersonViewHolder personViewHolder, int position) {
             TrackInfo trackInfo = tracks.get(position);
-            int distance = (int)trackInfo.getDistance();
+            double distance = trackInfo.getDistance();
             double avgSpeed = (trackInfo.getDistance()/(trackInfo.getElapsedTime()/1000))*3.6;
-            String content = trackInfo.getElapsedTime()/1000.0 + " s \n" + distance + " m\n" + (int)avgSpeed+" km/h";
-            personViewHolder.elapsedTime.setText(content);
+            String content = trackInfo.getElapsedTime()/1000.0 + " s" + distance + " m\n" + (int)avgSpeed+" km/h";
+
+            personViewHolder.chronometer.setBase(SystemClock.elapsedRealtime()-trackInfo.getElapsedTime());
+            personViewHolder.distance.setText(new DecimalFormat("#.#").format(distance));
+            personViewHolder.avgSpeed.setText(new DecimalFormat("#.#").format(avgSpeed));
+
         }
 
 
@@ -118,12 +125,16 @@ public class HistoryActivity extends AppCompatActivity {
 
         public static class PersonViewHolder extends RecyclerView.ViewHolder {
             CardView cv;
-            TextView elapsedTime;
+            Chronometer chronometer;
+            TextView distance;
+            TextView avgSpeed;
 
             PersonViewHolder(View itemView) {
                 super(itemView);
                 cv = (CardView)itemView.findViewById(R.id.cv);
-                elapsedTime = (TextView)itemView.findViewById(R.id.txtMensagem);
+                chronometer = (Chronometer) itemView.findViewById(R.id.chronometer);
+                distance = (TextView)itemView.findViewById(R.id.distance);
+                avgSpeed = (TextView)itemView.findViewById(R.id.avg_speed);
             }
         }
 

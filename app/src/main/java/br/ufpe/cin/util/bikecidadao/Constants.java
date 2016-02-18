@@ -11,11 +11,10 @@ public class Constants {
     public static final String TRACKING_SERVICE_STATUS_KEY = "TRACKING_STATUS";
     public static final String TRACKING_SERVICE_START_TIME_KEY = "TRACKING_START_TIME";
     public static final String TRACKING_SERVICE_COUNTER_KEY = "TRACKING_COUNTER";
-    public static final String CURRENT_TRACKING_POINTS_COUNTER_KEY = "TRACKING_POINTS";
+    public static final String TMP_TRACKING_POINTS_KEY = "TRACKING_POINTS";
 
 
     public static final String SHARED_TRACKINGS_HISTORY_NAME = PACKAGE_NAME+ ".SHARED_TRACKINGS_HISTORY_NAME";
-    public static final String TRACKINGS_HISTORY_KEY = "TRACKING_START_TIME";
 
 
 

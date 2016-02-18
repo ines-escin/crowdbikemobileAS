@@ -242,9 +242,9 @@ public class LocationTrackerService extends Service implements LocationListener,
     public void onDestroy() {
         super.onDestroy();
 
-        saveTracking();
+        saveTmpTracking();
         stopTracking();
-        startHistoryActivity();
+        startResultsActivity();
     }
 
     private void setupBroadcastHandler() {
@@ -286,7 +286,8 @@ public class LocationTrackerService extends Service implements LocationListener,
         localRepositoryController.setIsTracking(isTracking);
     }
     public void saveStartTime(){
-        localRepositoryController.saveStartTime(SystemClock.elapsedRealtime());
+
+        localRepositoryController.saveStartTime(System.currentTimeMillis());
     }
     public long getStartTime(){
         return localRepositoryController.getStartTime();
@@ -301,13 +302,13 @@ public class LocationTrackerService extends Service implements LocationListener,
         stopForeground(true);
     }
 
-    private void saveTracking() {
-        TrackInfo trackInfo = new TrackInfo(trackingPoints, getStartTime(), SystemClock.elapsedRealtime(), distance);
-        localRepositoryController.saveTracking(trackInfo);
+    private void saveTmpTracking() {
+        TrackInfo trackInfo = new TrackInfo(trackingPoints, getStartTime(), System.currentTimeMillis(), distance);
+        localRepositoryController.saveTmpTracking(trackInfo);
     }
 
-    private void startHistoryActivity(){
-        Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+    private void startResultsActivity(){
+        Intent intent = new Intent(getApplicationContext(), ResultsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }

@@ -25,6 +25,9 @@
 
     <string name= "tracking_notification_title">Pedalando</string>
     <string name= "tracking_notification_text">Corrida em andamento</string>
-    <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_history">Histórico</string>
+    <string name="title_activity_results">Resultados</string>
+    <string name="action_save_track">Salvar</string>
+
 
 </resources>

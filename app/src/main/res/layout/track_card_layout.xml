@@ -3,20 +3,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:padding="3dp"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/cv"
-        card_view:cardCornerRadius="5dp"
         card_view:cardPreventCornerOverlap="false"
         card_view:cardUseCompatPadding="true">
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="10dp"
+            android:gravity="center_horizontal">
 
             <!--<ImageView-->
             <!--android:id="@+id/alert_img"-->
@@ -26,18 +28,65 @@
             <!--android:layout_alignParentTop="true"-->
             <!--android:layout_marginRight="16dp"-->
             <!--/>-->
+            <ImageView
+                android:layout_marginRight="5dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:id="@+id/imageView"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/ic_timer_black_48dp"/>
 
-            <TextView
-                android:id="@+id/txtMensagem"
+            <Chronometer
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/alert_img"
-                android:layout_alignParentTop="true"
-                android:text="testeajdoisajda"
+                android:textSize="18dp"
+                android:textColor="@color/preto"
+                android:id="@+id/chronometer" />
+            <View
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_width="0.5dp"
+                android:layout_height="fill_parent"
+                android:background="#FF888888" />
+            <TextView
+                android:id="@+id/distance"
+                android:textSize="18dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.0"
+                android:textColor="@color/preto"
+                />
+            <TextView
+                android:textSize="14dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" km"
+                android:textColor="@color/preto"
+                />
+            <View
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_width="0.5dp"
+                android:layout_height="fill_parent"
+                android:background="#FF888888" />
+            <TextView
+                android:id="@+id/avg_speed"
+                android:textSize="18dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.0"
 
                 android:textColor="@color/preto"
                 />
-        </RelativeLayout>
+            <TextView
+                android:textSize="14dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" km/h"
+                android:textColor="@color/preto"
+                />
+
+        </LinearLayout>
 
     </android.support.v7.widget.CardView>
 </LinearLayout>

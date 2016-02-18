@@ -381,8 +381,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		}
 	}
 
-    public long getStartTime(){
-		return localRepositoryController.getStartTime();
+    public long getRunElapsedTime(){
+		long elapsed = (System.currentTimeMillis()-localRepositoryController.getStartTime());
+		return SystemClock.elapsedRealtime() - elapsed;
     }
 
 	private void startTrackingService() {
@@ -1046,7 +1047,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
           //  this.startTime = startTime;
 //            long now = System.currentTimeMillis();
 //            long elapsed = now - getStartTime();
-            chronometer.setBase(getStartTime());
+            chronometer.setBase(getRunElapsedTime());
             chronometer.start();
             drawPolyline(points);
         }

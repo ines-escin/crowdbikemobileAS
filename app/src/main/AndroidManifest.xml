@@ -100,6 +100,11 @@
             android:name="br.ufpe.cin.contexto.bikecidadao.HistoryActivity"
             android:label="@string/title_activity_history" >
         </activity>
+        <activity
+            android:name="br.ufpe.cin.contexto.bikecidadao.ResultsActivity"
+            android:label="@string/title_activity_results"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

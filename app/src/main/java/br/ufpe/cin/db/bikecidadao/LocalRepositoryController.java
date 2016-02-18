@@ -1,18 +1,15 @@
 package br.ufpe.cin.db.bikecidadao;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import br.ufpe.cin.contexto.bikecidadao.HistoryActivity;
 import br.ufpe.cin.db.bikecidadao.entity.TrackInfo;
 import br.ufpe.cin.util.bikecidadao.Constants;
 
@@ -64,12 +61,25 @@ public class LocalRepositoryController {
         int count = mSharedPreferences.getInt(Constants.TRACKING_SERVICE_COUNTER_KEY, 0);
         SharedPreferences.Editor editor  = mSharedPreferences.edit();
         editor.putInt(Constants.TRACKING_SERVICE_COUNTER_KEY, ++count);
-        //editor.remove(Constants.TRACKING_SERVICE_COUNTER_KEY).commit();//TODO take this out to save the id's properly. Now it only saves the last track
+        editor.remove(Constants.TRACKING_SERVICE_COUNTER_KEY).commit();//TODO take this out to save the id's properly. Now it only saves the last track
         editor.apply();
         return count+"";
     }
 
-    public void saveTracking(TrackInfo trackInfo) {
+    public void saveTmpTracking(TrackInfo trackInfo) {
+        SharedPreferences.Editor editor  = mSharedPreferences.edit();
+        String trackingPointsStr = gson.toJson(trackInfo);
+        editor.putString(Constants.TMP_TRACKING_POINTS_KEY, trackingPointsStr);
+        editor.apply();
+    }
+
+    public TrackInfo getTmpTracking() {
+        String jsonString = mSharedPreferences.getString(Constants.TMP_TRACKING_POINTS_KEY, null);
+        TrackInfo trackInfo = gson.fromJson(jsonString, TrackInfo.class);
+        return trackInfo;
+    }
+
+    public void saveTrackingInHistory(TrackInfo trackInfo) {
         long elapsedTime = SystemClock.elapsedRealtime() - getStartTime();
 
         //TrackInfo trackInfo = new TrackInfo(trackingPoints, getStartTime(), SystemClock.elapsedRealtime(), distance);
@@ -77,13 +87,9 @@ public class LocalRepositoryController {
 
         String trackId = getNewTrackId();
         SharedPreferences.Editor editor  = mSharedTrackingHistory.edit();
-        //editor.clear().commit(); //TODO take this out to save all tracks properly
+        editor.clear().commit(); //TODO take this out to save all tracks properly
         editor.putString(trackId, trackingPointsStr);
         editor.apply();
-
-//        Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intent);
     }
 
     public List<TrackInfo> getAllTrackInfo() {
