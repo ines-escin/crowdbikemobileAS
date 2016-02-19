@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name= "yes">Sim</string>
+    <string name= "no">Não</string>
     <string name="app_name">Bike Cidadão</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
@@ -22,6 +23,7 @@
     <string name="map_action">View map</string>
     <string name="no_network_avaible">Sem conexão de internet</string>
     <string name= "report_an_issue">Reportar um problema</string>
+    <string name= "discard_save">Deseja descartar o percurso?</string>
 
     <string name= "tracking_notification_title">Pedalando</string>
     <string name= "tracking_notification_text">Corrida em andamento</string>

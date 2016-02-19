@@ -1,9 +1,12 @@
 package br.ufpe.cin.contexto.bikecidadao;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -46,9 +49,13 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
+        setActivityEnviroment();
+
         initVariables();
         loadTrackInfo();
     }
+
+
     protected void onStart() {
         if(mGoogleApiClient!=null)
             mGoogleApiClient.connect();
@@ -81,21 +88,51 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_save_track) {
-
-            localRepositoryController.saveTrackingInHistory(trackInfo);
-            startHistoryActivity();
-            return true;
+        switch (id) {
+            case android.R.id.home:
+                this.onBackPressed();
+                return true;
+            case R.id.action_save_track:
+                localRepositoryController.saveTrackingInHistory(trackInfo);
+                startHistoryActivity();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+    @Override
+    public void onBackPressed() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.discard_save))
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        ResultsActivity.super.onBackPressed();
+
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                })
+        ;
+
+        builder.create().show();
+
     }
 
     private void startHistoryActivity(){
         Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+        finish();
         startActivity(intent);
+    }
+    private void setActivityEnviroment() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     private void loadTrackInfo() {
@@ -109,7 +146,7 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
         double avgSpeed = (trackInfo.getDistance()/(trackInfo.getElapsedTime()/1000))*3.6;
 
         chronometerV.setBase(SystemClock.elapsedRealtime() - trackInfo.getElapsedTime());
-        distanceV.setText(new DecimalFormat("#.#").format(distance));
+        distanceV.setText(new DecimalFormat("#.#").format(distance / 1000));
         avgSpeedV.setText(new DecimalFormat("#.#").format(avgSpeed));
 
     }
@@ -133,6 +170,7 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
 
         drawPolyline();
     }
+
 
     private void drawPolyline() {
         ArrayList<LatLng> points = trackInfo.getTrackingPoints();

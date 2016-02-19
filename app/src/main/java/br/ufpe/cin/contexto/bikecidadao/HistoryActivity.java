@@ -112,7 +112,7 @@ public class HistoryActivity extends AppCompatActivity {
             String content = trackInfo.getElapsedTime()/1000.0 + " s" + distance + " m\n" + (int)avgSpeed+" km/h";
 
             personViewHolder.chronometer.setBase(SystemClock.elapsedRealtime()-trackInfo.getElapsedTime());
-            personViewHolder.distance.setText(new DecimalFormat("#.#").format(distance));
+            personViewHolder.distance.setText(new DecimalFormat("#.#").format(distance/1000));
             personViewHolder.avgSpeed.setText(new DecimalFormat("#.#").format(avgSpeed));
 
         }

@@ -61,7 +61,7 @@ public class LocalRepositoryController {
         int count = mSharedPreferences.getInt(Constants.TRACKING_SERVICE_COUNTER_KEY, 0);
         SharedPreferences.Editor editor  = mSharedPreferences.edit();
         editor.putInt(Constants.TRACKING_SERVICE_COUNTER_KEY, ++count);
-        editor.remove(Constants.TRACKING_SERVICE_COUNTER_KEY).commit();//TODO take this out to save the id's properly. Now it only saves the last track
+        //editor.remove(Constants.TRACKING_SERVICE_COUNTER_KEY).commit();//TODO take this out to save the id's properly. Now it only saves the last track
         editor.apply();
         return count+"";
     }
@@ -87,7 +87,7 @@ public class LocalRepositoryController {
 
         String trackId = getNewTrackId();
         SharedPreferences.Editor editor  = mSharedTrackingHistory.edit();
-        editor.clear().commit(); //TODO take this out to save all tracks properly
+        //editor.clear().commit(); //TODO take this out to save all tracks properly
         editor.putString(trackId, trackingPointsStr);
         editor.apply();
     }
