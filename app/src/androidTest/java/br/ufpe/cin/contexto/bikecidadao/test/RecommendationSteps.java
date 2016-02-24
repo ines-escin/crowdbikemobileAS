@@ -28,13 +28,10 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.notNullValue;
 
-/**
- * Created by tcbenkhard on 08/12/15.
- */
-@CucumberOptions(features = "features")
-public class MainActivitySteps extends ActivityInstrumentationTestCase2<MainActivity> {
+@CucumberOptions(features = "features" )
+public class RecommendationSteps extends ActivityInstrumentationTestCase2<MainActivity> {
 
-    public MainActivitySteps(MainActivity activityClass) {
+    public RecommendationSteps(MainActivity activityClass) {
         super(MainActivity.class);
     }
 

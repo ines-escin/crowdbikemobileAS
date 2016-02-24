@@ -5,9 +5,6 @@ import android.support.test.runner.MonitoringInstrumentation;
 
 import cucumber.api.android.CucumberInstrumentationCore;
 
-/**
- * Created by tcbenkhard on 08/12/15.
- */
 public class CucumberRunner extends MonitoringInstrumentation {
 
     private final CucumberInstrumentationCore mInstrumentationCore = new CucumberInstrumentationCore(this);
