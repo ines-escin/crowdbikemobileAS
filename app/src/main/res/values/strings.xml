@@ -31,5 +31,9 @@
     <string name="title_activity_results">Resultados</string>
     <string name="action_save_track">Salvar</string>
 
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="menu_history_title" >Histórico</string>
+
 
 </resources>

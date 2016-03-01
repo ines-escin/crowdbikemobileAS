@@ -2,11 +2,13 @@ package br.ufpe.cin.contexto.bikecidadao;
 
 import android.content.SharedPreferences;
 import android.os.SystemClock;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,10 +41,17 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+        setActivityEnvironment();
         initVariables();
         showTrackCards();
     }
 
+    private void setActivityEnvironment() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+    }
     private void initVariables() {
 
         gson = new Gson();
@@ -80,13 +89,13 @@ public class HistoryActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case android.R.id.home:
+                super.onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public static class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder>{
@@ -112,7 +121,7 @@ public class HistoryActivity extends AppCompatActivity {
             String content = trackInfo.getElapsedTime()/1000.0 + " s" + distance + " m\n" + (int)avgSpeed+" km/h";
 
             personViewHolder.chronometer.setBase(SystemClock.elapsedRealtime()-trackInfo.getElapsedTime());
-            personViewHolder.distance.setText(new DecimalFormat("#.#").format(distance/1000));
+            personViewHolder.distance.setText(new DecimalFormat("#.#").format(distance/1000.0));
             personViewHolder.avgSpeed.setText(new DecimalFormat("#.#").format(avgSpeed));
 
         }

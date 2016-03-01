@@ -6,7 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,10 +17,17 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -168,7 +175,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     boolean mBroadcastIsRegistered = false;
 
 	private LocalRepositoryController localRepositoryController;
-    @Override
+
+	private Toolbar toolbar;
+	private DrawerLayout mDrawerLayout;
+	private NavigationView nvDrawer;
+	private ActionBarDrawerToggle mDrawerToggle;
+
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -227,9 +241,51 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             setStartButtonState(true);
         }
 
+		toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerToggle = setupDrawerToggle();
+
+		nvDrawer = (NavigationView) findViewById(R.id.nvView);
+		setupDrawerContent(nvDrawer);
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
+
 	}
 
-    @Override
+	private void setupDrawerContent(NavigationView navigationView) {
+		navigationView.setNavigationItemSelectedListener(
+				new NavigationView.OnNavigationItemSelectedListener() {
+					@Override
+					public boolean onNavigationItemSelected(MenuItem menuItem) {
+						selectDrawerItem(menuItem);
+						return true;
+					}
+				});
+	}
+
+	public void selectDrawerItem(MenuItem menuItem) {
+
+		Class fragmentClass;
+		switch(menuItem.getItemId()) {
+			case R.id.menu_history:
+				fragmentClass = HistoryActivity.class;
+				break;
+			default:
+				fragmentClass = HistoryActivity.class;
+		}
+
+		startActivity(new Intent(this, fragmentClass));
+
+		// Highlight the selected item, update the title, and close the drawer
+		menuItem.setChecked(false);
+		mDrawerLayout.closeDrawers();
+	}
+	private ActionBarDrawerToggle setupDrawerToggle() {
+		return new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open,  R.string.drawer_close);
+	}
+
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         // Inflate the menu items for use in the action bar
@@ -240,7 +296,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
+		if (mDrawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
+			// Handle presses on the action bar items
 		threadsAlive = false;
 		if(mGoogleApiClient != null){
 			stopLocationUpdate();
@@ -249,10 +308,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             case R.id.view_map_action:
                 displayMapActivity();
                 return true;
+			case android.R.id.home:
+				mDrawerLayout.openDrawer(GravityCompat.START);
+				return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		mDrawerToggle.syncState();
+	}
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		// Pass any configuration change to the drawer toggles
+		mDrawerToggle.onConfigurationChanged(newConfig);
+	}
 
     @Override
     public void onMapReady(GoogleMap map) {
