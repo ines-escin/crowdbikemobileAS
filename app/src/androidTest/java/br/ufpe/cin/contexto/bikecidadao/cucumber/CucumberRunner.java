@@ -1,4 +1,4 @@
-package br.ufpe.cin.contexto.bikecidadao.test;
+package br.ufpe.cin.contexto.bikecidadao.cucumber;
 
 import android.os.Bundle;
 import android.support.test.runner.MonitoringInstrumentation;

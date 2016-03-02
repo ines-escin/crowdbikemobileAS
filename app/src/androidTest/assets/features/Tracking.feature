@@ -3,26 +3,22 @@ Feature: Tracking
 	I want to track, save and view my routes
 	so that I can see all the information about my running such as time taken, distance, average speed and calories.
 
-  	Scenario: start tracking service
-	  Given I am at the MainActivity
-	  When I click the start button
-      Then the start button is changed to stop button
+  	Scenario: start tracking
+	  Given I am on the main screen
+	  When I click to start tracking
+      Then the tracking is started
+      And the chronometer starts counting
+
+    Scenario: stop tracking
+      Given I am on the main screen
       And the tracking is started
-
-    Scenario: stop tracking service
-      Given I am at the MainActivity
-      And the tracking service is already started
-      When I click the stop button
+      When I click to stop tracking
       Then the tracking is stopped
-      And I am at the ResultsActivity
-      And I can see the distance, time taken and average speed
+      And I should be on the results screen
+      And I can see the tracking details
 
-    Scenario: chronometer running while tracking service started
-      Given I am at the MainActivity
-      And  the tracking service is already started
-      Then the chronometer is running
+    Scenario: show current path on map
+      Given I just started a new tracking
+      When I go to a new location
+      Then I should see a line of my path on map
 
-    Scenario: chronometer at zero
-      Given I am at the MainActivity
-      And  the tracking service is not started
-      Then the chronometer is in 0

@@ -1,5 +1,7 @@
-package br.ufpe.cin.contexto.bikecidadao.test;
+package br.ufpe.cin.contexto.bikecidadao.cucumber.steps;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 
@@ -10,8 +12,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import com.example.bikecidadao.R;
-
 
 
 import static android.support.test.espresso.Espresso.onView;
@@ -37,53 +37,61 @@ public class TrackingSteps extends ActivityInstrumentationTestCase2<MainActivity
 
     @Before
     public void setUp() {
+        getActivity();
     }
-    @When("^I click the start button$")
-    public void i_click_the_start_button() throws Throwable {
+
+
+    @Given("^I just started a new tracking$")
+    public void i_just_started_a_new_tracking() throws Throwable {
 
     }
-    @Then("^the start button is changed to stop button$")
-    public void the_start_button_is_changed_to_stop_button() throws Throwable {
+
+    @When("^I click to stop tracking$")
+    public void i_click_to_stop_tracking() throws Throwable {
 
     }
-    @Then("^the tracking is started$")
-    public void the_tracking_is_started() throws Throwable {
-		//TODO
-    }
-    @Given("^the tracking service is already started$")
-    public void the_tracking_service_is_already_started() throws Throwable {
+    @When("^I click to start tracking$")
+    public void i_click_to_start_tracking() throws Throwable {
 
     }
-    @When("^I click the stop button$")
-    public void i_click_the_stop_button() throws Throwable {
-
+    @When("^I go to a new location$")
+    public void i_go_to_a_new_location() throws Throwable {
     }
     @Then("^the tracking is stopped$")
     public void the_tracking_is_stopped() throws Throwable {
 
     }
-    @Then("^I am at the ResultsActivity$")
-    public void i_Am_at_the_ResultsActivity() throws Throwable {
+
+    @Then("^the tracking is started$")
+    public void the_tracking_is_started() throws Throwable {
+
+    }
+    @Then("^I should be on the results screen$")
+    public void i_should_be_on_the_results_screen() throws Throwable {
 
     }
 
-    @Then("^I can see the distance, time taken and average speed$")
-    public void i_can_see_the_distance_time_taken_and_average_speed() throws Throwable {
-		//TODO
+    @Then("^the chronometer starts counting$")
+    public void the_chronometer_starts_counting() throws Throwable {
     }
 
-    @Then("^the chronometer is running$")
-    public void the_chronometer_is_running() throws Throwable {
-		//TODO
-    }
-
-    @Given("^the tracking service is not started$")
-    public void the_tracking_service_is_not_started() throws Throwable {
+    @Then("^I can see the tracking details$")
+    public void i_can_see_the_tracking_details() throws Throwable {
 
     }
-    
-    @Then("^the chronometer is in (\\d+)$")
-    public void the_chronometer_is_in(int arg1) throws Throwable {
-		//TODO
+
+    @Then("^I should see a line of my path on map$")
+    public void i_should_see_a_line_of_my_path_on_map() throws Throwable {
+
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

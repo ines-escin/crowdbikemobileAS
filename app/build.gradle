@@ -71,8 +71,8 @@ android {
         targetSdkVersion 23
         applicationId "br.ufpe.cin.contexto.bikecidadao"
 
-        testApplicationId "br.ufpe.cin.contexto.bikecidadao.test"
-        testInstrumentationRunner "br.ufpe.cin.contexto.bikecidadao.test.CucumberRunner"
+        testApplicationId "br.ufpe.cin.contexto.bikecidadao.cucumber"
+        testInstrumentationRunner "br.ufpe.cin.contexto.bikecidadao.cucumber.CucumberRunner"
 
         multiDexEnabled true
     }
