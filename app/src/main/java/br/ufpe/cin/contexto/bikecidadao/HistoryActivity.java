@@ -1,6 +1,7 @@
 package br.ufpe.cin.contexto.bikecidadao;
 
-import android.content.SharedPreferences;
+import android.content.Context;
+import android.content.Intent;
 import android.os.SystemClock;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,19 +17,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.bikecidadao.R;
 import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
-import br.ufpe.cin.db.bikecidadao.entity.TrackInfo;
-import br.ufpe.cin.util.bikecidadao.Constants;
+import br.ufpe.cin.db.bikecidadao.model.TrackInfo;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -61,7 +60,7 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void showTrackCards(){
-        List tracks = localRepositoryController.getAllTrackInfo();
+        List tracks = TrackInfo.listAll(TrackInfo.class);
 
         Collections.sort(tracks, TrackInfo.DATE_COMPARATOR);
 
@@ -115,17 +114,24 @@ public class HistoryActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(PersonViewHolder personViewHolder, int position) {
-            TrackInfo trackInfo = tracks.get(position);
+            final TrackInfo trackInfo = tracks.get(position);
             double distance = trackInfo.getDistance();
-            double avgSpeed = (trackInfo.getDistance()/(trackInfo.getElapsedTime()/1000))*3.6;
+            double avgSpeed = (trackInfo.getDistance()/(trackInfo.getElapsedTime()/1000.0))*3.6;
             String content = trackInfo.getElapsedTime()/1000.0 + " s" + distance + " m\n" + (int)avgSpeed+" km/h";
 
             personViewHolder.chronometer.setBase(SystemClock.elapsedRealtime()-trackInfo.getElapsedTime());
-            personViewHolder.distance.setText(new DecimalFormat("#.#").format(distance/1000.0));
-            personViewHolder.avgSpeed.setText(new DecimalFormat("#.#").format(avgSpeed));
-
+            personViewHolder.distance.setText(new DecimalFormat("#.##").format(distance / 1000.0));
+            personViewHolder.avgSpeed.setText(new DecimalFormat("#.##").format(avgSpeed));
+            personViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Context context = view.getContext();
+                    Intent intent = new Intent(context, ResultsActivity.class);
+                    intent.putExtra("trackId", trackInfo.getId());
+                    context.startActivity(intent);
+                }
+            });
         }
-
 
         @Override
         public int getItemCount() {

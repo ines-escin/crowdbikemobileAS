@@ -9,11 +9,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
@@ -34,9 +32,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
-import br.ufpe.cin.db.bikecidadao.entity.TrackInfo;
+import br.ufpe.cin.db.bikecidadao.model.TrackInfo;
 
 public class ResultsActivity extends AppCompatActivity implements OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener {
 
@@ -46,13 +43,25 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
     private LocalRepositoryController localRepositoryController;
     private TrackInfo trackInfo;
 
+    boolean newTrack = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
         setActivityEnvironment();
         initVariables();
+
+        Intent intent = getIntent();
+        if(intent!=null && intent.hasExtra("trackId")){
+            long id=intent.getLongExtra("trackId", 1);
+            trackInfo = TrackInfo.findById(TrackInfo.class, id);
+        }else{
+            newTrack = true;
+            trackInfo = localRepositoryController.getTmpTracking();
+        }
         loadTrackInfo();
+
     }
 
 
@@ -78,7 +87,8 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_results, menu);
+        if(newTrack)
+            getMenuInflater().inflate(R.menu.menu_results, menu);
         return true;
     }
 
@@ -93,7 +103,7 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
                 this.onBackPressed();
                 return true;
             case R.id.action_save_track:
-                localRepositoryController.saveTrackingInHistory(trackInfo);
+                trackInfo.save();
                 startHistoryActivity();
                 return true;
             default:
@@ -103,25 +113,28 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
 
     @Override
     public void onBackPressed() {
+        if(newTrack){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getString(R.string.discard_save))
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.discard_save))
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
+                            ResultsActivity.super.onBackPressed();
 
-                        ResultsActivity.super.onBackPressed();
+                        }
+                    })
+                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    })
+            ;
 
-                    }
-                })
-                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                })
-        ;
-
-        builder.create().show();
+            builder.create().show();
+        }else{
+            super.onBackPressed();
+        }
 
     }
 
@@ -138,20 +151,19 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void loadTrackInfo() {
-        trackInfo = localRepositoryController.getTmpTracking();
-
         Chronometer chronometerV = (Chronometer) findViewById(R.id.chronometer);
         TextView distanceV = (TextView )findViewById(R.id.distance);
         TextView avgSpeedV = (TextView) findViewById(R.id.avg_speed);
 
         double distance = trackInfo.getDistance();
-        double avgSpeed = (trackInfo.getDistance()/(trackInfo.getElapsedTime()/1000))*3.6;
+        double avgSpeed = (trackInfo.getDistance()/(trackInfo.getElapsedTime()/1000.0))*3.6;
 
         chronometerV.setBase(SystemClock.elapsedRealtime() - trackInfo.getElapsedTime());
-        distanceV.setText(new DecimalFormat("#.#").format(distance / 1000.0));
-        avgSpeedV.setText(new DecimalFormat("#.#").format(avgSpeed));
+        distanceV.setText(new DecimalFormat("#.##").format(distance / 1000.0));
+        avgSpeedV.setText(new DecimalFormat("#.##").format(avgSpeed));
 
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {

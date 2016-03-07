@@ -1,23 +1,28 @@
-package br.ufpe.cin.db.bikecidadao.entity;
+package br.ufpe.cin.db.bikecidadao.model;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.orm.SugarRecord;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
  * Created by jal3 on 03/02/2016.
  */
-public class TrackInfo {
+public class TrackInfo extends SugarRecord implements Serializable {
 
-    private long id;
     private ArrayList<LatLng> trackingPoints;
     private long startTime;
     private long endTime;
     private double distance;
 
-    public TrackInfo(ArrayList<LatLng> trackingPoints, long startTime, long endTime, double distance) {
-        this.trackingPoints = trackingPoints;
+    public TrackInfo(){
+        trackingPoints= new ArrayList<LatLng>();
+    }
+
+    public TrackInfo(long startTime, long endTime, double distance) {
+        this();
         this.startTime = startTime;
         this.endTime = endTime;
         this.distance = distance;
@@ -27,16 +32,32 @@ public class TrackInfo {
         return trackingPoints;
     }
 
+    public void setTrackingPoints(ArrayList<LatLng> trackingPoints) {
+        this.trackingPoints = trackingPoints;
+    }
+
     public long getStartTime() {
         return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 
     public long getEndTime() {
         return endTime;
     }
 
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
+
     public double getDistance() {
         return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 
     public long getElapsedTime(){

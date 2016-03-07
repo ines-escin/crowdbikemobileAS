@@ -4,14 +4,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
 import com.example.bikecidadao.R;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -27,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
-import br.ufpe.cin.db.bikecidadao.entity.TrackInfo;
+import br.ufpe.cin.db.bikecidadao.model.TrackInfo;
 import br.ufpe.cin.util.bikecidadao.Constants;
 
 public class LocationTrackerService extends Service implements LocationListener, ConnectionCallbacks{
@@ -303,7 +300,8 @@ public class LocationTrackerService extends Service implements LocationListener,
     }
 
     private void saveTmpTracking() {
-        TrackInfo trackInfo = new TrackInfo(trackingPoints, getStartTime(), System.currentTimeMillis(), distance);
+        TrackInfo trackInfo = new TrackInfo(getStartTime(), System.currentTimeMillis(), distance);
+        trackInfo.setTrackingPoints(trackingPoints);
         localRepositoryController.saveTmpTracking(trackInfo);
     }
 

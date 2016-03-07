@@ -31,20 +31,9 @@ dependencies {
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
 
     androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.5.2'
-//    testCompile 'junit:junit:4.12'
-//    //testCompile "org.mockito:mockito-core:1.9.5"
-//    compile files('libs/AmarinoLibrary_v0_55.jar')
-//    compile files('libs/commons-cli-1.1.jar')
-//    compile files('libs/commons-io-1.2.jar')
-//    compile files('libs/commons-lang3-3.3.2.jar')
-//    compile files('libs/json-simple-1.1.jar')
-//    compile files('libs/jsonassert-1.2.3.jar')
-//    compile fileTree('libs/uiautomator.jar')
 
-
-   // androidTestCompile 'org.robolectric:robolectric:2.3'
-   // testCompile 'org.robospock:robospock:0.7.0'
-
+    // SugarORM
+    compile 'com.github.satyan:sugar:1.4'
 
     compile 'com.android.support:support-v4:23.0.1'
     compile 'com.google.code.gson:gson:2.3'
