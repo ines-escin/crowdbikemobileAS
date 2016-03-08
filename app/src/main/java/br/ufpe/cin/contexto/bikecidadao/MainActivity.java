@@ -2,8 +2,11 @@ package br.ufpe.cin.contexto.bikecidadao;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,10 +15,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -24,7 +36,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -42,10 +57,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.google.maps.android.SphericalUtil;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -72,14 +92,16 @@ import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncSendNotification;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
 import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
+import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
 import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
+import br.ufpe.cin.util.bikecidadao.Constants;
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 
 @SuppressLint("NewApi")
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, OnGetOccurrencesCompletedCallback,
-		LocationListener {
+		GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback,
+        LocationListener, OnClickListener , OnGetOccurrencesCompletedCallback{
     public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização ruim", "Via danificada"};
     private GoogleMap googleMap;
     private HashMap<String,String> markers;
@@ -132,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	// The minimum distance to change Updates in meters
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0; // 1 meters
-	// The minimum time between updates in milliseconds
+	// The minimum startTime between updates in milliseconds
 	private static final long MIN_TIME_BW_UPDATES = 0;// 1000 * 60 * 1; // 1
 	// minute
 
@@ -140,13 +162,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 	private String registered = "";
-	private GoogleApiClient mGoogleApiClient;
+
+    private Intent trackingIntent;
+
+
+    private GoogleApiClient mGoogleApiClient;
 	private LocationRequest mLocationRequest;
-    public boolean threadsAlive = false;
+	private Location mLastLocation;
+	public boolean threadsAlive = false;
+	Chronometer chronometer;
+	long startTime;
+    boolean mBroadcastIsRegistered = false;
+
+	private LocalRepositoryController localRepositoryController;
+
+	private Toolbar toolbar;
+	private DrawerLayout mDrawerLayout;
+	private NavigationView nvDrawer;
+	private ActionBarDrawerToggle mDrawerToggle;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+		trackingIntent = new Intent(this, LocationTrackerService.class);
+		localRepositoryController = new LocalRepositoryController(this);
 		setContentView(R.layout.activity_main);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -191,9 +232,60 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		if(!ConnectivityUtil.isNetworkAvaiable(this)){
 			Toast.makeText(getApplicationContext(), getText(R.string.no_network_avaible), Toast.LENGTH_LONG).show();
 		}
+		chronometer = (Chronometer) findViewById(R.id.chronometer);
+        Button startButton = (Button)findViewById(R.id.start_button);
+        startButton.setOnClickListener(this);
+
+        if(isTracking()){
+            startTrackingService();
+            setStartButtonState(true);
+        }
+
+		toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerToggle = setupDrawerToggle();
+
+		nvDrawer = (NavigationView) findViewById(R.id.nvView);
+		setupDrawerContent(nvDrawer);
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
+
 	}
 
-    @Override
+	private void setupDrawerContent(NavigationView navigationView) {
+		navigationView.setNavigationItemSelectedListener(
+				new NavigationView.OnNavigationItemSelectedListener() {
+					@Override
+					public boolean onNavigationItemSelected(MenuItem menuItem) {
+						selectDrawerItem(menuItem);
+						return true;
+					}
+				});
+	}
+
+	public void selectDrawerItem(MenuItem menuItem) {
+
+		Class fragmentClass;
+		switch(menuItem.getItemId()) {
+			case R.id.menu_history:
+				fragmentClass = HistoryActivity.class;
+				break;
+			default:
+				fragmentClass = HistoryActivity.class;
+		}
+
+		startActivity(new Intent(this, fragmentClass));
+
+		// Highlight the selected item, update the title, and close the drawer
+		menuItem.setChecked(false);
+		mDrawerLayout.closeDrawers();
+	}
+	private ActionBarDrawerToggle setupDrawerToggle() {
+		return new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open,  R.string.drawer_close);
+	}
+
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         // Inflate the menu items for use in the action bar
@@ -204,7 +296,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
+		if (mDrawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
+			// Handle presses on the action bar items
 		threadsAlive = false;
 		if(mGoogleApiClient != null){
 			stopLocationUpdate();
@@ -213,14 +308,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             case R.id.view_map_action:
                 displayMapActivity();
                 return true;
+			case android.R.id.home:
+				mDrawerLayout.openDrawer(GravityCompat.START);
+				return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		mDrawerToggle.syncState();
+	}
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		// Pass any configuration change to the drawer toggles
+		mDrawerToggle.onConfigurationChanged(newConfig);
+	}
+
     @Override
     public void onMapReady(GoogleMap map) {
-        // Add a marker in Sydney, Australia, and move the camera.
         this.googleMap = map;
 
         //this.googleMap.setOnMapLongClickListener(this);
@@ -230,19 +339,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         try {
             AsyncGetOcurrences asyncGetOcurrences = new AsyncGetOcurrences(MainActivity.this);
-            asyncGetOcurrences.execute();
+			asyncGetOcurrences.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-
-
 	@Override
 	protected void onPause() {
 		super.onPause();
 		mGoogleApiClient.disconnect();
+
+        if (mBroadcastIsRegistered) {
+            unregisterReceiver(broadcastReceiver);
+            mBroadcastIsRegistered = false;
+        }
 	}
 
 	@Override
@@ -253,6 +365,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			startLocationUpdate();
 		}
 		firstForecast = true;
+
+        if (!mBroadcastIsRegistered) {
+            registerReceiver(broadcastReceiver, new IntentFilter(
+                    LocationTrackerService.BROADCAST_ACTION));
+            mBroadcastIsRegistered = true;
+        }
+
 	}
 
 
@@ -298,6 +417,97 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	public void updateResults(String resultado) throws Exception {
 		retornoServidorFiware(resultado);
 	}
+	boolean isTracking = false;
+
+    Location startLocation;
+
+
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()){
+
+		case R.id.start_button:
+
+            boolean isTracking = isTracking();
+
+            if(isTracking){ //then stop and show start button
+				stopTrackingService();
+            }else{
+				startTrackingService();
+            }
+            setStartButtonState(!isTracking);
+
+
+			break;
+
+		}
+	}
+
+    // true if it's tracking, otherwise false
+	public void setStartButtonState(boolean isTracking){
+		Button startButton = (Button) findViewById(R.id.start_button);
+		if(isTracking) {
+			ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.red_smooth));
+			startButton.setText(getResources().getText(R.string.stop_run));
+		}else{
+			ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.green_smooth));
+			startButton.setText(getResources().getText(R.string.start_run));
+		}
+	}
+
+    public long getRunElapsedTime(){
+		long elapsed = (System.currentTimeMillis()-localRepositoryController.getStartTime());
+		return SystemClock.elapsedRealtime() - elapsed;
+    }
+
+	private void startTrackingService() {
+
+//        chronometer.setBase(SystemClock.elapsedRealtime() - getStartTime());
+//        chronometer.start();
+        startLocation = getLastLocation();
+        //drawStartPoint(startLocation);
+        //drawPolyline(startLocation);
+
+        trackingIntent.putExtra(Constants.TRACKING_ACTION, Constants.TRACKING_SERVICE_COMMAND_START);
+        startService(trackingIntent);
+
+		registerReceiver(broadcastReceiver, new IntentFilter(
+				LocationTrackerService.BROADCAST_ACTION));
+		mBroadcastIsRegistered = true;
+
+	}
+
+	private void stopTrackingService() {
+
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.stop();
+
+        if(polyline !=null) {
+            //greenPoint.remove();
+            polyline.remove();
+            polyline=null;
+        }
+
+        trackingIntent.putExtra(Constants.TRACKING_ACTION, Constants.TRACKING_SERVICE_COMMAND_STOP);
+        stopService(trackingIntent);
+
+
+		if (mBroadcastIsRegistered) {
+			unregisterReceiver(broadcastReceiver);
+			mBroadcastIsRegistered = false;
+		}
+
+	}
+
+	private void drawStartPoint(Location startLocation){
+        greenPoint = googleMap.addCircle(new CircleOptions()
+                .center(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()))
+                .radius(2)
+                .strokeColor(ContextCompat.getColor(getApplicationContext(), R.color.green_smooth))
+                .fillColor(ContextCompat.getColor(getApplicationContext(), R.color.green_smooth))
+                .strokeWidth(16)
+                .zIndex(2));
+    }
 
 	public class DoSomethingThread extends Thread {
 
@@ -409,6 +619,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
     }
+
+
 
 
 	public void retornoServidorFiware(String retorno) throws Exception {
@@ -786,12 +998,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		mGoogleApiClient.connect();
 	}
 
+										//mili * sec * minute
+										//1000 * 60 * 1
+	private static final long INTERVAL = 1000 * 4;
+	private static final long FASTEST_INTERVAL = 1000 * 2;
+    private static final long SMALLEST_DISPLACEMENT = 10;
 
 	private void initLocationRequest(){
 		mLocationRequest = new LocationRequest();
-		mLocationRequest.setInterval(2000);
-		mLocationRequest.setFastestInterval(1000);
-		mLocationRequest.setSmallestDisplacement(1); // deslocamento mínimo em metros
+		mLocationRequest.setInterval(INTERVAL);
+		mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+		mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT); // deslocamento mínimo em metros
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
 
@@ -812,16 +1029,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	public void onConnected(Bundle bundle) {
 		Log.i("LOG", "UpdateLocationActivity.onConnected(" + bundle + ")");
 
-		Location mLastLocation = LocationServices
-				.FusedLocationApi
-				.getLastLocation(mGoogleApiClient); // PARA JÁ TER UMA COORDENADA PARA O UPDATE FEATURE UTILIZAR
+		mLastLocation = getLastLocation(); // PARA JÁ TER UMA COORDENADA PARA O UPDATE FEATURE UTILIZAR
 
         if(mLastLocation !=null){
             LatLng currentLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
-        }
+		}
 
 		startLocationUpdate();
+	}
+
+	private Location getLastLocation(){
+		if(mGoogleApiClient!=null && mGoogleApiClient.isConnected())
+			return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+		return null;
 	}
 
 	@Override
@@ -878,6 +1099,77 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			}
 		}
 
+		//updateTracking(loc);
+	}
+
+	String mLastUpdateTime;
+	Polyline polyline;
+    Circle greenPoint;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent serviceIntent) {
+
+            updateTracking(serviceIntent);
+        }
+    };
+
+	private void updateTracking(Intent serviceIntent){
+		ArrayList<LatLng> points = serviceIntent.getParcelableArrayListExtra("trackingPoints");
+
+		if(isTracking()) {
+          //  this.startTime = startTime;
+//            long now = System.currentTimeMillis();
+//            long elapsed = now - getStartTime();
+            chronometer.setBase(getRunElapsedTime());
+            chronometer.start();
+            drawPolyline(points);
+        }
+	}
+
+    //TODO refactor to a PreferenceManager class
+	public boolean isTracking(){
+		return localRepositoryController.isTracking();
+    }
+
+
+	private boolean isLocationValid(Location lastLocation, Location nextLocation){
+		double accuracy = nextLocation.getAccuracy();
+		if(accuracy==0.0) return false; // means there's no accuracy
+
+		double timeDelta = nextLocation.getElapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos();
+        timeDelta /= 1e9;
+		List<LatLng> points = new ArrayList<>();
+		points.add( new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+		points.add(new LatLng(nextLocation.getLatitude(), nextLocation.getLongitude()));
+
+		double path = SphericalUtil.computeLength(points);
+	//	if((path/timeDelta)>17) return false;
+
+		if(accuracy<15) return true;
+
+		return false;
+	}
+
+    public double getAverageSpeed(){
+        return ((int)(SphericalUtil.computeLength(polyline.getPoints()) / ((SystemClock.elapsedRealtime()-chronometer.getBase())/1000))) * 3.6;
+    }
+
+	private void drawPolyline(ArrayList<LatLng> points){
+//		ArrayList<LatLng> latLngPoints = new ArrayList<>();
+//		for (Location location: points) {
+//			latLngPoints.add(new LatLng(location.getLatitude(), location.getLongitude()));
+//		}
+
+        if (polyline == null) {
+            polyline = googleMap.addPolyline(new PolylineOptions()
+                    .width(8)
+                    .color(ContextCompat.getColor(getApplicationContext(), R.color.red_smooth))
+                    .geodesic(true)
+                    .zIndex(1));
+        }
+
+        polyline.setPoints(points);
 	}
 
     private void setToggleVoiceAlert(){

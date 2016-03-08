@@ -28,7 +28,7 @@ public class SplashScreenActivity extends Activity {
 		@Override
 		protected Object doInBackground(Object... arg0) {
 			try {
-			ImageView image = (ImageView) findViewById(R.id.splash);
+			final ImageView image = (ImageView) findViewById(R.id.splash);
 			Animation fadeIn = new AlphaAnimation(0, 1);
 			fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
 			fadeIn.setDuration(1000);
@@ -38,11 +38,17 @@ public class SplashScreenActivity extends Activity {
 			fadeOut.setStartOffset(2000);
 			fadeOut.setDuration(1000);
 
-			AnimationSet animation = new AnimationSet(false); //change to false
+			final AnimationSet animation = new AnimationSet(false); //change to false
 			animation.addAnimation(fadeIn);
 			animation.addAnimation(fadeOut);
-			image.setVisibility(View.INVISIBLE);
-			image.setAnimation(animation);
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					image.setVisibility(View.INVISIBLE);
+					image.setAnimation(animation);
+
+				  }
+			  });
 			Thread.sleep(DEFAULT_DELAY_TIME + 500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -50,7 +56,7 @@ public class SplashScreenActivity extends Activity {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Object result){
 

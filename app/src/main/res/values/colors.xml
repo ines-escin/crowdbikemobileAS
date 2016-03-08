@@ -9,12 +9,14 @@
 
     <color name="teal">#009688</color>
     <color name="teal_dark">#004D40</color>
-    <color name="teal_accent">#80CBC4</color>
+    <color name="teal_accent">#B2DFDB</color>
 
     <color name="red_smooth">#c83737</color>
     <color name="yellow_smooth">#ffc107</color>
     <color name="green_smooth">#077375</color>
     <color name="gray_1">#eee</color>
+    <color name="gray_2">#ddd</color>
+    <color name="gray_3">#ccc</color>
     <color name="gray_9">#888</color>
     <color name="gray_11">#666</color>
 

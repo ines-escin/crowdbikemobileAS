@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -89,7 +90,8 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
         super.onCreate(icicle);
 		setContentView(R.layout.activity_display_map);
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -121,7 +123,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 //        @Override
 //        public void onClick(View v) {
 //            Button startButton = (Button) findViewById(R.id.start_button);//            double seconds = getTimeInSeconds();
-//            if(isStarted){ //then stop and show start button
+//            if(isTracking){ //then stop and show start button
 //                ViewCompat.setBackgroundTintList(startButton, ContextCompat.getColorStateList(getApplicationContext(), R.color.green_smooth));
 //                startButton.setText(getResources().getText(R.string.start_run));
 //                stopTime = seconds;
@@ -130,7 +132,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 //                startButton.setText(getResources().getText(R.string.stop_run));
 //                startTime = seconds;
 //            }
-//            isStarted = !isStarted;
+//            isTracking = !isTracking;
 //        }
 //    };
 
@@ -173,7 +175,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         selectedOccurence = 0;
         AlertDialog.Builder builder = new AlertDialog.Builder(MapDisplayActivity.this);
         // Set the dialog title
-        builder.setTitle("Reportar um problema")
+        builder.setTitle(getString(R.string.report_an_issue))
                 // Specify the list array, the items to be selected by default (null for none),
                 // and the listener through which to receive callbacks when items are selected
 //	    	.setMessage("helper message")
@@ -552,7 +554,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 
     @Override
     public void onLocationChanged(Location location) {
-//        if(isStarted) {
+//        if(isTracking) {
 //            mCurrentLocation = location;
 //            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
 //            LatLng currentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());

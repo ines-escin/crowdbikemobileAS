@@ -34,7 +34,13 @@
         android:allowBackup="true"
         android:icon="@drawable/app_icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:name="com.orm.SugarApp">
+
+        <meta-data android:name="DATABASE" android:value="bikecidao.db" />
+        <meta-data android:name="VERSION" android:value="2" />
+        <meta-data android:name="QUERY_LOG" android:value="true" />
+        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="br.ufpe.cin.db.bikecidadao.model" />
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
@@ -42,7 +48,7 @@
 
         <activity
             android:name="br.ufpe.cin.contexto.bikecidadao.MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="MAIN_ACTIVITY" />
 
@@ -50,8 +56,9 @@
             </intent-filter>
         </activity>
 
-        <uses-library android:name="com.google.android.maps" />
         <uses-library android:name="android.test.runner" />
+
+        <service android:name="br.ufpe.cin.contexto.bikecidadao.LocationTrackerService" />
 
         <activity
             android:name="br.ufpe.cin.contexto.bikecidadao.ActivitySendNotification"
@@ -60,11 +67,11 @@
         </activity>
         <activity
             android:name="br.ufpe.cin.contexto.bikecidadao.MapDisplayActivity"
-            android:screenOrientation="portrait"
-            android:parentActivityName="br.ufpe.cin.contexto.bikecidadao.MainActivity">
+            android:parentActivityName="br.ufpe.cin.contexto.bikecidadao.MainActivity"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="br.ufpe.cin.contexto.bikecidadao.MainActivity"/>
+                android:value="br.ufpe.cin.contexto.bikecidadao.MainActivity" />
         </activity>
         <activity
             android:name="br.ufpe.cin.contexto.bikecidadao.SplashScreenActivity"
@@ -80,24 +87,31 @@
 
         <meta-data
             android:name="com.google.android.gms.version"
-            tools:node ="replace"
-            android:value="7895000" />
+            android:value="7895000"
+            tools:node="replace" />
 
         <activity
             android:name="br.ufpe.cin.contexto.bikecidadao.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="stateAlwaysHidden"/>
-
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name="br.ufpe.cin.contexto.bikecidadao.RegisterActivity"
-            android:label="@string/title_activity_register"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_register"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="stateAlwaysHidden"/>
-
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity
+            android:name="br.ufpe.cin.contexto.bikecidadao.HistoryActivity"
+            android:label="@string/title_activity_history" >
+        </activity>
+        <activity
+            android:name="br.ufpe.cin.contexto.bikecidadao.ResultsActivity"
+            android:label="@string/title_activity_results"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>
