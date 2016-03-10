@@ -18,8 +18,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
@@ -93,6 +91,7 @@ import br.ufpe.cin.contexto.bikecidadao.async.AsyncSendNotification;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
 import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
+import br.ufpe.cin.db.bikecidadao.model.GeoLocation;
 import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
 import br.ufpe.cin.util.bikecidadao.Constants;
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
@@ -486,6 +485,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             //greenPoint.remove();
             polyline.remove();
             polyline=null;
+            ongoingMarker.remove();
+            startMarker.remove();
+            this.googleMap.setMyLocationEnabled(true);
         }
 
         trackingIntent.putExtra(Constants.TRACKING_ACTION, Constants.TRACKING_SERVICE_COMMAND_STOP);
@@ -1104,6 +1106,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	String mLastUpdateTime;
 	Polyline polyline;
+    Marker startMarker;
+    Marker ongoingMarker;
     Circle greenPoint;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -1115,7 +1119,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     };
 
 	private void updateTracking(Intent serviceIntent){
-		ArrayList<LatLng> points = serviceIntent.getParcelableArrayListExtra("trackingPoints");
+		ArrayList<GeoLocation> latLngPoints = serviceIntent.getParcelableArrayListExtra("trackingPoints");
+		ArrayList<LatLng> points = new ArrayList<>(latLngPoints.size()+1);
+		for (GeoLocation point : latLngPoints){
+			points.add(new LatLng(point.getLatitude(), point.getLongitude()));
+		}
 
 		if(isTracking()) {
           //  this.startTime = startTime;
@@ -1156,10 +1164,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 	private void drawPolyline(ArrayList<LatLng> points){
-//		ArrayList<LatLng> latLngPoints = new ArrayList<>();
-//		for (Location location: points) {
-//			latLngPoints.add(new LatLng(location.getLatitude(), location.getLongitude()));
-//		}
 
         if (polyline == null) {
             polyline = googleMap.addPolyline(new PolylineOptions()
@@ -1167,18 +1171,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .color(ContextCompat.getColor(getApplicationContext(), R.color.red_smooth))
                     .geodesic(true)
                     .zIndex(1));
+
+            startMarker = googleMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(points.get(0).latitude, points.get(0).longitude))
+                    .title("Start")
+                    .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(getMarkerView(R.layout.start_flag_layout))))
+                    .anchor(0.5f, 0.5f));
+            ongoingMarker = googleMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(points.get(0).latitude, points.get(0).longitude))
+                    .title("Ongoing")
+                    .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(getMarkerView(R.layout.ongoing_flag_layout))))
+                    .anchor(0.5f, 0.5f));
+            this.googleMap.setMyLocationEnabled(false);
         }
 
         polyline.setPoints(points);
+        ongoingMarker.setPosition(new LatLng(points.get(points.size() - 1).latitude, points.get(points.size() - 1).longitude));
+
 	}
 
     private void setToggleVoiceAlert(){
         ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_voice);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                doVoiceAlert = isChecked;
-            }
-        });
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				doVoiceAlert = isChecked;
+			}
+		});
     }
 
 	@Override
@@ -1248,19 +1266,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public Bitmap getBitmapIcon(int occurenceTypeID){
-        View markerView = getMarkerView(occurenceTypeID);
+        View markerView = getOccurrenceMarkerView(occurenceTypeID);
         Bitmap markerBmp =  createDrawableFromView(markerView);
         return markerBmp;
     }
-
-    public View getMarkerView(int occurenceTypeID){
+	public View getMarkerView(int viewId){
+		View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(viewId, null);
+		return marker;
+	}
+    public View getOccurrenceMarkerView(int occurenceTypeID){
         //OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização Ruim", "Via danificada"};
-
-        View marker = null;
-        int markerViewTypeID = getMarkViewTypeID(occurenceTypeID);
-        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(markerViewTypeID, null);
-        return marker;
-
+		return getMarkerView(getMarkViewOccurenceTypeID(occurenceTypeID));
     }
 
     public Bitmap createDrawableFromView(View view) {
@@ -1279,7 +1295,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return bitmap;
     }
 
-    private int getMarkViewTypeID(int occurenceTypeID){
+    private int getMarkViewOccurenceTypeID(int occurenceTypeID){
         int markerViewTypeID = R.layout.mark_layout;
 
         switch (occurenceTypeID){
