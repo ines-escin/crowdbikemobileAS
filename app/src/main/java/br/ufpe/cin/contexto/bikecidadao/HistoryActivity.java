@@ -22,11 +22,14 @@ import android.widget.Toast;
 import com.example.bikecidadao.R;
 import com.google.gson.Gson;
 
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
 
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
+import br.ufpe.cin.db.bikecidadao.dao.DatabaseHelper;
+import br.ufpe.cin.db.bikecidadao.dao.TrackInfoDao;
 import br.ufpe.cin.db.bikecidadao.model.TrackInfo;
 
 public class HistoryActivity extends AppCompatActivity {
@@ -60,19 +63,22 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void showTrackCards(){
-        List tracks = TrackInfo.listAll(TrackInfo.class);
+        DatabaseHelper databaseHelper = new DatabaseHelper(this);
+        List tracks = null;
+        try{
+            TrackInfoDao trackInfoDao = new TrackInfoDao(databaseHelper.getConnectionSource());
+            tracks = trackInfoDao.queryForAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         Collections.sort(tracks, TrackInfo.DATE_COMPARATOR);
-
-//        String jsonString = mSharedTrackingHistory.getString("1", null);
-//        TrackInfo trackInfo = gson.fromJson(jsonString, TrackInfo.class);
-
-//        TextView textAlertDetailsView = (TextView) findViewById(R.id.txtMensagem);
-//        textAlertDetailsView.setText(content);
 
         RVAdapter adapter = new RVAdapter(tracks);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
+
+        databaseHelper.close();
     }
 
     @Override

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
+import br.ufpe.cin.db.bikecidadao.model.GeoLocation;
 import br.ufpe.cin.db.bikecidadao.model.TrackInfo;
 import br.ufpe.cin.util.bikecidadao.Constants;
 
@@ -47,7 +48,7 @@ public class LocationTrackerService extends Service implements LocationListener,
     private static final long SMALLEST_DISPLACEMENT = 10;
     private boolean isStarted;
 
-    private ArrayList<LatLng> trackingPoints = new ArrayList<>();
+    private ArrayList<GeoLocation> trackingPoints = new ArrayList<>();
 
     private final Handler handler = new Handler();
     public static final String BROADCAST_ACTION = "br.ufpe.cin.contexto.bikecidadao.runningprogress";
@@ -184,7 +185,7 @@ public class LocationTrackerService extends Service implements LocationListener,
 
 
     private void saveTrackingLocations(Location location){
-        trackingPoints.add(new LatLng(location.getLatitude(), location.getLongitude()));
+        trackingPoints.add(new GeoLocation(location.getLatitude(), location.getLongitude()));
     }
 
 

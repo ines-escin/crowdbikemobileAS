@@ -1,8 +1,11 @@
 package br.ufpe.cin.contexto.bikecidadao;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Location;
 import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
@@ -10,8 +13,12 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
@@ -25,14 +32,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
+import br.ufpe.cin.db.bikecidadao.dao.DatabaseHelper;
+import br.ufpe.cin.db.bikecidadao.dao.GeoLocationDao;
+import br.ufpe.cin.db.bikecidadao.dao.TrackInfoDao;
+import br.ufpe.cin.db.bikecidadao.model.GeoLocation;
 import br.ufpe.cin.db.bikecidadao.model.TrackInfo;
 
 public class ResultsActivity extends AppCompatActivity implements OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener {
@@ -45,6 +61,11 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
 
     boolean newTrack = false;
 
+    DatabaseHelper databaseHelper;
+    TrackInfoDao trackInfoDao;
+    GeoLocationDao geoLocationDao;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,15 +74,18 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
         initVariables();
 
         Intent intent = getIntent();
-        if(intent!=null && intent.hasExtra("trackId")){
-            long id=intent.getLongExtra("trackId", 1);
-            trackInfo = TrackInfo.findById(TrackInfo.class, id);
-        }else{
+        if (intent != null && intent.hasExtra("trackId")) {
+            int id = intent.getIntExtra("trackId", 1);
+            try {
+                trackInfo = trackInfoDao.queryForId(id);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
             newTrack = true;
             trackInfo = localRepositoryController.getTmpTracking();
         }
         loadTrackInfo();
-
     }
 
 
@@ -78,10 +102,19 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     public void initVariables(){
+        databaseHelper = new DatabaseHelper(this);
+        try{
+            trackInfoDao = new TrackInfoDao(databaseHelper.getConnectionSource());
+            geoLocationDao = new GeoLocationDao(databaseHelper.getConnectionSource());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        localRepositoryController = new LocalRepositoryController(this);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        localRepositoryController = new LocalRepositoryController(this);
     }
 
     @Override
@@ -103,7 +136,16 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
                 this.onBackPressed();
                 return true;
             case R.id.action_save_track:
-                trackInfo.save();
+                try {
+                    trackInfoDao.create(trackInfo);
+                    for(GeoLocation d : trackInfo.getTrackingPoints()){
+                        d.setTrackInfo(trackInfo);
+                        geoLocationDao.create(d);
+                    }
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 startHistoryActivity();
                 return true;
             default:
@@ -183,25 +225,66 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
         mGoogleApiClient.connect();
 
         drawPolyline();
+
     }
 
 
     private void drawPolyline() {
-        ArrayList<LatLng> points = trackInfo.getTrackingPoints();
+        Collection<GeoLocation> latLngPoints = trackInfo.getTrackingPoints();
+        ArrayList<LatLng> points = new ArrayList<>(latLngPoints.size()+1);
+        for (GeoLocation point : latLngPoints){
+            points.add(new LatLng(point.getLatitude(), point.getLongitude()));
+        }
+
         Polyline polyline = googleMap.addPolyline(new PolylineOptions()
                 .width(8)
                 .color(ContextCompat.getColor(getApplicationContext(), R.color.red_smooth))
                 .geodesic(true)
                 .zIndex(1));
         polyline.setPoints(points);
+
+        googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(points.get(0).latitude, points.get(0).longitude))
+                .title("Start")
+                .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(getMarkerView(R.layout.start_flag_layout))))
+                .anchor(0.5f, 0.5f));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(points.get(0).latitude, points.get(0).longitude), 15));
+
+        googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(points.get(points.size() - 1).latitude, points.get(points.size() - 1).longitude))
+                .title("Stop")
+                .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(getMarkerView(R.layout.stop_flag_layout))))
+                .anchor(0, 1));
+
     }
+
+    public Bitmap createDrawableFromView(View view) {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        this.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
+    public View getMarkerView(int viewId){
+        View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(viewId, null);
+        return marker;
+    }
+
 
     @Override
     public void onConnected(Bundle connectionHint) {
 
         Location location = getLastLocation();
         LatLng currentLatLng =  new LatLng(location.getLatitude(), location.getLongitude());
-        this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
 
     }
 
@@ -218,4 +301,11 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        databaseHelper.close();
+    }
+
 }

@@ -1,24 +1,37 @@
 package br.ufpe.cin.db.bikecidadao.model;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.orm.SugarRecord;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.table.DatabaseTable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 
 /**
  * Created by jal3 on 03/02/2016.
  */
-public class TrackInfo extends SugarRecord implements Serializable {
+@DatabaseTable(tableName="track_info")
+public class TrackInfo implements Serializable {
 
-    private ArrayList<LatLng> trackingPoints;
+    @DatabaseField(generatedId=true)
+    private int id;
+
+    @DatabaseField
     private long startTime;
+    @DatabaseField
     private long endTime;
+    @DatabaseField
     private double distance;
 
+    @ForeignCollectionField
+    private Collection<GeoLocation> trackingPoints;
+
+
     public TrackInfo(){
-        trackingPoints= new ArrayList<LatLng>();
+
     }
 
     public TrackInfo(long startTime, long endTime, double distance) {
@@ -28,11 +41,11 @@ public class TrackInfo extends SugarRecord implements Serializable {
         this.distance = distance;
     }
 
-    public ArrayList<LatLng> getTrackingPoints() {
+    public Collection<GeoLocation> getTrackingPoints() {
         return trackingPoints;
     }
 
-    public void setTrackingPoints(ArrayList<LatLng> trackingPoints) {
+    public void setTrackingPoints(ArrayList<GeoLocation> trackingPoints) {
         this.trackingPoints = trackingPoints;
     }
 
@@ -62,6 +75,14 @@ public class TrackInfo extends SugarRecord implements Serializable {
 
     public long getElapsedTime(){
         return endTime - startTime;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public static Comparator<TrackInfo> DATE_COMPARATOR = new Comparator<TrackInfo>(){
