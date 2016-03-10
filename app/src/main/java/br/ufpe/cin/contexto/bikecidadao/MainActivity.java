@@ -1035,7 +1035,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if(mLastLocation !=null){
             LatLng currentLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
+            this.googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
 		}
 
 		startLocationUpdate();
@@ -1186,8 +1186,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
         polyline.setPoints(points);
-        ongoingMarker.setPosition(new LatLng(points.get(points.size() - 1).latitude, points.get(points.size() - 1).longitude));
-
+        LatLng lastLatLnt = new LatLng(points.get(points.size() - 1).latitude, points.get(points.size() - 1).longitude);
+        ongoingMarker.setPosition(lastLatLnt);
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastLatLnt, 16));
 	}
 
     private void setToggleVoiceAlert(){

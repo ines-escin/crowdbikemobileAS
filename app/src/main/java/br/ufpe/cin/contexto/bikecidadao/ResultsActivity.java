@@ -73,24 +73,19 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
         setActivityEnvironment();
         initVariables();
 
-
-        List tracks = null;
-
-
-
-            Intent intent = getIntent();
-            if (intent != null && intent.hasExtra("trackId")) {
-                int id = intent.getIntExtra("trackId", 1);
-                try {
-                    trackInfo = trackInfoDao.queryForId(id);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                newTrack = true;
-                trackInfo = localRepositoryController.getTmpTracking();
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("trackId")) {
+            int id = intent.getIntExtra("trackId", 1);
+            try {
+                trackInfo = trackInfoDao.queryForId(id);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            loadTrackInfo();
+        } else {
+            newTrack = true;
+            trackInfo = localRepositoryController.getTmpTracking();
+        }
+        loadTrackInfo();
     }
 
 
@@ -230,6 +225,7 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
         mGoogleApiClient.connect();
 
         drawPolyline();
+
     }
 
 
@@ -252,6 +248,8 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
                 .title("Start")
                 .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(getMarkerView(R.layout.start_flag_layout))))
                 .anchor(0.5f, 0.5f));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(points.get(0).latitude, points.get(0).longitude), 15));
+
         googleMap.addMarker(new MarkerOptions()
                 .position(new LatLng(points.get(points.size() - 1).latitude, points.get(points.size() - 1).longitude))
                 .title("Stop")
@@ -287,7 +285,6 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
 
         Location location = getLastLocation();
         LatLng currentLatLng =  new LatLng(location.getLatitude(), location.getLongitude());
-        this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16));
 
     }
 
