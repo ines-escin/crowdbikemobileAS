@@ -36,7 +36,6 @@ import static org.hamcrest.Matchers.notNullValue;
 @CucumberOptions(features = "features")
 public class VoiceAlertSteps extends ActivityInstrumentationTestCase2<MainActivity> {
 
-    private BaseScreen currentScreen;
     private Activity mActivity;
 
     public VoiceAlertSteps(MainActivity activityClass) {
@@ -45,12 +44,14 @@ public class VoiceAlertSteps extends ActivityInstrumentationTestCase2<MainActivi
 
     @Before
     public void setUp() {
-        mActivity = getActivity();
+
     }
 
     @Given("^I am on the main screen$")
     public void i_am_on_the_main_screen() throws Throwable {
-        currentScreen = new MainScreen();
+        mActivity = getActivity();
+        assertNotNull(mActivity);
+        onView(withId(R.id.drawer_layout)).check(matches(isDisplayed()));
     }
 
     @Given("^the voice alert is on$")

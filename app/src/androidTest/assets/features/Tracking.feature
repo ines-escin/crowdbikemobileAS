@@ -22,3 +22,15 @@ Feature: Tracking
       When I go to a new location
       Then I should see a line of my path on map
 
+    Scenario: list saved tracks
+      Given I have two tracks stored
+      When I go to the history screen
+      Then my tracks are displayed on the list
+
+    Scenario: show saved track
+      Given I have two tracks stored
+      When I go to the history screen
+      And I click on a track
+      Then I can see the tracking details
+
+

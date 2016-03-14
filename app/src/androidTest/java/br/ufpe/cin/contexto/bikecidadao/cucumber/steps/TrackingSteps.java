@@ -1,11 +1,14 @@
 package br.ufpe.cin.contexto.bikecidadao.cucumber.steps;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 
 import br.ufpe.cin.contexto.bikecidadao.MainActivity;
+import br.ufpe.cin.contexto.bikecidadao.cucumber.screens.BaseScreen;
+import br.ufpe.cin.contexto.bikecidadao.cucumber.screens.MainScreen;
 import cucumber.api.CucumberOptions;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
@@ -31,21 +34,20 @@ import static org.hamcrest.Matchers.notNullValue;
 @CucumberOptions(features = "features" )
 public class TrackingSteps extends ActivityInstrumentationTestCase2<MainActivity> {
 
+    private Activity mActivity;
+
     public TrackingSteps(MainActivity activityClass) {
         super(MainActivity.class);
     }
 
     @Before
     public void setUp() {
-        getActivity();
     }
-
 
     @Given("^I just started a new tracking$")
     public void i_just_started_a_new_tracking() throws Throwable {
 
     }
-
     @When("^I click to stop tracking$")
     public void i_click_to_stop_tracking() throws Throwable {
 
@@ -82,6 +84,25 @@ public class TrackingSteps extends ActivityInstrumentationTestCase2<MainActivity
 
     @Then("^I should see a line of my path on map$")
     public void i_should_see_a_line_of_my_path_on_map() throws Throwable {
+
+    }
+
+    @Given("^I have two tracks stored$")
+    public void i_have_two_tracks_stored() throws Throwable {
+
+    }
+
+    @When("^I go to the history screen$")
+    public void i_go_to_the_history_screen() throws Throwable {
+
+    }
+    @Then("^my tracks are displayed on the list$")
+    public void my_tracks_are_displayed_on_the_list() throws Throwable {
+
+    }
+
+    @When("^I click on a track$")
+    public void i_click_on_a_track() throws Throwable {
 
     }
 

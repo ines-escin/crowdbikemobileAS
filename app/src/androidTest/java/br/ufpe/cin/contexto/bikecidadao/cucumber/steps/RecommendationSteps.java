@@ -1,9 +1,11 @@
 package br.ufpe.cin.contexto.bikecidadao.cucumber.steps;
 
+import android.app.Activity;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 
 import br.ufpe.cin.contexto.bikecidadao.MainActivity;
+import br.ufpe.cin.contexto.bikecidadao.cucumber.screens.BaseScreen;
 import cucumber.api.CucumberOptions;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
@@ -29,14 +31,16 @@ import static org.hamcrest.Matchers.notNullValue;
 @CucumberOptions(features = "features" )
 public class RecommendationSteps extends ActivityInstrumentationTestCase2<MainActivity> {
 
+    private Activity mActivity;
+
     public RecommendationSteps(MainActivity activityClass) {
         super(MainActivity.class);
     }
 
     @Before
     public void setUp() {
-        getActivity();
     }
+
     @Given("^there are comfortable routes to go through$")
     public void there_are_comfortable_routes_to_go_through() throws Throwable {
 
