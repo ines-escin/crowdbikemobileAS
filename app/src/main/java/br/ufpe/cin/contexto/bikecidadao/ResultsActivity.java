@@ -136,6 +136,7 @@ public class ResultsActivity extends AppCompatActivity implements OnMapReadyCall
                 this.onBackPressed();
                 return true;
             case R.id.action_save_track:
+                item.setEnabled(false);
                 try {
                     trackInfoDao.create(trackInfo);
                     for(GeoLocation d : trackInfo.getTrackingPoints()){
