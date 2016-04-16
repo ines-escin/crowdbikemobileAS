@@ -1,9 +1,11 @@
 package br.ufpe.cin.contexto.bikecidadao.cucumber.steps;
 
+import android.app.Activity;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 
 import br.ufpe.cin.contexto.bikecidadao.MainActivity;
+import br.ufpe.cin.contexto.bikecidadao.cucumber.screens.BaseScreen;
 import cucumber.api.CucumberOptions;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
@@ -35,7 +37,6 @@ public class OccurrenceSteps extends ActivityInstrumentationTestCase2<MainActivi
 
     @Before
     public void setUp() {
-        getActivity();
     }
 
 

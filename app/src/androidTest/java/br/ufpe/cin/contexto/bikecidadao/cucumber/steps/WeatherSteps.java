@@ -1,5 +1,6 @@
 package br.ufpe.cin.contexto.bikecidadao.cucumber.steps;
 
+import android.app.Activity;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.test.ActivityInstrumentationTestCase2;
 
@@ -31,13 +32,15 @@ import static org.hamcrest.Matchers.notNullValue;
 @CucumberOptions(features = "features" )
 public class WeatherSteps extends ActivityInstrumentationTestCase2<MainActivity> {
 
+    private Activity mActivity;
+
     public WeatherSteps(MainActivity activityClass) {
         super(MainActivity.class);
     }
 
     @Before
     public void setUp() {
-        getActivity();
+
     }
 
     @Then("^I can see the weather details$")
