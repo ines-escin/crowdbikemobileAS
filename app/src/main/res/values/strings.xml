@@ -25,6 +25,10 @@
     <string name= "report_an_issue">Reportar um problema</string>
     <string name= "discard_save">Deseja descartar o percurso?</string>
 
+    <string name= "enable_gps_title">Desejar ativar o serviço de geolocalização?</string>
+    <string name= "enable_gps_message">"O aplicativo se baseia em geolocalização. Sem o GPS, algumas informações podem não ser apresentadas."</string>
+    <string name= "low_accuracy_gps">"O sinal de GPS está fraco. Tente novamente mais tarde"</string>
+
     <string name= "tracking_notification_title">Pedalando</string>
     <string name= "tracking_notification_text">Corrida em andamento</string>
     <string name="title_activity_history">Histórico</string>
