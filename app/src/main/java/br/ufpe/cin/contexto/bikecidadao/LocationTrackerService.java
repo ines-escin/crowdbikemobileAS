@@ -57,17 +57,22 @@ public class LocationTrackerService extends Service implements LocationListener,
     private LocalRepositoryController localRepositoryController;
 
     private Gson gson;
+    private Location startLocation;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        //Toast.makeText(this, "service created", Toast.LENGTH_SHORT).show();
-
         initVariables();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        startLocation = (Location) intent.getExtras().get("startLocation");
         callGoogleApiConnection();
 
+        return START_STICKY;
     }
 
     private void initVariables(){
@@ -98,11 +103,13 @@ public class LocationTrackerService extends Service implements LocationListener,
 
     @Override
     public void onConnected(Bundle connectionHint) {
+        setImmediateStartLocation();
+        startTracking();
+        setupBroadcastHandler();
         startLocationUpdates();
 
         mNotificationBuilder = initNotificationBuilder();
         mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
-
         startForeground(Constants.TRACKING_SERVICE_NOTIFICATION_ID, mNotificationBuilder.build());
 
     }
@@ -158,18 +165,25 @@ public class LocationTrackerService extends Service implements LocationListener,
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
+    private void setImmediateStartLocation() {
+        updateTracking(startLocation);
+    }
 
     @Override
     public void onLocationChanged(Location location) {
-
-        //validateLocation() TODO create method to filter new location
-
-        updateTracking(location);
-        mPreviousLocation = location;
-
+        if(isLocationValid(location)){
+            updateTracking(location);
+        }
     }
 
-
+    public boolean isLocationValid(Location location){
+        if(location!=null){
+            double accuracy = location.getAccuracy();
+            if(accuracy==0.0) return false; //means there's no accuracy
+            if(accuracy<=20) return true;
+        }
+        return false;
+    }
 
     private void updateTracking(Location location){
 
@@ -188,61 +202,14 @@ public class LocationTrackerService extends Service implements LocationListener,
         trackingPoints.add(new GeoLocation(location.getLatitude(), location.getLongitude()));
     }
 
-
-    private boolean isLocationValid(Location lastLocation, Location nextLocation) {
-        double accuracy = nextLocation.getAccuracy();
-        if (accuracy == 0.0) return false; // means there's no accuracy
-
-        double timeDelta = nextLocation.getElapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos();
-        timeDelta /= 1e9;
-        List<LatLng> points = new ArrayList<>();
-        points.add(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
-        points.add(new LatLng(nextLocation.getLatitude(), nextLocation.getLongitude()));
-
-        double path = SphericalUtil.computeLength(points);
-        //	if((path/timeDelta)>17) return false;
-
-        if (accuracy < 15) return true;
-
-        return false;
-    }
-
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        //Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
-
-        if (intent != null && intent.hasExtra(Constants.TRACKING_ACTION)) {
-
-            int action = intent.getIntExtra(Constants.TRACKING_ACTION, Constants.TRACKING_SERVICE_COMMAND_START);
-
-            switch (action) {
-                case Constants.TRACKING_SERVICE_COMMAND_START:
-                    startTracking();
-                    break;
-                case Constants.TRACKING_SERVICE_COMMAND_STOP:
-                    isStarted = false;
-                    stopTracking();
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
-        setupBroadcastHandler();
-
-        return START_STICKY;
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        saveTmpTracking();
-        stopTracking();
-        startResultsActivity();
+        if(isTracking()){
+            saveTmpTracking();
+            stopTracking();
+            startResultsActivity();
+        }
     }
 
     private void setupBroadcastHandler() {

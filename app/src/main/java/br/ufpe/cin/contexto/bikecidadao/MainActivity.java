@@ -2,8 +2,10 @@ package br.ufpe.cin.contexto.bikecidadao;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -11,11 +13,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -94,6 +98,7 @@ import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
 import br.ufpe.cin.db.bikecidadao.model.GeoLocation;
 import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
 import br.ufpe.cin.util.bikecidadao.Constants;
+import br.ufpe.cin.util.bikecidadao.LocationUtil;
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 
@@ -116,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	private AsyncTempo tempo;
 	private TextView txtResultado;
 	private long timePosition;
-	private boolean isGPSEnabled = true;
 	private String lastLatitudeString;
 	private String lastLongitudeString;
 	private long timeLastPosition;
@@ -235,10 +239,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Button startButton = (Button)findViewById(R.id.start_button);
         startButton.setOnClickListener(this);
 
-        if(isTracking()){
-            startTrackingService();
-            setStartButtonState(true);
-        }
+
 
 		toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -249,17 +250,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		setupDrawerContent(nvDrawer);
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+        if(!LocationUtil.isGPSEnabled(this)){
+            LocationUtil.showEnableGPSDialog(this);
+        }
+
+        resumeTrackingStatus();
 	}
 
 	private void setupDrawerContent(NavigationView navigationView) {
 		navigationView.setNavigationItemSelectedListener(
-				new NavigationView.OnNavigationItemSelectedListener() {
-					@Override
-					public boolean onNavigationItemSelected(MenuItem menuItem) {
-						selectDrawerItem(menuItem);
-						return true;
-					}
-				});
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        selectDrawerItem(menuItem);
+                        return true;
+                    }
+                });
 	}
 
 	public void selectDrawerItem(MenuItem menuItem) {
@@ -371,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mBroadcastIsRegistered = true;
         }
 
+        resumeTrackingStatus();
 	}
 
 
@@ -416,10 +423,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	public void updateResults(String resultado) throws Exception {
 		retornoServidorFiware(resultado);
 	}
-	boolean isTracking = false;
-
-    Location startLocation;
-
 
 	@Override
 	public void onClick(View view) {
@@ -431,18 +434,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             if(isTracking){ //then stop and show start button
 				stopTrackingService();
-            }else{
-				startTrackingService();
+			}else{
+
+				if(LocationUtil.isGPSEnabled(this)){
+                    startTrackingService();
+                }else{
+                    LocationUtil.showEnableGPSDialog(this);
+                }
             }
-            setStartButtonState(!isTracking);
-
-
 			break;
-
 		}
 	}
 
-    // true if it's tracking, otherwise false
+	// true if it's tracking, otherwise false
 	public void setStartButtonState(boolean isTracking){
 		Button startButton = (Button) findViewById(R.id.start_button);
 		if(isTracking) {
@@ -460,23 +464,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 	private void startTrackingService() {
-
-//        chronometer.setBase(SystemClock.elapsedRealtime() - getStartTime());
-//        chronometer.start();
-        startLocation = getLastLocation();
-        //drawStartPoint(startLocation);
-        //drawPolyline(startLocation);
-
-        trackingIntent.putExtra(Constants.TRACKING_ACTION, Constants.TRACKING_SERVICE_COMMAND_START);
-        startService(trackingIntent);
-
-		registerReceiver(broadcastReceiver, new IntentFilter(
-				LocationTrackerService.BROADCAST_ACTION));
-		mBroadcastIsRegistered = true;
-
+        Location location = getLastLocation();
+        if(location!=null && location.getAccuracy()<30){
+            trackingIntent.putExtra("startLocation", location);
+            setStartButtonState(true);
+            startService(trackingIntent);
+            registerReceiver(broadcastReceiver, new IntentFilter(
+                    LocationTrackerService.BROADCAST_ACTION));
+            mBroadcastIsRegistered = true;
+        }else{
+            Toast.makeText(this, R.string.low_accuracy_gps, Toast.LENGTH_SHORT).show();
+        }
 	}
 
+    private void resumeTrackingStatus(){
+        if(isTracking()){
+            setStartButtonState(true);
+        }
+    }
+
 	private void stopTrackingService() {
+        setStartButtonState(false);
 
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.stop();
@@ -499,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			mBroadcastIsRegistered = false;
 		}
 
-	}
+    }
 
 	private void drawStartPoint(Location startLocation){
         greenPoint = googleMap.addCircle(new CircleOptions()
@@ -1120,19 +1128,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	private void updateTracking(Intent serviceIntent){
 		ArrayList<GeoLocation> latLngPoints = serviceIntent.getParcelableArrayListExtra("trackingPoints");
-		ArrayList<LatLng> points = new ArrayList<>(latLngPoints.size()+1);
-		for (GeoLocation point : latLngPoints){
-			points.add(new LatLng(point.getLatitude(), point.getLongitude()));
+		if(latLngPoints!=null &&!latLngPoints.isEmpty()) {
+			ArrayList<LatLng> points = new ArrayList<>(latLngPoints.size() + 1);
+			for (GeoLocation point : latLngPoints) {
+				points.add(new LatLng(point.getLatitude(), point.getLongitude()));
+			}
+			if (isTracking()) {
+				chronometer.setBase(getRunElapsedTime());
+				chronometer.start();
+				drawPolyline(points);
+			}
 		}
-
-		if(isTracking()) {
-          //  this.startTime = startTime;
-//            long now = System.currentTimeMillis();
-//            long elapsed = now - getStartTime();
-            chronometer.setBase(getRunElapsedTime());
-            chronometer.start();
-            drawPolyline(points);
-        }
 	}
 
     //TODO refactor to a PreferenceManager class
