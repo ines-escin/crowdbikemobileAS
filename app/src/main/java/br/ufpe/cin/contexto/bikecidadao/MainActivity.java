@@ -99,6 +99,7 @@ import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
 import br.ufpe.cin.util.bikecidadao.Constants;
 import br.ufpe.cin.util.bikecidadao.LocationUtil;
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
+import br.ufpe.cin.util.bikecidadao.PermissionRequest;
 
 
 @SuppressLint("NewApi")
@@ -333,7 +334,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         this.googleMap = map;
 
         //this.googleMap.setOnMapLongClickListener(this);
-        this.googleMap.setMyLocationEnabled(true);
+        if(PermissionRequest.checkLocationPermission(this)){
+            googleMap.setMyLocationEnabled(true);
+        }else{
+            PermissionRequest.requestLocationPermission(this);
+        }
         this.googleMap.setBuildingsEnabled(true);
         this.googleMap.getUiSettings().setZoomControlsEnabled(true);
 
@@ -982,8 +987,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 	private void startLocationUpdate(){
-		initLocationRequest();
-		LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        if(PermissionRequest.checkLocationPermission(this)){
+            initLocationRequest();
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }else{
+            PermissionRequest.requestLocationPermission(this);
+        }
 	}
 
 
