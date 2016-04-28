@@ -249,14 +249,6 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         super.onStart();
     }
 
-	private String getIMEI(Context context) {
-
-		TelephonyManager mngr = (TelephonyManager) context
-				.getSystemService(context.TELEPHONY_SERVICE);
-		String imei = mngr.getDeviceId();
-		return imei;
-
-	}
 
 
 	public void sendInformation(){
@@ -428,9 +420,6 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 	}
 
 	private String generateUniqueId(Context context){
-		TelephonyManager mngr = (TelephonyManager) context
-				.getSystemService(context.TELEPHONY_SERVICE);
-		String imei = mngr.getDeviceId();
 		Calendar cal = Calendar.getInstance();
 		String date =  "" + cal.get(Calendar.SECOND) + "" + cal.get(Calendar.MINUTE) + "" + cal.get(Calendar.HOUR_OF_DAY)
 				+ "" + cal.get(Calendar.DAY_OF_MONTH) +  "" + cal.get(Calendar.MONTH) + "" + cal.get(Calendar.YEAR) ;

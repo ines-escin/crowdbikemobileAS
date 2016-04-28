@@ -19,9 +19,7 @@ import java.util.List;
 import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
-import br.ufpe.cin.contexto.bikecidadao.MainActivity;
-import br.ufpe.cin.contexto.bikecidadao.MapDisplayActivity;
-import br.ufpe.cin.contexto.bikecidadao.pojo.BikePosition;
+
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 public class AsyncGetOcurrences extends AsyncTask <String, Void, List<Ocorrencia>> {

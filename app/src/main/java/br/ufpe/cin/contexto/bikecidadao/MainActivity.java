@@ -91,7 +91,6 @@ import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
-import br.ufpe.cin.contexto.bikecidadao.async.AsyncSendNotification;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
 import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
@@ -116,8 +115,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	private Tempo tempoLocal = new Tempo();
 	private int bgColor = 0;
 	private TextView txtMensagem;
-	private String IMEI;
-	private AsyncSendNotification task2;
 	private AsyncTempo tempo;
 	private TextView txtResultado;
 	private long timePosition;
@@ -199,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         markers = new HashMap<String,String>();
 
 		txtMensagem = (TextView) findViewById(R.id.txtMensagem);
-		IMEI = getIMEI(this);
 
 		TTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
 			@Override
@@ -208,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		});
 
         setToggleVoiceAlert();
-		txtResultado = (TextView) findViewById(R.id.txtResultado);
 
 		// Setando a cor de fundo. Padrao: branco
 		setarCorDeFundo(R.color.branco);
@@ -436,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 				stopTrackingService();
 			}else{
 
-				if(LocationUtil.isGPSEnabled(this)){
+				if(LocationUtil.isGPSEnabled(this) && getLastLocation()!=null){
                     startTrackingService();
                 }else{
                     LocationUtil.showEnableGPSDialog(this);
@@ -592,39 +587,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		return json;
 	}
 
-
-/*
-	public void tarefaParalelaServidor2() {
-		// Instanciando a asynctask para contato com o servidor e acesso ao
-		// arduino
-		task2 = new AsyncSendNotification(this);
-		task2.execute(IMEI, latitudeString, longitudeString);
-
-	}
-*/
 	public void tarefaParalelaTempo() {
 			// Instanciando a asynktask para contato com o servi?o de tempo
 
 		tempo = new AsyncTempo(MainActivity.this);
 		tempo.execute(latitudeString, longitudeString);
-		if(firstForecast)
-        {
-//            boolean findFirst = false;
-//
-//            while(!findFirst) {
-//
-//				tempo = new AsyncTempo(MainActivity.this);
-//				tempo.execute(latitudeString, longitudeString);
-//				try {
-//					Tempo respostaTempo = tempo.get();
-//					if(respostaTempo.getDescricao() != null && respostaTempo.getTemperatura() != null)
-//					{
-//						findFirst = true;
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
+		if(firstForecast){
             firstForecast = false;
         }
 
@@ -834,8 +802,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		return longitudeString;
 	}
 
-
-
 	/**
 	 * Este metodo recebe a resposta da chamada da ActivitySendNotification
 	 */
@@ -849,14 +815,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		}
 	}
 
-	public String getIMEI(Context context) {
-
-		TelephonyManager mngr = (TelephonyManager) context
-				.getSystemService(context.TELEPHONY_SERVICE);
-		String imei = mngr.getDeviceId();
-		return imei;
-
-	}
 
 	public int getBgColor() {
 		return bgColor;
