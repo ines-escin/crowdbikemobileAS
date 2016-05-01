@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.bikecidadao"
-    android:versionCode="6"
-    android:versionName="6.0" >
+    android:versionCode="12"
+    android:versionName="0.12" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -12,7 +12,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -55,11 +54,6 @@
 
         <service android:name="br.ufpe.cin.contexto.bikecidadao.LocationTrackerService" />
 
-        <activity
-            android:name="br.ufpe.cin.contexto.bikecidadao.ActivitySendNotification"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape" >
-        </activity>
         <activity
             android:name="br.ufpe.cin.contexto.bikecidadao.MapDisplayActivity"
             android:parentActivityName="br.ufpe.cin.contexto.bikecidadao.MainActivity"
