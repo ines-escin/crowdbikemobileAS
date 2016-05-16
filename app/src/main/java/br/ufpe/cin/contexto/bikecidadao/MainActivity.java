@@ -607,9 +607,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 	public void retornoServidorFiware(String retorno) throws Exception {
-		Gson gson = new Gson();
-		String noValues = "{\"errorCode\":{\"code\":\"404\",\"reasonPhrase\":\"No context element found\"}}";
-		if (!retorno.equals(noValues) && !retorno.equals("")) {
+        if (!retorno.contains("No context element found") && !retorno.equals("")) {
 			String distance = getDistanceLocation(retorno);
             Ocorrencia occ = getTipoOcorrencia(retorno);
 			String title = occ.getTitle();
