@@ -10,9 +10,10 @@ branches:
 
 env:
   matrix:
-    #- ANDROID_TARGET=android-18 ANDROID_ABI=armeabi-v7a
-    - ANDROID_TARGET=android-23 ANDROID_ABI=armeabi-v7a
+    - ANDROID_TARGET=android-18
+    - ANDROID_TARGET=android-23
   global:
+    - ANDROID_ABI=armeabi-v7a
     - MALLOC_ARENA_MAX=2
    # install timeout in minutes (2 minutes by default)
     - ADB_INSTALL_TIMEOUT=10
