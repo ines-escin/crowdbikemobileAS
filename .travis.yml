@@ -1,5 +1,5 @@
 language: android
-sudo: false
+sudo: true
 jdk: oraclejdk7
 
 branches:
@@ -13,6 +13,7 @@ env:
     #- ANDROID_TARGET=android-18 ANDROID_ABI=armeabi-v7a
     - ANDROID_TARGET=android-23 ANDROID_ABI=armeabi-v7a
   global:
+    - MALLOC_ARENA_MAX=2
    # install timeout in minutes (2 minutes by default)
     - ADB_INSTALL_TIMEOUT=10
 
