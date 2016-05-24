@@ -1,6 +1,4 @@
 language: android
-cache: false
-sudo: true
 jdk: oraclejdk7
 
 branches:
@@ -49,8 +47,7 @@ android:
 
 cache:
   directories:
-    - $HOME/.gradle/caches/2.2.1
-    - $HOME/.gradle/caches/jars-1
+    - $HOME/.gradle/caches
     - $HOME/.gradle/daemon
     - $HOME/.gradle/native
     - $HOME/.gradle/wrapper
@@ -63,25 +60,35 @@ addons:
       - $(git ls-files -o | grep build/outputs | tr "\n" ":")
 
 before_script:
-  #- echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
   - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
   - emulator -avd test -no-skin -no-audio -no-window &
-  #- android-wait-for-emulator
-  #- adb shell input keyevent 82 &
-
-script:
-  #- android list target
-  - ./gradlew assembleDebug -PdisablePreDex
-  - ./gradlew assembleAndroidTest -PdisablePreDex
-
   - android-wait-for-emulator
-  - adb devices
+  - sleep 20
   - adb shell input keyevent 82 &
 
-  - adb install -r app/build/outputs/apk/app-debug.apk
-  - adb install -r app/build/outputs/apk/app-debug-androidTest-unaligned.apk
+#before_script:
+#  #- echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
+#  - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
+#  - emulator -avd test -no-skin -no-audio -no-window &
+#  #- android-wait-for-emulator
+#  #- adb shell input keyevent 82 &
 
-  - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
+script:
+   - travis_wait 20 ./gradlew clean assemble connectedAndroidTest -PdisablePreDex --continue --stacktrace
+
+#script:
+#  #- android list target
+#  - ./gradlew assembleDebug -PdisablePreDex
+#  - ./gradlew assembleAndroidTest -PdisablePreDex
+#
+#  - android-wait-for-emulator
+#  - adb devices
+#  - adb shell input keyevent 82 &
+#
+#  - adb install -r app/build/outputs/apk/app-debug.apk
+#  - adb install -r app/build/outputs/apk/app-debug-androidTest-unaligned.apk
+#
+#  - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
 
 after_failure:
   - wget http://imgur.com/tools/imgurbash.sh

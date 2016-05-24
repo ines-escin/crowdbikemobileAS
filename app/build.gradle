@@ -107,4 +107,12 @@ android {
         }
 
     }
+
+    // This enables long timeouts required on slow environments, e.g. Travis
+    adbOptions {
+        timeOutInMs 20 * 60 * 1000  // 10 minutes
+        installOptions "-d","-t"
+    }
+
+    com.android.ddmlib.DdmPreferences.setTimeOut(120000)
 }
