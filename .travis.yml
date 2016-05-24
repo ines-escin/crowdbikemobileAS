@@ -1,5 +1,5 @@
 language: android
-sudo: true
+sudo: false
 jdk: oraclejdk7
 
 branches:
@@ -10,11 +10,9 @@ branches:
 
 env:
   matrix:
-    - ANDROID_TARGET=android-18
-    - ANDROID_TARGET=android-23
+    - ANDROID_TARGET=android-18 - ANDROID_ABI=armeabi-v7a
+    - ANDROID_TARGET=android-23 - ANDROID_ABI=armeabi-v7a
   global:
-    - ANDROID_ABI=armeabi-v7a
-    - MALLOC_ARENA_MAX=2
    # install timeout in minutes (2 minutes by default)
     - ADB_INSTALL_TIMEOUT=10
 
@@ -72,9 +70,16 @@ before_script:
 
 script:
   #- android list target
+  - ./gradlew assembleDebug -PdisablePreDex
+  - ./gradlew assembleAndroidTest -PdisablePreDex
+
   - android-wait-for-emulator
   - adb devices
   - adb shell input keyevent 82 &
+
+  - adb install -r app/build/outputs/apk/app-mock-debug.apk
+  - adb install -r app/build/outputs/apk/app-mock-debug-androidTest-unaligned.apk
+
   - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
 
 after_failure:
