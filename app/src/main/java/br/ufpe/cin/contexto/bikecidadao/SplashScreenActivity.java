@@ -20,14 +20,8 @@ public class SplashScreenActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.splash);
-	    new SwitchToMain().execute();
-	}
 
-	private class SwitchToMain extends AsyncTask<Object, Object, Object>{
-
-		@Override
-		protected Object doInBackground(Object... arg0) {
-			try {
+		try {
 			final ImageView image = (ImageView) findViewById(R.id.splash);
 			Animation fadeIn = new AlphaAnimation(0, 1);
 			fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
@@ -41,30 +35,21 @@ public class SplashScreenActivity extends Activity {
 			final AnimationSet animation = new AnimationSet(false); //change to false
 			animation.addAnimation(fadeIn);
 			animation.addAnimation(fadeOut);
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					image.setVisibility(View.INVISIBLE);
-					image.setAnimation(animation);
 
-				  }
-			  });
+			image.setVisibility(View.INVISIBLE);
+			image.setAnimation(animation);
+
 			Thread.sleep(DEFAULT_DELAY_TIME + 500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		@Override
-		protected void onPostExecute(Object result){
 
-			Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-			startActivity(intent);
-			finish();
-			super.onPostExecute(result);
-		}
-		
+		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+		startActivity(intent);
+		finish();
+
 	}
+
 }
