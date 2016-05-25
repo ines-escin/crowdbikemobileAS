@@ -7,19 +7,14 @@ branches:
   except:
     # disable all branches while Travis is not stable
 
+#before_cache:
+#  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
   directories:
     - $HOME/.gradle/caches
     - $HOME/.gradle/daemon
     - $HOME/.gradle/native
     - $HOME/.gradle/wrapper
-
-#before_cache:
-#  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-#cache:
-#  directories:
-#    - $HOME/.gradle/caches/
-#    - $HOME/.gradle/wrapper/
 
 env:
   matrix:
@@ -72,9 +67,6 @@ android:
     - sys-img-armeabi-v7a-android-21
     - sys-img-armeabi-v7a-android-22
     - sys-img-armeabi-v7a-android-23
-
-    #- sys-img-armeabi-v7a-android-19
-    #- sys-img-armeabi-v7a-android-19
     #- sys-img-x86-android-17
 
 before_script:
@@ -84,32 +76,11 @@ before_script:
   - sleep 20
   - adb shell input keyevent 82 &
 
-#before_script:
-#  #- echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
-#  - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
-#  - emulator -avd test -no-skin -no-audio -no-window &
-#  #- android-wait-for-emulator
-#  #- adb shell input keyevent 82 &
-
 script:
    - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
 
-#script:
-#  #- android list target
-#  - ./gradlew assembleDebug -PdisablePreDex
-#  - ./gradlew assembleAndroidTest -PdisablePreDex
-#
-#  - android-wait-for-emulator
-#  - adb devices
-#  - adb shell input keyevent 82 &
-#
-#  - adb install -r app/build/outputs/apk/app-debug.apk
-#  - adb install -r app/build/outputs/apk/app-debug-androidTest-unaligned.apk
-#
-#  - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
-
 after_script:
-  - cat $HOME/ui/espresso/*/app/build/outputs/androidTest-results/connected/* # logs
+  - cat $HOME/app/build/outputs/androidTest-results/connected/* # logs
 
 
 
