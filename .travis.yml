@@ -41,11 +41,6 @@ android:
     - build-tools-23.0.2
 
     # The SDK version used to compile your project
-    - android-16
-    - android-17
-    - android-18
-    - android-19
-    - android-21
     - android-22
     - android-23
 
@@ -60,11 +55,6 @@ android:
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-16
-    - sys-img-armeabi-v7a-android-17
-    - sys-img-armeabi-v7a-android-18
-    - sys-img-armeabi-v7a-android-19
-    - sys-img-armeabi-v7a-android-21
     - sys-img-armeabi-v7a-android-22
     - sys-img-armeabi-v7a-android-23
     #- sys-img-x86-android-17
