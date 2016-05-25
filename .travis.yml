@@ -7,23 +7,26 @@ branches:
   except:
     # disable all branches while Travis is not stable
 
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
   directories:
-    - ${TRAVIS_BUILD_DIR}/gradle/caches/
-    - ${TRAVIS_BUILD_DIR}/gradle/wrapper/dists/
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
 
 env:
   matrix:
-    - ANDROID_TARGET=android-16 - ANDROID_ABI=armeabi-v7a
-    - ANDROID_TARGET=android-17 - ANDROID_ABI=armeabi-v7a
-    - ANDROID_TARGET=android-18 - ANDROID_ABI=armeabi-v7a
-    - ANDROID_TARGET=android-19 - ANDROID_ABI=armeabi-v7a
-    - ANDROID_TARGET=android-21 - ANDROID_ABI=armeabi-v7a
-    - ANDROID_TARGET=android-22 - ANDROID_ABI=armeabi-v7a
-    - ANDROID_TARGET=android-23 - ANDROID_ABI=armeabi-v7a
+    - ANDROID_TARGET=android-16
+    - ANDROID_TARGET=android-17
+    - ANDROID_TARGET=android-18
+    - ANDROID_TARGET=android-19
+    - ANDROID_TARGET=android-21
+    - ANDROID_TARGET=android-22
+    - ANDROID_TARGET=android-23
   global:
    # install timeout in minutes (2 minutes by default)
     - ADB_INSTALL_TIMEOUT=20
+    - ANDROID_ABI=armeabi-v7a
 
 android:
   components:
