@@ -27,7 +27,7 @@ env:
     - ANDROID_TARGET=android-23
   global:
    # install timeout in minutes (2 minutes by default)
-    - ADB_INSTALL_TIMEOUT=20
+    - ADB_INSTALL_TIMEOUT=30
     - ANDROID_ABI=armeabi-v7a
 
 android:
@@ -63,14 +63,14 @@ before_script:
   - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
-  - sleep 20
+  - sleep 30
   - adb shell input keyevent 82 &
 
 script:
    - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
 
 after_script:
-  - cat $HOME/app/build/outputs/androidTest-results/connected/* # logs
+  - cat app/build/outputs/androidTest-results/connected/* # logs
 
 
 

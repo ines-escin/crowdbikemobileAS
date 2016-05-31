@@ -110,7 +110,7 @@ android {
 
     // This enables long timeouts required on slow environments, e.g. Travis
     adbOptions {
-        timeOutInMs 30 * 60 * 1000  // 20 minutes
+        timeOutInMs 30 * 60 * 1000  // 30 minutes
         installOptions "-d","-t"
     }
 
