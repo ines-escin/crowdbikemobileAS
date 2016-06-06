@@ -13,13 +13,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -30,7 +29,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,6 +76,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -266,16 +266,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	public void selectDrawerItem(MenuItem menuItem) {
 
-		Class fragmentClass;
 		switch(menuItem.getItemId()) {
 			case R.id.menu_history:
-				fragmentClass = HistoryActivity.class;
+				startActivity(new Intent(this, HistoryActivity.class));
+				break;
+			case R.id.menu_export:
+				openPopUp(findViewById(R.id.drawer_layout));
 				break;
 			default:
-				fragmentClass = HistoryActivity.class;
+				startActivity(new Intent(this, HistoryActivity.class));
 		}
 
-		startActivity(new Intent(this, fragmentClass));
+
 
 		// Highlight the selected item, update the title, and close the drawer
 		menuItem.setChecked(false);
@@ -1288,5 +1290,57 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         return markerViewTypeID;
     }
+
+	public void openPopUp(View view){
+		Context context = view.getContext();
+		final Context context2 = context;
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle("Deseja exportar os pontos do mapa?")
+				.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						String myInputText = makeCvsFile();
+							String myInternalFile = "exportedMap.csv";
+							createAndWriteFile(myInternalFile,myInputText, context2);
+					}
+				}).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+
+			}
+		});
+		builder.create().show();
+	}
+
+	public String makeCvsFile(){
+		MapDisplayActivity map = new MapDisplayActivity();
+		String myInputText = "Latitude,Longitude,Ocorrencia" + "\n";
+		try {
+			List<Ocorrencia> ocurrencesList = map.getAllOccurrences();
+			for(int i = 0;i < ocurrencesList.size();i++){
+				String lat = ocurrencesList.get(i).getLat().toString();
+				String lng = ocurrencesList.get(i).getLng().toString();
+				String ocorrencia = ocurrencesList.get(i).getOccurenceCode().toString();
+				myInputText +=  lat + "," + lng + "," + ocorrencia + "\n" ;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return myInputText;
+	}
+
+	public void createAndWriteFile(String filename, String text, Context context){
+		try {
+				File path = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+				File file = new File(path, filename);
+				FileOutputStream fos = new FileOutputStream(file);
+				fos.write(text.getBytes());
+				fos.close();
+			} catch (IOException e){
+				e.printStackTrace();
+			}
+	}
+
 
 }

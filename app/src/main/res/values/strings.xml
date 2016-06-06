@@ -37,7 +37,9 @@
 
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    <string name="menu_history_title" >Histórico</string>
+    <string name="menu_history_title">Histórico</string>
+    <string name="menu_export_title"> Exportar pontos</string>
+    <string name="title_activity_export">ExportActivity</string>
 
 
 </resources>
