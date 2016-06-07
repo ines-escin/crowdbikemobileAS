@@ -1,6 +1,8 @@
 package br.ufpe.cin.contexto.bikecidadao;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.support.v7.app.ActionBar;
@@ -135,6 +137,42 @@ public class HistoryActivity extends AppCompatActivity {
                     Intent intent = new Intent(context, ResultsActivity.class);
                     intent.putExtra("trackId", trackInfo.getId());
                     context.startActivity(intent);
+                }
+            });
+            personViewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    final View newView = view;
+                    Context context = newView.getContext();
+                    DatabaseHelper databaseHelper;
+                    final TrackInfoDao trackInfoDao;
+                    databaseHelper = new DatabaseHelper(context);
+                    Intent intent = new Intent(context, HistoryActivity.class);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    try {
+                        trackInfoDao = new TrackInfoDao(databaseHelper.getConnectionSource());
+                        builder.setTitle("Deseja descartar este histórico?")
+                                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        try {
+                                            trackInfoDao.delete(trackInfo);
+                                            newView.setVisibility(View.GONE);
+                                        } catch (SQLException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        })
+                        ;
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    builder.create().show();
+                    return true;
                 }
             });
         }
