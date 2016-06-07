@@ -559,7 +559,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 		BufferedReader rd;
 		try {
-			String uri = "http://148.6.80.19:1026/v1/queryContext";
+			String uri = Constants.getFiwareBaseAddress(this)+"/v1/queryContext";
             String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}],\"restriction\": " +
                     "{\"scopes\": [{\"type\" : \"FIWARE::Location\",\"value\" : {\"circle\": {\"centerLatitude\": \"" +
                     latitudeString +"\",\"centerLongitude\": \"" +longitudeString +"\",\"radius\": \"30\"}}}]}}";
@@ -1191,7 +1191,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Gson gson = new Gson();
 
 
-        String uri = "http://148.6.80.19:1026/v1/queryContext?limit=500&details=on";
+        String uri = Constants.getFiwareBaseAddress(this)+"/v1/queryContext?limit=500&details=on";
         String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}]}";
         OkHttpClient client = new OkHttpClient();
         try

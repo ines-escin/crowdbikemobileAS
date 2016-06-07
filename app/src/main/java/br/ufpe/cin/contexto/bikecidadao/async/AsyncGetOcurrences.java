@@ -20,6 +20,7 @@ import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
 
+import br.ufpe.cin.util.bikecidadao.Constants;
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
 public class AsyncGetOcurrences extends AsyncTask <String, Void, List<Ocorrencia>> {
@@ -65,7 +66,7 @@ public class AsyncGetOcurrences extends AsyncTask <String, Void, List<Ocorrencia
 		Gson gson = new Gson();
 
 
-		String uri = "http://148.6.80.19:1026/v1/queryContext?limit=500&details=on";
+		String uri = Constants.getFiwareBaseAddress(contexto)+"/v1/queryContext?limit=500&details=on";
 		String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}]}";
 		OkHttpClient client = new OkHttpClient();
 		try
