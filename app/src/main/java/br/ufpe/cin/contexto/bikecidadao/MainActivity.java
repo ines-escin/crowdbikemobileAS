@@ -90,6 +90,7 @@ import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncCreateAndWriteFile;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
 import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
@@ -1293,15 +1294,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	public void openPopUp(View view){
 		Context context = view.getContext();
-		final Context context2 = context;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle("Deseja exportar os pontos do mapa?")
 				.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int id) {
-						String myInputText = makeCvsFile();
-							String myInternalFile = "exportedMap.csv";
-							createAndWriteFile(myInternalFile,myInputText, context2);
+						AsyncCreateAndWriteFile asyncCreateAndWriteFile = new AsyncCreateAndWriteFile(MainActivity.this);
+						asyncCreateAndWriteFile.execute();
 					}
 				}).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 			@Override
@@ -1311,36 +1310,4 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 		});
 		builder.create().show();
 	}
-
-	public String makeCvsFile(){
-		MapDisplayActivity map = new MapDisplayActivity();
-		String myInputText = "Latitude,Longitude,Ocorrencia" + "\n";
-		try {
-			List<Ocorrencia> ocurrencesList = map.getAllOccurrences();
-			for(int i = 0;i < ocurrencesList.size();i++){
-				String lat = ocurrencesList.get(i).getLat().toString();
-				String lng = ocurrencesList.get(i).getLng().toString();
-				String ocorrencia = ocurrencesList.get(i).getOccurenceCode().toString();
-				myInputText +=  lat + "," + lng + "," + ocorrencia + "\n" ;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return myInputText;
-	}
-
-	public void createAndWriteFile(String filename, String text, Context context){
-		try {
-				File path = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-				File file = new File(path, filename);
-				FileOutputStream fos = new FileOutputStream(file);
-				fos.write(text.getBytes());
-				fos.close();
-			} catch (IOException e){
-				e.printStackTrace();
-			}
-	}
-
-
 }
