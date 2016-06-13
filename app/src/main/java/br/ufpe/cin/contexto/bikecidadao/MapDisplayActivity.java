@@ -62,6 +62,7 @@ import br.ufpe.cin.br.adapter.bikecidadao.Metadata;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
 import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
+import br.ufpe.cin.util.bikecidadao.Constants;
 import br.ufpe.cin.util.bikecidadao.LocationAddress;
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 
@@ -303,7 +304,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		entity.setAttributes(attributes);
 
 		Gson gson = new Gson();
-		String uri = "http://148.6.80.19:1026/v1/contextEntities/";
+		String uri = Constants.getFiwareBaseAddress(this)+"/v1/contextEntities/";
 		uri += id;
 
 		try
@@ -359,7 +360,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         Gson gson = new Gson();
 
 
-        String uri = "http://148.6.80.19:1026/v1/queryContext?limit=500&details=on";
+        String uri = Constants.getFiwareBaseAddress(this)+"/v1/queryContext?limit=500&details=on";
         String getAll = "{\"entities\": [{\"type\": \"Ocurrence\",\"isPattern\": \"true\",\"id\": \".*\"}]}";
         OkHttpClient client = new OkHttpClient();
         try
@@ -622,7 +623,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         String id =  markers.get(marker.getId());// pegar id do objeto marcador---------------------------------
 
         Gson gson = new Gson();
-        String uri = "http://148.6.80.19:1026/v1/contextEntities/";
+        String uri = Constants.getFiwareBaseAddress(this)+"/v1/contextEntities/";
         uri += id;
 
         try

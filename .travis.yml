@@ -1,53 +1,81 @@
 language: android
 jdk: oraclejdk7
 
+notifications:
+  email: false
+
 branches:
+  only:
+    #- master
   except:
     # disable all branches while Travis is not stable
-    - /./
+
+#before_cache:
+#  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches
+    - $HOME/.gradle/daemon
+    - $HOME/.gradle/native
+    - $HOME/.gradle/wrapper
 
 env:
+  matrix:
+    - ANDROID_TARGET=android-16
+    - ANDROID_TARGET=android-17
+    - ANDROID_TARGET=android-18
+    - ANDROID_TARGET=android-19
+    - ANDROID_TARGET=android-21
+    - ANDROID_TARGET=android-22
+    - ANDROID_TARGET=android-23
   global:
    # install timeout in minutes (2 minutes by default)
-    - ADB_INSTALL_TIMEOUT=8
-
-before_script:
-  - echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
-  - emulator -avd test -no-skin -no-audio -no-window &
-  - android-wait-for-emulator
-  - adb shell input keyevent 82 &
-
-script:
-  #- android list target
-  - ./gradlew connectedAndroidTest --info
+    - ADB_INSTALL_TIMEOUT=30
+    - ANDROID_ABI=armeabi-v7a
 
 android:
   components:
     # Uncomment the lines below if you want to
     # use the latest revision of Android SDK Tools
-    #- platform-tools
-    #- tools
+    - platform-tools
+    - tools
 
     # The BuildTools version used by your project
-    - build-tools-22.0.1
+    - build-tools-23.0.2
 
     # The SDK version used to compile your project
+    - android-22
     - android-23
 
     # Additional components
-    - extra
-    - addon
-    #- extra-android-support
-    #- extra-google-google_play_services
-    #- extra-google-m2repository
-    #- extra-android-m2repository
+    #- extra
+    #- addon
+    - extra-android-support
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
     #- addon-google_apis-google-21
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-19
-    #- sys-img-armeabi-v7a-android-19
+    - sys-img-armeabi-v7a-android-22
+    - sys-img-armeabi-v7a-android-23
     #- sys-img-x86-android-17
+
+before_script:
+  - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - android-wait-for-emulator
+  - sleep 30
+  - adb shell input keyevent 82 &
+
+script:
+   - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
+
+after_script:
+  - cat app/build/outputs/androidTest-results/connected/* # logs
+
+
 
 
 

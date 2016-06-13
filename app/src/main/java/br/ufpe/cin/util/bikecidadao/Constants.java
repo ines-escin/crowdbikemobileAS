@@ -1,5 +1,9 @@
 package br.ufpe.cin.util.bikecidadao;
 
+import android.content.Context;
+
+import com.example.bikecidadao.R;
+
 /**
  * Created by jal3 on 18/01/2016.
  */
@@ -17,10 +21,6 @@ public class Constants {
     public static final String SHARED_TRACKINGS_HISTORY_NAME = PACKAGE_NAME+ ".SHARED_TRACKINGS_HISTORY_NAME";
 
 
-
-
-
-
     public static final int TRACKING_SERVICE_NOTIFICATION_ID = 1;
 
     public static final String TRACKING_ACTION = "TRACKING_ACTION";
@@ -28,5 +28,10 @@ public class Constants {
     public static final int TRACKING_SERVICE_COMMAND_START = 1;
     public static final int TRACKING_SERVICE_COMMAND_STOP = 2;
     public static final int TRACKING_SERVICE_COMMAND_RESUME = 3;
+
+
+    public static String getFiwareBaseAddress(Context context){
+        return context.getString(R.string.fiware_base_address);
+    }
 
 }
