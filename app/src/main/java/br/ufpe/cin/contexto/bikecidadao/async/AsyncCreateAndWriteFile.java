@@ -48,7 +48,8 @@ public class AsyncCreateAndWriteFile extends AsyncTask<String,Void, Boolean> {
         String myInputText = "Latitude,Longitude,Ocorrencia" + "\n";
         try {
             List<Ocorrencia> ocurrencesList = getOcurrences.getAllOccurrences();
-            for(int i = 0;i < ocurrencesList.size();i++){                String lat = ocurrencesList.get(i).getLat().toString();
+            for(int i = 0;i < ocurrencesList.size();i++){
+                String lat = ocurrencesList.get(i).getLat().toString();
                 String lng = ocurrencesList.get(i).getLng().toString();
                 String ocorrencia = ocurrencesList.get(i).getOccurenceCode().toString();
                 switch (ocorrencia){
@@ -77,7 +78,7 @@ public class AsyncCreateAndWriteFile extends AsyncTask<String,Void, Boolean> {
 
     public void createAndWriteFile(String filename, String text, Context context){
         try {
-            File path = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+            File path = getDataFolder(context);
             File file = new File(path, filename);
             FileOutputStream fos = new FileOutputStream(file);
             fos.write(text.getBytes());
@@ -87,5 +88,20 @@ public class AsyncCreateAndWriteFile extends AsyncTask<String,Void, Boolean> {
         }
     }
 
+    public File getDataFolder(Context context) {
+        File dataDir = null;
+        if (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).exists()) {
+            dataDir = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
+            if(!dataDir.isDirectory()) {
+                dataDir.mkdirs();
+            }
+        }
+
+        if(!dataDir.isDirectory()) {
+            dataDir = context.getFilesDir();
+        }
+
+        return dataDir;
+    }
 }
 
