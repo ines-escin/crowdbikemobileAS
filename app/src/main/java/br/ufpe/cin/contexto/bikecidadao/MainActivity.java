@@ -13,13 +13,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -30,7 +29,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,6 +76,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,6 +90,7 @@ import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
+import br.ufpe.cin.contexto.bikecidadao.async.AsyncCreateAndWriteFile;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncTempo;
 import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
@@ -266,16 +267,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 	public void selectDrawerItem(MenuItem menuItem) {
 
-		Class fragmentClass;
 		switch(menuItem.getItemId()) {
 			case R.id.menu_history:
-				fragmentClass = HistoryActivity.class;
+				startActivity(new Intent(this, HistoryActivity.class));
+				break;
+			case R.id.menu_export:
+				openPopUp(findViewById(R.id.drawer_layout));
 				break;
 			default:
-				fragmentClass = HistoryActivity.class;
+				startActivity(new Intent(this, HistoryActivity.class));
 		}
 
-		startActivity(new Intent(this, fragmentClass));
+
 
 		// Highlight the selected item, update the title, and close the drawer
 		menuItem.setChecked(false);
@@ -1287,4 +1290,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return markerViewTypeID;
     }
 
+	public void openPopUp(View view){
+		Context context = view.getContext();
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle("Deseja exportar os pontos do mapa?")
+				.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						AsyncCreateAndWriteFile asyncCreateAndWriteFile = new AsyncCreateAndWriteFile(MainActivity.this);
+						asyncCreateAndWriteFile.execute();
+					}
+				}).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+
+			}
+		});
+		builder.create().show();
+	}
 }
