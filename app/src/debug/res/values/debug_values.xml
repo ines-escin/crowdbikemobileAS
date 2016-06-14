@@ -7,9 +7,9 @@
      -->
 
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
-        AIzaSyD9Vc8q8uM30dSAH4-ifLoIFwVqM9ouVBk
+       AIzaSyAmYHUW6eV0TRjSXd_0M873s23sLTvFTaA
     </string>
 
-    <string name="fiware_base_address">http://148.6.80.19:1026</string>
+    <string name="fiware_base_address"></string>
 
 </resources>

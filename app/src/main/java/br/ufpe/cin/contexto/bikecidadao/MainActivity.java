@@ -14,7 +14,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
@@ -76,8 +75,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -591,7 +588,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			responseCode = 408;
 			e.printStackTrace();
 		}
-
+		Thread.sleep(500);
 		return json;
 	}
 
@@ -636,6 +633,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 					}
 				}
 			}
+
 			Log.v("DIST", distance);
 		} else {
 			txtMensagem.setText("Nenhum alerta");
