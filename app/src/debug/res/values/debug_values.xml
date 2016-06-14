@@ -7,7 +7,7 @@
      -->
 
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
-       AIzaSyAmYHUW6eV0TRjSXd_0M873s23sLTvFTaA
+       
     </string>
 
     <string name="fiware_base_address"></string>
