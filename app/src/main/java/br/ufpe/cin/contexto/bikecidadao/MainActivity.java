@@ -65,6 +65,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 import com.google.maps.android.SphericalUtil;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -80,12 +82,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
+import br.ufpe.cin.br.adapter.bikecidadao.Marcador;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncCreateAndWriteFile;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
@@ -180,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	private NavigationView nvDrawer;
 	private ActionBarDrawerToggle mDrawerToggle;
 
+	private ClusterManager<Marcador> mClusterManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -341,6 +346,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         this.googleMap.setBuildingsEnabled(true);
         this.googleMap.getUiSettings().setZoomControlsEnabled(true);
+
+		mClusterManager = new ClusterManager<Marcador>(this, this.googleMap);
+		this.googleMap.setOnCameraChangeListener(mClusterManager);
 
         try {
             AsyncGetOcurrences asyncGetOcurrences = new AsyncGetOcurrences(MainActivity.this);
@@ -1175,12 +1183,26 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 	@Override
     public void onGetOccurrencesCompleted(List<Ocorrencia> occurrences){
         if(occurrences!=null){
-            for(Ocorrencia occurrence: occurrences){
+            /*for(Ocorrencia occurrence: occurrences){
 
                 LatLng latLng = new LatLng(Double.parseDouble(occurrence.getLat()), Double.parseDouble(occurrence.getLng()));
                 Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
                 markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
-            }
+            }*/
+			List<Marcador> list = new ArrayList<>();;
+			Iterator<Ocorrencia> it = null;
+			it = occurrences.iterator();
+			while (it.hasNext()) {
+				Ocorrencia o = it.next();
+				Marcador m = new Marcador(new LatLng(Double.parseDouble(o.getLat()),Double.parseDouble(o.getLng())),
+						OCCURRENCES[o.getOccurenceCode().intValue()],
+						o.getOccurenceCode().intValue(), o.getIdOcorrencia());
+				list.add(m);
+				//markers.put(String.valueOf(mClusterManager.getMarkerManager().), String.valueOf(o.getIdOcorrencia()));
+			}
+			mClusterManager.addItems(list);
+			mClusterManager.setRenderer(new OwnIconRendered(this, this.googleMap, mClusterManager));
+
         }
     }
 
@@ -1305,5 +1327,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 			}
 		});
 		builder.create().show();
+	}
+
+	private class OwnIconRendered extends DefaultClusterRenderer<Marcador> {
+
+		public OwnIconRendered(Context context, GoogleMap map,
+							   ClusterManager<Marcador> clusterManager) {
+			super(context, map, clusterManager);
+		}
+
+		@Override
+		protected void onBeforeClusterItemRendered(Marcador item, MarkerOptions markerOptions) {
+			markerOptions.icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon(item.getIdTipoMarcador())));
+			markerOptions.title(item.getTitle());
+			super.onBeforeClusterItemRendered(item, markerOptions);
+		}
 	}
 }
