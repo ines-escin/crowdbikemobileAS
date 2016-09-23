@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -311,7 +310,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 		{
 			OkHttpClient client = new OkHttpClient();
 			RequestBody body = RequestBody.create(JSON, gson.toJson(entity));
-			Request request = new Request.Builder().url(uri).post(body).build();
+			Request request = new Request.Builder().url(uri).put(body).build();
 			Response response;
 
 			int executeCount = 0;
