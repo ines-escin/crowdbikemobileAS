@@ -7,9 +7,16 @@
      -->
 
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
+<<<<<<< HEAD
        AIzaSyAmYHUW6eV0TRjSXd_0M873s23sLTvFTaA
     </string>
 
     <string name="fiware_base_address">http://172.20.26.78:1026</string>
+=======
+          AIzaSyAmYHUW6eV0TRjSXd_0M873s23sLTvFTaA
+    </string>
+
+    <string name="fiware_base_address">http://148.6.80.19:1026</string>
+>>>>>>> bddd4c9f3ffa721ba5ef24c9bdb7d22a6aac5ab1
 
 </resources>

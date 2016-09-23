@@ -39,6 +39,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.gson.Gson;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -52,11 +54,13 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import br.ufpe.cin.br.adapter.bikecidadao.AdapterOcurrence;
 import br.ufpe.cin.br.adapter.bikecidadao.Attributes;
 import br.ufpe.cin.br.adapter.bikecidadao.Entity;
+import br.ufpe.cin.br.adapter.bikecidadao.Marcador;
 import br.ufpe.cin.br.adapter.bikecidadao.Metadata;
 import br.ufpe.cin.br.adapter.bikecidadao.Ocorrencia;
 import br.ufpe.cin.contexto.bikecidadao.async.AsyncGetOcurrences;
@@ -82,6 +86,8 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
 	public static final String[] OCCURRENCES = {"Local de acidente", "Tráfego intenso", "Sinalização ruim", "Via danificada"};
 	int selectedOccurence;
     private Marker marker;
+
+    //private ClusterManager<Marcador> mClusterManager;
 
     private HashMap<String,String> markers;
 
@@ -151,6 +157,10 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //mClusterManager = new ClusterManager<Marcador>(this, this.googleMap);
+       // this.googleMap.setOnCameraChangeListener(mClusterManager);
+
         this.googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -221,6 +231,7 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
                 public void onClick(DialogInterface dialog, int id) {
                     try {
                         removeMarker(marker);
+
                     } catch (Exception e){
 
                     }
@@ -340,6 +351,21 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
                 Marker marker = this.addMarker(latLng, occurrence.getOccurenceCode());
                 markers.put(marker.getId(), String.valueOf(occurrence.getIdOcorrencia()));
             }
+
+          //  List<Marcador> list = new ArrayList<>();;
+         //   Iterator<Ocorrencia> it = null;
+          //  it = occurrences.iterator();
+          /*  while (it.hasNext()) {
+                Ocorrencia o = it.next();
+                Marcador m = new Marcador(new LatLng(Double.parseDouble(o.getLat()),Double.parseDouble(o.getLng())),
+                        OCCURRENCES[o.getOccurenceCode().intValue()],
+                        o.getOccurenceCode().intValue(),o.getIdOcorrencia());
+                mClusterManager.addItem(m);
+
+            }*/
+           // mClusterManager.addItems(list);
+            //mClusterManager.setRenderer(new OwnIconRendered(this, this.googleMap, mClusterManager));
+
         }
 
     }
@@ -648,7 +674,47 @@ public class MapDisplayActivity extends AppCompatActivity implements LocationLis
         {
             e.printStackTrace();
         }
+
         return result;
     }
+    /*
+    private class OwnIconRendered extends DefaultClusterRenderer<Marcador> {
+       private HashMap<Long, Marker> markerOcurrences = new HashMap<>();
 
+        public OwnIconRendered(Context context, GoogleMap map,
+                               ClusterManager<Marcador> clusterManager) {
+            super(context, map, clusterManager);
+
+        }
+
+
+        @Override
+        protected void onBeforeClusterItemRendered(Marcador item, MarkerOptions markerOptions) {
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(getBitmapIcon(item.getIdTipoMarcador())));
+            markerOptions.title(item.getTitle());
+            super.onBeforeClusterItemRendered(item, markerOptions);
+        }
+
+        @Override
+        protected void onClusterItemRendered(Marcador clusterItem, Marker marker) {
+            markers.put(marker.getId(), String.valueOf(clusterItem.getIdOcurrence()));
+            markerOcurrences.put(clusterItem.getIdOcurrence(), marker);
+            super.onClusterItemRendered(clusterItem, marker);
+        }
+
+        public Marker getMarker(Marcador item) {
+            return super.getMarker(item);
+        }
+
+        public Marker getMarker(int id) {
+            Marker item;
+            if (markerOcurrences != null) {
+                item = markerOcurrences.get(id);
+            } else {
+                item = null;
+            }
+            return item;
+        }
+
+    }*/
 }
