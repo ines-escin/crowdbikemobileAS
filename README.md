@@ -22,5 +22,6 @@ Os arquivos **.feature** são escritos na linguagem chamada Gherkin e registram 
 - Caso as tarefas de funcionalidade e teste sejam realizadas pela mesma pessoa, pode ser definida uma user story única no PivotalTracker para ambas;
 - Commits que não estiverem relacionados à uma funcionalidade específica não devem ter ID;
 - Um commit pode estar relacionado à mais de uma tarefa, o que significa que sua mensagem pode conter mais de um ID. Formato: <b>[#ID_1 #ID_2]</b>, sendo <b>ID_1</b> o identificador da tarefa 1 e <b>ID_2</b> o identificador da tarefa 2.
+- Para importação do projeto no Android Studio seguir o seguinte [Tutorial de Importação](https://github.com/ines-escin/crowdbikemobileAS/blob/master/ImportBikeCidad%C3%A3o.docx?raw=true).
 
 Em caso de dúvidas, entrar em contato com <b>Thaís Burity</b> (https://github.com/thaisabr).
