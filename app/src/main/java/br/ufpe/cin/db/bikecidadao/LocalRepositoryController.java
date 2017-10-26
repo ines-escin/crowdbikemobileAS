@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
 
-import java.util.List;
-
 import br.ufpe.cin.db.bikecidadao.model.TrackInfo;
 import br.ufpe.cin.util.bikecidadao.Constants;
 
