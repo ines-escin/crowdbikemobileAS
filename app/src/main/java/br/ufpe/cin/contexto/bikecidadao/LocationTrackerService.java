@@ -16,12 +16,9 @@ import com.google.android.gms.common.api.GoogleApiClient.*;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
-import com.google.maps.android.SphericalUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
 import br.ufpe.cin.db.bikecidadao.model.GeoLocation;

@@ -98,8 +98,8 @@ import br.ufpe.cin.contexto.bikecidadao.pojo.Tempo;
 import br.ufpe.cin.db.bikecidadao.LocalRepositoryController;
 import br.ufpe.cin.db.bikecidadao.model.GeoLocation;
 import br.ufpe.cin.util.bikecidadao.ConnectivityUtil;
-import br.ufpe.cin.util.bikecidadao.Constants;
 import br.ufpe.cin.util.bikecidadao.LocationUtil;
+import br.ufpe.cin.util.bikecidadao.Constants;
 import br.ufpe.cin.util.bikecidadao.OnGetOccurrencesCompletedCallback;
 import br.ufpe.cin.util.bikecidadao.PermissionRequest;
 
